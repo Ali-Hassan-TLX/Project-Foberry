@@ -423,14 +423,9 @@ document.addEventListener('click', function (e) {
     removescroll.scrollTop = 0;
   }
 
-  //   Show the loader, then build the list on the next frame so the loader actually
-  //   paints before getnewList's synchronous DOM work runs. Hide it once the list has
-  //   been revealed and had a frame to paint, so there's never a blank/unstyled gap.
-  showChildListLoader();
-  requestAnimationFrame(() => {
-    getnewList(index, total_options, childsIn, subTitle, mainparent, dataIds);
-    requestAnimationFrame(() => hideChildListLoader());
-  });
+  //   getnewList manages its own loader and reveals cards in batches across frames, so it
+  //   never blocks the main thread (no "frozen" feel) — just call it directly.
+  getnewList(index, total_options, childsIn, subTitle, mainparent, dataIds);
 });
 
 let stepSubtitles = {};
@@ -450,13 +445,12 @@ function getnewList(index, total_options, childsIn, subTitle, mainparent, dataId
   const targetUL = document.querySelector(`.${childsIn}[data-index="${index}"]`);
   if (!targetUL) return;
 
-  //   Decide which children are visible WHILE the <ul> is still display:none. Toggling
-  //   classes on a hidden subtree costs no layout. The old order revealed the <ul> first
-  //   and hid the non-matching cards afterwards, so the browser laid out & painted every
-  //   card in the list — collection lists hold up to 1000 product cards — before the loop
-  //   trimmed it down. That full layout froze the main thread for several seconds.
+  //   Decide which children match WHILE the <ul> is still display:none (toggling classes
+  //   on a hidden subtree costs no layout). Keep every card hidden for now and collect the
+  //   matches so we can reveal them in small batches below.
   const dataIdSet = new Set(dataIds);
   const childListItems = targetUL.querySelectorAll('li[child-id]');
+  const matches = [];
   childListItems.forEach(childLi => {
     const childId = childLi.getAttribute('child-id');
     const parentId = childLi.getAttribute('parent-id');
@@ -464,19 +458,40 @@ function getnewList(index, total_options, childsIn, subTitle, mainparent, dataId
       dataIdSet.has(childId) ||
       dataIdSet.has(parentId) ||
       parentId === mainparent;
-    childLi.classList.toggle('hidden', !shouldShow);
+    if (shouldShow) matches.push(childLi);
+    childLi.classList.add('hidden');
   });
 
-  //   Now reveal the list — only the matching cards remain, so this lays out a handful
-  //   of cards instead of the whole collection.
+  //   Reveal the (now visually empty) list — cheap, no cards are laid out yet.
   targetUL.setAttribute('data-scroll', targetUL.scrollTop);
   targetUL.classList.remove('hidden');
   targetUL.scrollTop = 0;
-  //   Trigger the slide-in on the next frame instead of after a fixed 200ms delay.
-  //   A double rAF lets the browser commit the initial state (display + translateX(-100%))
-  //   so the transform transition still plays, but it starts ~16ms later instead of 200ms.
+
+  showChildListLoader();
+
+  //   Reveal matching cards in small batches across frames. When a selected option is a
+  //   collection, every matching card shares the same parent, so a step can hold hundreds
+  //   of cards — laying them all out in one frame froze the main thread for seconds (the
+  //   "frozen, no spinner" symptom). ~24 per frame keeps each frame's layout cheap, so the
+  //   thread never blocks and the compositor-animated spinner stays smooth while the cards
+  //   stream in.
+  const BATCH = 24;
+  let i = 0;
+  function revealBatch() {
+    const end = Math.min(i + BATCH, matches.length);
+    for (; i < end; i++) matches[i].classList.remove('hidden');
+    if (i < matches.length) {
+      requestAnimationFrame(revealBatch);
+    } else {
+      hideChildListLoader();
+    }
+  }
+
+  //   Commit the initial (hidden/translated) state first, then start the slide-in and
+  //   stream the cards in.
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => targetUL.classList.add('openchilds'));
+    targetUL.classList.add('openchilds');
+    revealBatch();
   });
 }
 const myTabContent = document.querySelector("#myTabContent");
