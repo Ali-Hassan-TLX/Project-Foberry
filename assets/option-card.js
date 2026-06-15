@@ -251,28 +251,33 @@ function clearLastSelected() {
   checkRequiredOptionsAndToggleButton()
 }
 // --- Event Listeners ---
-document.querySelectorAll('input[type="radio"]').forEach(input => {
-  input.addEventListener('change', function (e) {
-    handleRadioChange(e);
+//   Delegate a single 'change' listener instead of binding one per radio. Collection
+//   options render a radio per product (thousands of them), so the old per-input loop
+//   ran thousands of addEventListener calls synchronously the moment the customizer is
+//   injected — right as the open animation plays — which stuttered the animation.
+document.addEventListener('change', function (e) {
+  const input = e.target;
+  if (!(input instanceof HTMLInputElement) || input.type !== 'radio') return;
 
-    if (prev_tab && prev_tab.classList.contains('summary-page')) {
-      prev_tab.classList.add('disabled');
-    }
-    if (this.closest('.monogram_options') && monogramPrevTab) {
-      monogramPrevTab.classList.add('mono-change');
-    }
+  handleRadioChange(e);
 
-    // If this input was previously applied but now unchecked → remove it
-    if (!this.checked && this.hasAttribute('data-applied')) {
-      removeAppliedSelectionById(this.id);
-    }
+  if (prev_tab && prev_tab.classList.contains('summary-page')) {
+    prev_tab.classList.add('disabled');
+  }
+  if (input.closest('.monogram_options') && monogramPrevTab) {
+    monogramPrevTab.classList.add('mono-change');
+  }
 
-    // Also check for any applied inputs that got unchecked programmatically
-    document.querySelectorAll('input[type="radio"][data-applied="true"]').forEach(appliedInput => {
-      if (!appliedInput.checked) {
-        removeAppliedSelectionById(appliedInput.id);
-      }
-    });
+  // If this input was previously applied but now unchecked → remove it
+  if (!input.checked && input.hasAttribute('data-applied')) {
+    removeAppliedSelectionById(input.id);
+  }
+
+  // Also check for any applied inputs that got unchecked programmatically
+  document.querySelectorAll('input[type="radio"][data-applied="true"]').forEach(appliedInput => {
+    if (!appliedInput.checked) {
+      removeAppliedSelectionById(appliedInput.id);
+    }
   });
 });
 document.querySelector('.apply_btn')?.addEventListener('click', applySelections);
@@ -410,9 +415,6 @@ document.addEventListener('click', function (e) {
 
   const dataIds = dataList.split(',').map(id => id.trim());
 
-  // Call getnewList but without UI updates inside
-  getnewList(index, total_options, childsIn, subTitle, mainparent, dataIds);
-
   prev_tab?.classList.remove('disabled');
   mainstyleLists?.classList.add('hidden');
 
@@ -420,6 +422,15 @@ document.addEventListener('click', function (e) {
   if (removescroll) {
     removescroll.scrollTop = 0;
   }
+
+  //   Show the loader, then build the list on the next frame so the loader actually
+  //   paints before getnewList's synchronous DOM work runs. Hide it once the list has
+  //   been revealed and had a frame to paint, so there's never a blank/unstyled gap.
+  showChildListLoader();
+  requestAnimationFrame(() => {
+    getnewList(index, total_options, childsIn, subTitle, mainparent, dataIds);
+    requestAnimationFrame(() => hideChildListLoader());
+  });
 });
 
 let stepSubtitles = {};
@@ -439,6 +450,25 @@ function getnewList(index, total_options, childsIn, subTitle, mainparent, dataId
   const targetUL = document.querySelector(`.${childsIn}[data-index="${index}"]`);
   if (!targetUL) return;
 
+  //   Decide which children are visible WHILE the <ul> is still display:none. Toggling
+  //   classes on a hidden subtree costs no layout. The old order revealed the <ul> first
+  //   and hid the non-matching cards afterwards, so the browser laid out & painted every
+  //   card in the list — collection lists hold up to 1000 product cards — before the loop
+  //   trimmed it down. That full layout froze the main thread for several seconds.
+  const dataIdSet = new Set(dataIds);
+  const childListItems = targetUL.querySelectorAll('li[child-id]');
+  childListItems.forEach(childLi => {
+    const childId = childLi.getAttribute('child-id');
+    const parentId = childLi.getAttribute('parent-id');
+    const shouldShow =
+      dataIdSet.has(childId) ||
+      dataIdSet.has(parentId) ||
+      parentId === mainparent;
+    childLi.classList.toggle('hidden', !shouldShow);
+  });
+
+  //   Now reveal the list — only the matching cards remain, so this lays out a handful
+  //   of cards instead of the whole collection.
   targetUL.setAttribute('data-scroll', targetUL.scrollTop);
   targetUL.classList.remove('hidden');
   targetUL.scrollTop = 0;
@@ -447,18 +477,6 @@ function getnewList(index, total_options, childsIn, subTitle, mainparent, dataId
   //   so the transform transition still plays, but it starts ~16ms later instead of 200ms.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => targetUL.classList.add('openchilds'));
-  });
-
-  // Show/hide children
-  const childListItems = targetUL.querySelectorAll('li[child-id]');
-  childListItems.forEach(childLi => {
-    const childId = childLi.getAttribute('child-id');
-    const parentId = childLi.getAttribute('parent-id');
-    const shouldShow =
-      dataIds.includes(childId) ||
-      dataIds.includes(parentId) ||
-      parentId === mainparent;
-    childLi.classList.toggle('hidden', !shouldShow);
   });
 }
 const myTabContent = document.querySelector("#myTabContent");
@@ -1457,30 +1475,32 @@ document.addEventListener('click', function (event) {
 
   }
 });
-// unchecked sizes radio inputs 
-document.querySelectorAll('.create-size input[type="radio"]').forEach(radio => {
-  radio.addEventListener('click', function (e) {
-    validateSizeInputs()
-    // Check if already checked
-    if (this.checked) {
-      if (this.hasAttribute('data-waschecked')) {
-        validateSizeInputs()
-        this.checked = false;
-        this.removeAttribute('data-waschecked');
-      } else {
-        validateSizeInputs()
-        this.setAttribute('data-waschecked', 'true');
-      }
+// unchecked sizes radio inputs (delegated — avoids binding a listener per radio at init)
+document.addEventListener('click', function (e) {
+  const radio = e.target;
+  if (!(radio instanceof HTMLInputElement) || radio.type !== 'radio') return;
+  if (!radio.closest('.create-size')) return;
 
-      // Clear others in the same group
-      document.querySelectorAll(`.create-size input[type="radio"][name="${this.name}"]`).forEach(other => {
-        if (other !== this) {
-          other.removeAttribute('data-waschecked');
-        }
-        validateSizeInputs()
-      });
+  validateSizeInputs()
+  // Check if already checked
+  if (radio.checked) {
+    if (radio.hasAttribute('data-waschecked')) {
+      validateSizeInputs()
+      radio.checked = false;
+      radio.removeAttribute('data-waschecked');
+    } else {
+      validateSizeInputs()
+      radio.setAttribute('data-waschecked', 'true');
     }
-  });
+
+    // Clear others in the same group
+    document.querySelectorAll(`.create-size input[type="radio"][name="${radio.name}"]`).forEach(other => {
+      if (other !== radio) {
+        other.removeAttribute('data-waschecked');
+      }
+      validateSizeInputs()
+    });
+  }
 });
 // sizes option validation 
 function validateSizeInputs(buttonSelector = '.btn-next-tab') {
@@ -1572,21 +1592,33 @@ Sizes?.addEventListener('change', function (e) {
 });
 // text slider
  function applyMarquee() {
-    //   Collect all measurements first (reads), then apply class changes (writes).
-    //   Interleaving reads/writes forces a layout reflow on every iteration; batching
-    //   them keeps it to a single reflow no matter how many wrappers there are.
+    //   Only measure cards that are actually on screen. Collection options render an
+    //   <li> per product (paginated by 1000), so the document can hold thousands of
+    //   .scroll-wrapper/.why-not-scroll nodes inside hidden lists. Reading scrollWidth
+    //   on all of them forces a full-document layout flush in the same frame the newly
+    //   opened list needs to paint. Scoping to visible lists + visible <li> keeps the
+    //   read to just what the user can see.
+    const visibleLists = document.querySelectorAll(
+      '.overview-list:not(.hidden), .customizer-list:not(.hidden)'
+    );
+    if (!visibleLists.length) return;
+
+    //   Collect all measurements first (reads), then apply class changes (writes), so
+    //   the whole pass costs a single reflow instead of one per node.
     const updates = [];
 
-    document.querySelectorAll('.scroll-wrapper').forEach(wrapper => {
-      const textElement = wrapper.querySelector('.name') || wrapper.querySelector('.title');
-      if (!textElement) return;
-      updates.push([textElement, textElement.scrollWidth > wrapper.clientWidth]);
-    });
+    visibleLists.forEach(list => {
+      list.querySelectorAll('li:not(.hidden) .scroll-wrapper').forEach(wrapper => {
+        const textElement = wrapper.querySelector('.name') || wrapper.querySelector('.title');
+        if (!textElement) return;
+        updates.push([textElement, textElement.scrollWidth > wrapper.clientWidth]);
+      });
 
-    document.querySelectorAll('.why-not-scroll').forEach(wrapper => {
-      const textElement = wrapper.querySelector('.why_not');
-      if (!textElement) return;
-      updates.push([textElement, textElement.scrollWidth > wrapper.clientWidth]);
+      list.querySelectorAll('li:not(.hidden) .why-not-scroll').forEach(wrapper => {
+        const textElement = wrapper.querySelector('.why_not');
+        if (!textElement) return;
+        updates.push([textElement, textElement.scrollWidth > wrapper.clientWidth]);
+      });
     });
 
     updates.forEach(([textElement, overflowing]) => {
@@ -1605,8 +1637,11 @@ Sizes?.addEventListener('change', function (e) {
       applyMarquee();
     });
   }
+  //   Run the first measure through the rAF scheduler too. option-card.js is injected
+  //   after load (readyState === 'complete'), so a direct call would force a layout read
+  //   during the open animation; scheduling it lets the open paint first.
   if (document.readyState === 'complete') {
-    applyMarquee();
+    scheduleMarquee();
   } else {
     window.addEventListener('load', applyMarquee);
   }
