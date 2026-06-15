@@ -16,20 +16,20 @@ const nextToSizeBtn = document.querySelector('.btn-next-tab');
 // const nextToSizeBtn = document.querySelector('.btn-next-tab');
 const prev_tab = document.querySelector('.btn-prev-tab');
 const currently_open_option = document.querySelector('.currently_open_option');
-apply_btn.addEventListener('click', function () {
-  prev_tab.classList.remove("summary-page")
-  currently_open_option.classList.add('hidden');
+apply_btn?.addEventListener('click', function () {
+  prev_tab?.classList.remove("summary-page")
+  currently_open_option?.classList.add('hidden');
   // Hide and disable the apply button
   apply_btn.classList.add('hidden', 'disabled');
-  prev_tab.classList.add('disabled');
+  prev_tab?.classList.add('disabled');
   // Hide all child tabs
   all_child_tabs.forEach(tab => tab.classList.add('hidden'));
   // Show the main tab and next button
-  main_tab.classList.remove('openchilds');
-  main_tab.classList.remove('hidden');
-  nextToSizeBtn.classList.remove('hidden');
+  main_tab?.classList.remove('openchilds');
+  main_tab?.classList.remove('hidden');
+  nextToSizeBtn?.classList.remove('hidden');
         setTimeout(  ()=>{
-          main_tab.classList.add('openchilds')
+          main_tab?.classList.add('openchilds')
         }, 200 )
 });
 function handleRadioChange(event) {
@@ -38,6 +38,7 @@ function handleRadioChange(event) {
   // Enable Apply button
   apply_btn?.classList.remove('disabled');
   // Store selected input ID (not value)
+  if (!apply_btn) return;
   apply_btn.dataset.lastSelected = input.id;
   const data_main_parent = input.getAttribute('data-main-parent');
   // Uncheck all related inputs first
@@ -45,9 +46,9 @@ function handleRadioChange(event) {
   all_related_inputs.forEach(el => {
     if (el !== input) el.checked = false;
   });
-  if (prev_tab.classList.contains('summary-page')) {
+  if (prev_tab?.classList.contains('summary-page')) {
     apply_btn.classList.remove('hidden');
-    nextToSizeBtn.classList.add('hidden');
+    nextToSizeBtn?.classList.add('hidden');
   }
   updatePrice();
 }
@@ -352,13 +353,13 @@ document.addEventListener('click', function (e) {
   const subTitle = clickedLi.getAttribute('sub-title') || clickedLi.getAttribute('contras_name') || '';
 
   //   Moved currently_open_option UI update here
-  if (typeof currently_open_option !== 'undefined') {
+  if (currently_open_option) {
     currently_open_option.classList.remove('hidden');
     currently_open_option.innerHTML = `<h4>${subTitle} : </h4> <span> (step ${index } of ${total_options + index - 1 })</span>`;
   }
-  if (!prev_tab.classList.contains('summary-page')) {
-  apply_btn.classList.remove('hidden');
-  nextToSizeBtn.classList.add('hidden');
+  if (!prev_tab?.classList.contains('summary-page')) {
+  apply_btn?.classList.remove('hidden');
+  nextToSizeBtn?.classList.add('hidden');
 }
 
   if (!dataList || isNaN(index) || !childsIn) return;
@@ -368,8 +369,8 @@ document.addEventListener('click', function (e) {
   // Call getnewList but without UI updates inside
   getnewList(index, total_options, childsIn, subTitle, mainparent, dataIds);
 
-  prev_tab.classList.remove('disabled');
-  mainstyleLists.classList.add('hidden');
+  prev_tab?.classList.remove('disabled');
+  mainstyleLists?.classList.add('hidden');
 
   const removescroll = e.target.closest(".product_form_wrapper");
   if (removescroll) {
@@ -422,18 +423,19 @@ const custom_summary_page = document.querySelector('.custom_summary_page');
 const hide_selection = document.querySelectorAll('.hide_selection');
 const styles = document.querySelector('.overview');
 // const prev_tab = document.querySelector('.btn-prev-tab'); // make sure this exists
-nextToSizeBtn.addEventListener('click', () => {
+nextToSizeBtn?.addEventListener('click', () => {
+  if (!Sizes || !styles || !myTabContent) return;
   // First move from styles to sizes
   // Then, if Sizes is now visible, show the summary next
   if (!Sizes.classList.contains('hidden')) {
     Sizes.classList.add('hidden');
     hide_selection.forEach(el => el.classList.add('hidden'));
-    custom_summary_page.classList.remove('hidden');
+    custom_summary_page?.classList.remove('hidden');
     summary_styles()
   }else{
     styles.classList.add('hidden');
   Sizes.classList.remove('hidden');
-  prev_tab.classList.remove('disabled');
+  prev_tab?.classList.remove('disabled');
   nextToSizeBtn.classList.add('disabled');
   myTabContent.classList.add('hidden');
   nextToSizeBtn.innerHTML="Review & BUY";
@@ -451,26 +453,26 @@ if (prev_tab) {
 
     // 🟡 Handle summary-page mode first
     if (prev_tab.classList.contains('summary-page')) {
-      Sizes.classList.add('hidden');
-      custom_summary_page.classList.remove('hidden');
+      Sizes?.classList.add('hidden');
+      custom_summary_page?.classList.remove('hidden');
 hide_selection.forEach(el => el.classList.add('hidden'));
       custom_hidden.forEach(el => {
         el.classList.add('custom_hide');
       });
 
-      styles.classList.add('hidden');
-      myTabContent.classList.add('hidden');
+      styles?.classList.add('hidden');
+      myTabContent?.classList.add('hidden');
       return; // stop further processing
     }
 
     // 🟢 Regular previous step logic
-    if (!Sizes.classList.contains('hidden')) {
+    if (Sizes && !Sizes.classList.contains('hidden')) {
       Sizes.classList.add('hidden');
-      styles.classList.remove('hidden');
-      myTabContent.classList.remove('hidden');
+      styles?.classList.remove('hidden');
+      myTabContent?.classList.remove('hidden');
       prev_tab.classList.add('disabled');
-      nextToSizeBtn.classList.remove('disabled');
-      nextToSizeBtn.innerHTML = "Next";
+      nextToSizeBtn?.classList.remove('disabled');
+      if (nextToSizeBtn) nextToSizeBtn.innerHTML = "Next";
       custom_hidden.forEach(el => { el.classList.remove("custom_hide"); });
       return;
     }
@@ -494,13 +496,15 @@ hide_selection.forEach(el => el.classList.add('hidden'));
       //   Restore subtitle from memory
       const prevSubTitle = stepSubtitles[prevIndex] || "";
       if (prevIndex >= 1) {
-        currently_open_option.innerHTML = `<h4>${prevSubTitle} :</h4> <span> Step( ${prevIndex + 1} of 4 )</span>`;
-        currently_open_option.classList.remove('hidden');
+        if (currently_open_option) {
+          currently_open_option.innerHTML = `<h4>${prevSubTitle} :</h4> <span> Step( ${prevIndex + 1} of 4 )</span>`;
+          currently_open_option.classList.remove('hidden');
+        }
       } else {
         prev_tab.classList.add('disabled');
-        nextToSizeBtn.classList.remove('hidden');
-        apply_btn.classList.add('hidden');
-        currently_open_option.classList.add('hidden');
+        nextToSizeBtn?.classList.remove('hidden');
+        apply_btn?.classList.add('hidden');
+        currently_open_option?.classList.add('hidden');
         // currently_open_option.innerHTML = ""; 
       }
     }
@@ -546,6 +550,7 @@ document.querySelectorAll('.create-size-list a').forEach(anchor => {
     e.preventDefault();
     const clickedId = anchor.getAttribute('id'); // Get the ID from the clicked <a>
     const tabContainer = document.getElementById('myTabContent3');
+    if (!tabContainer) return;
 
     tabContainer.querySelectorAll('div').forEach(div => {
       if (div.id === clickedId) {
@@ -649,7 +654,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Show Monogram Tab
   monogram_li.addEventListener("click", () => {
-    adjust_monoscroll.style.overflow= "hidden"
+    if (adjust_monoscroll) adjust_monoscroll.style.overflow= "hidden"
     custom_hidden.forEach(el => { el.classList.add("custom_hide");});
     apply_mono_btn.classList.add("hidden");
     styles.classList.add("hidden");
@@ -664,13 +669,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Apply Monogram
   apply_mono_btn.addEventListener("click", () => {
     all_child_tabs.forEach(tab => tab.classList.add('hidden'));
-    adjust_monoscroll.style.overflow= "auto"
+    if (adjust_monoscroll) adjust_monoscroll.style.overflow= "auto"
     apply_mono_btn.classList.add("hidden");
     monogram_li.classList.add("select");
     monogram_li_select?.classList.remove("hidden");
     custom_hidden.forEach(el => { el.classList.remove("custom_hide");});
  updatePrice();
-  mono_prev_tab.classList.remove("mono-change");
+  mono_prev_tab?.classList.remove("mono-change");
   commonly_btn.classList.remove("hidden");
   myTabContent.classList.remove("hidden");
   specific_mono_btn.classList.add("hidden");
@@ -740,7 +745,7 @@ document.addEventListener("DOMContentLoaded", function () {
 const popupLabels = ["Initial", "Design", "Color", "Position"];
 let currentpopup = popupLabels[currentstep - 1] || "Unknown";
 
-stepflow.innerHTML = `<p>${currentpopup} ( Step ${currentstep} of 4 )</p>`;
+    if (stepflow) stepflow.innerHTML = `<p>${currentpopup} ( Step ${currentstep} of 4 )</p>`;
 
 
     // Show/hide apply button
@@ -785,15 +790,15 @@ apply_mono_addons?.classList.toggle("hidden", !(isLastStep && isValid));
             specific_mono_btn.classList.add("hidden");
             custom_hidden.forEach(el => { el.classList.remove("custom_hide");});
             const adjust_monoscroll = document.querySelector(".main-customizer-new .product_form_wrapper");
-            adjust_monoscroll.style.overflow= "auto"
+            if (adjust_monoscroll) adjust_monoscroll.style.overflow= "auto"
           const monogramOptions = document.querySelector('.monogram_options');
           const mainmonoli = document.querySelector('.adjut_monogram');
-      const mono_selected = mainmonoli.querySelector('.option-card');
-      const mono_selection = mainmonoli.querySelector('.selections ');
+      const mono_selected = mainmonoli?.querySelector('.option-card');
+      const mono_selection = mainmonoli?.querySelector('.selections ');
       if (mono_prev_tab && mono_prev_tab.classList.contains('mono-change')) {
-        prev_tab.classList.add('disabled');
-        mono_selected.classList.remove("select");
-        mono_selection.innerHTML = "";
+        prev_tab?.classList.add('disabled');
+        mono_selected?.classList.remove("select");
+        if (mono_selection) mono_selection.innerHTML = "";
 
         let extramonocharges = 0;
 
@@ -893,16 +898,16 @@ apply_mono_addons?.classList.toggle("hidden", !(isLastStep && isValid));
             specific_mono_btn.classList.add("hidden");
             custom_hidden.forEach(el => { el.classList.remove("custom_hide");});
             const adjust_monoscroll = document.querySelector(".main-customizer-new .product_form_wrapper");
-            adjust_monoscroll.style.overflow= "auto"
+            if (adjust_monoscroll) adjust_monoscroll.style.overflow= "auto"
           const monogramOptions = document.querySelector('.monogram_options');
           const mainmonoli = document.querySelector('.adjut_monogram');
-           mainmonoli.querySelector('.custom-title').classList.remove("hidden")
-           mainmonoli.querySelector('.img').classList.add("hidden")
-      const mono_selected = mainmonoli.querySelector('.option-card');
-      const mono_selection = mainmonoli.querySelector('.selections ');
-        prev_tab.classList.add('disabled');
-        mono_selected.classList.remove("select");
-        mono_selection.innerHTML = "";
+           mainmonoli?.querySelector('.custom-title')?.classList.remove("hidden")
+           mainmonoli?.querySelector('.img')?.classList.add("hidden")
+      const mono_selected = mainmonoli?.querySelector('.option-card');
+      const mono_selection = mainmonoli?.querySelector('.selections ');
+        prev_tab?.classList.add('disabled');
+        mono_selected?.classList.remove("select");
+        if (mono_selection) mono_selection.innerHTML = "";
 
         let extramonocharges = 0;
 
@@ -999,6 +1004,7 @@ inputs.forEach(input => {
 });
 
 function updatePreview() {
+  if (!previewBox) return;
   const text = Array.from(inputs)
     .map(input => input.value)
     .join(" ")
@@ -1012,6 +1018,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Live update text in preview
   function updatePreviewText() {
+    if (!previewBox) return;
     const letters = Array.from(letterInputs).map(input => input.value.toUpperCase());
     previewBox.textContent = letters.join(" ");
   }
@@ -1363,7 +1370,7 @@ document.addEventListener('click', function (event) {
       if (styles) {
         const subTitle=event.target.getAttribute("option-title")
         const selection_steps=event.target.getAttribute("reselection-step")
-          if (typeof currently_open_option !== 'undefined') {
+      if (currently_open_option) {
     currently_open_option.classList.remove('hidden');
     currently_open_option.innerHTML = `<h4>${subTitle} : </h4> <span> (step ${selection_steps } of ${selection_steps } )</span>`;
   }
@@ -1433,6 +1440,7 @@ document.querySelectorAll('.create-size input[type="radio"]').forEach(radio => {
 });
 // sizes option validation 
 function validateSizeInputs(buttonSelector = '.btn-next-tab') {
+  if (!Sizes) return true;
   const standard_sizes = Sizes.querySelector('.standard.active.show');
   const measure_body = Sizes.querySelector('.measure_body.active.show');
   const smart_sizes = Sizes.querySelector('.smart_sizes');
@@ -1504,7 +1512,7 @@ function validateSizeInputs(buttonSelector = '.btn-next-tab') {
 }
   
 // Run validation only when inputs inside standard_sizes or measure_body change
-Sizes.addEventListener('change', function (e) {
+Sizes?.addEventListener('change', function (e) {
   const standard_sizes = Sizes.querySelector('.standard.active.show');
   const measure_body   = Sizes.querySelector('.measure_body.active.show');
 
@@ -1563,6 +1571,7 @@ const increaseBtn = document.querySelector('.increase');
 const decreaseBtn = document.querySelector('.decrease');
 // customizer price and quantity
 function updateDisplay(quantity) {
+  if (!priceContainer || !quantityInput) return;
   const basePrice = parseFloat(priceContainer.dataset.basePrice.replace(/,/g, ''));
   quantityInput.value = quantity; //   Correct for input
   const totalPrice = basePrice * quantity;
@@ -1570,14 +1579,14 @@ function updateDisplay(quantity) {
   priceContainer.querySelector('span').textContent = `PK. ${formattedPrice}`;
 }
 
-let quantity = parseInt(quantityInput.value) || 1;
+let quantity = parseInt(quantityInput?.value) || 1;
 
-increaseBtn.addEventListener('click', () => {
+increaseBtn?.addEventListener('click', () => {
   quantity++;
   updateDisplay(quantity);
 });
 
-decreaseBtn.addEventListener('click', () => {
+decreaseBtn?.addEventListener('click', () => {
   if (quantity > 1) {
     quantity--;
     updateDisplay(quantity);
@@ -1656,8 +1665,9 @@ document.querySelectorAll('input[name="mono"].blink-once').forEach(input => {
   input.addEventListener('input', updateMonogramTextValue);
 });
 // save selected options 
-document.querySelector('.save-btn').addEventListener('click', function () {
+document.querySelector('.save-btn')?.addEventListener('click', function () {
   const form = document.querySelector('.summary_form');
+  if (!form) return;
   const inputs = form.querySelectorAll('input');
   const savedSelections = {};
 
@@ -1857,7 +1867,9 @@ hasOptions(restrictedOptionIds, restricted_option_Pid, selectedParentId, why_not
     container.innerHTML = `<span>Rs. ${totalCharges.toLocaleString()}</span>`;
     container.setAttribute('data-base-price', totalCharges.toLocaleString());
   });
-customizer_additional_charges.value = `${totalCharges - basePrice}`;
+if (customizer_additional_charges) {
+  customizer_additional_charges.value = `${totalCharges - basePrice}`;
+}
 }
 
     //   Populate monogram_text into letter inputs
@@ -1869,7 +1881,7 @@ customizer_additional_charges.value = `${totalCharges - basePrice}`;
       letterInputs.forEach((input, index) => {
         input.value = chars[index] || '';
                   const apply_mono_btn = document.querySelector(".apply_mono_btn");
-        apply_mono_btn.click();
+        apply_mono_btn?.click();
         updatePreview()
       });
 
@@ -1923,7 +1935,7 @@ document.querySelectorAll('.close, .close_btn,.modal.fade').forEach(closeBtn => 
         modal.classList.remove('show'); // Remove 'show' from matched modal
            const stopscroll = document.querySelector('.customizer_content .product_form_wrapper')
            const stopscroll1 = document.querySelector('.modal.fade')
-    stopscroll.style.overflow = "auto"
+    if (stopscroll) stopscroll.style.overflow = "auto"
     });
        const adjust_height = document.querySelectorAll('.openchilds');
 adjust_height.forEach(el => {
@@ -1935,5 +1947,5 @@ adjust_height.forEach(el => {
 // open and close size guide popup 
 function myFunction() {
   var popup = document.getElementById("myPopup");
-  popup.classList.toggle("show");
+  popup?.classList.toggle("show");
 }

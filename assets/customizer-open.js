@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
   //  LOADER inside the modal (shown while the customizer is injected/loaded)
   function showModalLoader() {
     if (!modal) return;
+    modal.classList.add("is-loading-customizer");
     let loader = modal.querySelector(".customizer-loader");
     if (!loader) {
       loader = document.createElement("div");
@@ -122,6 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function hideModalLoader() {
     const loader = modal && modal.querySelector(".customizer-loader");
     if (loader) loader.remove();
+    modal?.classList.remove("is-loading-customizer");
   }
 
   //  OPEN MODAL (MULTIPLE BUTTONS) — lazy load on first click
