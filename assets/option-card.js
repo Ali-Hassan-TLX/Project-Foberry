@@ -1,9 +1,9 @@
 // select all required option 
 function checkRequiredOptionsAndToggleButton(buttonSelector = '.btn-next-tab') {
-  const requiredItems = document.querySelectorAll('.required-option');
+  const requiredItems = cachedRequiredOptions || document.querySelectorAll('.required-option');
   const allSelected = Array.from(requiredItems).every(item => item.classList.contains('select'));
 
-  const button = document.querySelector(buttonSelector);
+  const button = buttonSelector === '.btn-next-tab' ? nextToSizeBtn : document.querySelector(buttonSelector);
   if (button) {
     button.disabled = !allSelected;
     button.classList.toggle('disabled', !allSelected); // Optional: add styling
@@ -16,6 +16,51 @@ const nextToSizeBtn = document.querySelector('.btn-next-tab');
 // const nextToSizeBtn = document.querySelector('.btn-next-tab');
 const prev_tab = document.querySelector('.btn-prev-tab');
 const currently_open_option = document.querySelector('.currently_open_option');
+const cachedRequiredOptions = document.querySelectorAll('.required-option');
+const optionItemsByDataId = new Map(
+  Array.from(document.querySelectorAll('li[data-id]')).map(li => [li.getAttribute('data-id'), li])
+);
+const allOptionLis = Array.from(document.querySelectorAll('li[child-id], li[data-id]'));
+const inputsByMainParent = new Map();
+document.querySelectorAll('input[data-main-parent]').forEach(input => {
+  const parentId = input.getAttribute('data-main-parent');
+  if (!inputsByMainParent.has(parentId)) inputsByMainParent.set(parentId, []);
+  inputsByMainParent.get(parentId).push(input);
+});
+const customPriceContainers = document.querySelectorAll('.custom_price');
+const cardCustomPriceContainers = document.querySelectorAll('.card_custom_price');
+const additionalChargesInput = document.querySelector('.customizer_additional_charges input');
+const monogramPrevTab = document.querySelector('.mono-prev-tab');
+const getOptionItemById = id => optionItemsByDataId.get(String(id)) || document.querySelector(`li[data-id="${id}"]`);
+const getInputsByMainParent = id => inputsByMainParent.get(String(id)) || [];
+const CHILD_LIST_LOADER_DELAY = 300;
+
+function getChildListLoader() {
+  const loaderParent = document.querySelector('.overview') || document.querySelector('.customizer_content') || document.body;
+  let loader = loaderParent.querySelector(':scope > .child-list-loader');
+
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.className = 'child-list-loader hidden';
+    loader.setAttribute('aria-live', 'polite');
+    loader.setAttribute('aria-busy', 'true');
+    loader.innerHTML = '<span class="child-list-loader__spinner"></span>';
+    loaderParent.appendChild(loader);
+  }
+
+  return loader;
+}
+
+function showChildListLoader() {
+  const loader = getChildListLoader();
+  loader.classList.remove('hidden');
+}
+
+function hideChildListLoader() {
+  const loader = document.querySelector('.child-list-loader');
+  loader?.classList.add('hidden');
+}
+
 apply_btn?.addEventListener('click', function () {
   prev_tab?.classList.remove("summary-page")
   currently_open_option?.classList.add('hidden');
@@ -42,8 +87,7 @@ function handleRadioChange(event) {
   apply_btn.dataset.lastSelected = input.id;
   const data_main_parent = input.getAttribute('data-main-parent');
   // Uncheck all related inputs first
-  const all_related_inputs = document.querySelectorAll(`input[data-main-parent="${data_main_parent}"]:checked`);
-  all_related_inputs.forEach(el => {
+  getInputsByMainParent(data_main_parent).forEach(el => {
     if (el !== input) el.checked = false;
   });
   if (prev_tab?.classList.contains('summary-page')) {
@@ -77,7 +121,7 @@ function applySelections() {
     : [];
   hasOptions(restrictedOptionIds, restricted_option_Pid, selectedParentId, why_not_name);
   // --- UI selection visuals ---
-  const parentLi = document.querySelector(`li[data-id="${selectedParentId}"]`);
+  const parentLi = getOptionItemById(selectedParentId);
   if (parentLi) {
     parentLi.querySelector('.icon-check-circle')?.classList.add('active');
     parentLi.querySelector('.selected')?.classList.remove('hidden');
@@ -123,7 +167,7 @@ function removeAppliedSelectionById(inputId) {
   const input = document.getElementById(inputId);
   if (!input) return;
   const parentId = input.getAttribute('data-main-parent');
-  const parentLi = document.querySelector(`li[data-id="${parentId}"]`);
+  const parentLi = getOptionItemById(parentId);
   if (parentLi) {
     parentLi.classList.remove('selected_options');
     parentLi.removeAttribute('card-send');
@@ -159,9 +203,9 @@ function removeAppliedSelectionById(inputId) {
 }
 // --- Update Price ---
 function updatePrice() {
-  const priceContainers = document.querySelectorAll('.custom_price');
-  const cardPriceContainers = document.querySelectorAll('.card_custom_price');
-  const customizer_additional_charges = document.querySelector('.customizer_additional_charges input');
+  const priceContainers = customPriceContainers;
+  const cardPriceContainers = cardCustomPriceContainers;
+  const customizer_additional_charges = additionalChargesInput;
   if (priceContainers.length === 0) return;
   const basePriceAttr = priceContainers[0].getAttribute('default-price');
   const basePriceStr = basePriceAttr?.replace(/Rs\./i, '').replace(/,/g, '').trim();
@@ -214,9 +258,8 @@ document.querySelectorAll('input[type="radio"]').forEach(input => {
     if (prev_tab && prev_tab.classList.contains('summary-page')) {
       prev_tab.classList.add('disabled');
     }
-    const mono_prev_tab  = document.querySelector('.mono-prev-tab ');
-    if (this.closest('.monogram_options') && mono_prev_tab) {
-      mono_prev_tab.classList.add('mono-change');
+    if (this.closest('.monogram_options') && monogramPrevTab) {
+      monogramPrevTab.classList.add('mono-change');
     }
 
     // If this input was previously applied but now unchecked → remove it
@@ -239,13 +282,14 @@ document.querySelectorAll('.btn-prev-tab, .mono-prev-tab').forEach(btn =>
 
 // restricted and depended options  
 function hasOptions(restrictedOptionIds = [], restricted_option_Pid, selectedParentId, why_not_name) {
-  const allLis = document.querySelectorAll('li[child-id], li[data-id]');
+  const allLis = allOptionLis;
   const restrictedSet = new Set(restrictedOptionIds.map(String)); // normalize as strings
   // Remove previous disabled items related to the selected parent
    const monogram_tab = document.querySelector(".custom_monogram");
 
 
-   document.querySelectorAll('li.hasdisabled').forEach(li => {
+   allOptionLis.forEach(li => {
+  if (!li.classList.contains('hasdisabled')) return;
   //   Skip if inside monogram_tab
   if (monogram_tab && monogram_tab.contains(li)) return;
 
@@ -294,12 +338,12 @@ function hasOptions(restrictedOptionIds = [], restricted_option_Pid, selectedPar
       // Uncheck related inputs based on element type
       if (parentId && restrictedSet.has(parentId)) {
         // This is a parent being disabled - uncheck inputs related to this parent
-        document.querySelectorAll(`input[data-main-parent="${parentId}"]`).forEach(input => {
+        getInputsByMainParent(parentId).forEach(input => {
           input.checked = false;
         });
       } else if (childId && restrictedSet.has(childId)) {
         // This is a child being disabled - uncheck inputs related to the restricted_option_Pid
-        document.querySelectorAll(`input[data-main-parent="${restricted_option_Pid}"]`).forEach(input => {
+        getInputsByMainParent(restricted_option_Pid).forEach(input => {
           input.checked = false;
         });
       }
@@ -307,7 +351,7 @@ function hasOptions(restrictedOptionIds = [], restricted_option_Pid, selectedPar
   });
   // Additional logic: If restricted_option_Pid is provided, handle its specific visual state
   if (restricted_option_Pid) {
-    const parentLi = document.querySelector(`li[data-id="${restricted_option_Pid}"]`);
+    const parentLi = getOptionItemById(restricted_option_Pid);
     if (parentLi) {
       const optionCard = parentLi.querySelector('.option-card');
       const name = parentLi.querySelector('.name');
@@ -320,7 +364,7 @@ function hasOptions(restrictedOptionIds = [], restricted_option_Pid, selectedPar
     }
   }
   // Restore dependent options
-  const dependedLi = document.querySelector(`li[data-id="${selectedParentId}"]`);
+  const dependedLi = getOptionItemById(selectedParentId);
   if (dependedLi?.querySelector('.option-card')) {
     document.querySelectorAll(`input[has-depended="${selectedParentId}"]`).forEach(input => {
       input.parentElement?.classList.remove('hasdisabled');
