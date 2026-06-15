@@ -1,0 +1,204 @@
+{% assign mono_tabs_options = monogram %}
+
+<div class="custom_monogram customizer {{ product.type }}   hidden" >
+  {% assign inputs_limit = mono_tabs_options.setting.text_limit | times: 1 %}
+  {% assign inputlimits = mono_tabs_options.setting.text_limit %}
+  {% assign price = mono_tabs_options.setting %}
+  <div class="custom_monogram_steps">
+    <h4 class="custom_monogram_steps_heading">Monogram :</h4>
+    <div class="steps_flow">
+      <p>Initial ( Step 1 of 4 )</p>
+    </div>
+  </div>
+  <div class="monogram_options ">
+    {% if template == 'product' and product.type contains 'Shirts' %}
+      <span id="close-mono" class="modal-close ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="45.422" height="42.421" viewBox="3414.623 571.977 45.422 42.421">
+          <g data-name="Group 102"><g data-name="Path 71"><path d="m3455.956 571.977-37.244 42.336" fill="#794d49" fill-rule="evenodd"></path><path d="m3455.956 571.977-37.244 42.336" stroke-linejoin="round" stroke-linecap="round" stroke-width="4" stroke="#d3736b" fill="transparent"></path></g><g data-name="Path 72"><path d="m3456.799 614.399-38.93-40.794" fill="#d3736b" fill-rule="evenodd"></path><path d="m3456.799 614.399-38.93-40.794" stroke-linejoin="round" stroke-linecap="round" stroke-width="4" stroke="#d3736b" fill="transparent"></path></g></g>
+        </svg>
+      </span>
+    {%- endif %}
+    <div class="mono-input-box ">
+      <h3>Type up to {{ inputs_limit }} letters</h3>
+      <div class="letter-inputs" id="letterInputs">
+        {% for i in (1..inputs_limit) %}
+          <input type="text" name="mono" maxlength="1" class="blink-once">
+        {% endfor %}
+      </div>
+      <input type="text" class="hidden" name="properties[monogram text]" value="">
+      <div class="guidance">{{ mono_tabs_options.setting.description }}</div>
+      <div class="remove-monogram"> Remove Monogram </div>
+    </div>
+    <div class="mono-input-box fonts hidden">
+      <ul class="customizer-list ">
+        {% for font_options in mono_tabs_options.fonts %}
+          {% assign font_limit = font_options.max_text_limit %}
+          <li
+            class=" {% if inputlimits > font_limit %}hasdisabled {% endif %}"
+            {% if inputlimits > font_limit %}
+              has-depended="{{ font_limit }}"
+            {% endif %}
+          >
+            <style>
+              @font-face {
+  font-family: {{- font_options.label -}};
+  src: url("{{- font_options.custom_font_url -}}");
+}
+
+              </style>
+            <input
+              type="radio"
+              name="properties[monogram_font]"
+              id="font-{{ font_options.id }}"
+              value="{{ font_options.label }}"
+              class="mono-font customizer hidden"
+              data-google-font="{{ font_options.google_font_url }}"
+              data-custom-font="{{ font_options.custom_font_url }}"
+              more-charges="{{ price.additional_cost }}"
+              font-img="{{ font_options.feature_image  }}"
+            >
+            <label for="font-{{ font_options.id }}">
+              <span class="icon-check-circle"></span>
+              {% comment %}
+
+                <img src="{{ font_options.feature_image | strip }}" alt="{{ font_options.label }}">
+              {% endcomment %}
+              <span class="unavailable">UNAVAILABLE </span>
+              <div class="img">
+                {% if font_options.feature_image != blank %}
+                  <img src="{{ font_options.feature_image }}">
+                {% else %}
+                  <img src="{{ "placeholder.png" | asset_url }}">
+                {% endif %}
+              </div>
+              <div class="why-not-scroll">
+                <span class="why_not"> {{ font_limit }} text for this style</span>
+              </div>
+              {% comment %} {% if price.has_additional_cost == '1'
+                or price.has_additional_cost == 1
+                and price.additional_cost != null
+              %}
+                <span class="additional_charges ">+{{ price.additional_cost }}PKR </span>
+              {% endif %} {% endcomment %}
+              <div class="selection">
+                <span class="name">{{ font_options.label }}</span>
+              </div>
+            </label>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="mono-input-box colors hidden">
+      <ul class="customizer-list ">
+        {% for color_option in mono_tabs_options.colors %}
+          <li>
+            <input
+              type="radio"
+              name="properties[monogram_color]"
+              id="color-{{ color_option.id }}"
+              value="{{ color_option.label }}"
+              class="mono-color customizer hidden"
+              data-color="{{ color_option.color_code }}"
+              more-char
+              ges="{{ price.additional_cost }}"
+            >
+            <label for="color-{{ color_option.id }}">
+              <span class="icon-check-circle"></span>
+              <span class="unavailable">UNAVAILABLE </span>
+              <div class="img" style="background-color: {% if  color_option.feature_image == blank %} {{ color_option.color_code }} {% endif %}"> {% if color_option.feature_image != blank %} <img src="{{ color_option.feature_image }}" width="100" height="100">{% endif %} </div>
+              {% if color_option.has_additional_charges == '1'
+                or color_option.has_additional_charges == 1
+                and color_option.additional_charges != null
+              %}
+                <span class="additional_charges">+{{ color_option.additional_charges }} PKR</span>
+              {% endif %}
+              <div class="selection">
+                <span class="name">{{ color_option.label }}</span>
+              </div>
+            </label>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="mono-input-box positions hidden">
+      <ul class="customizer-list">
+        {% for position in mono_tabs_options.positions %}
+          {% assign has_type = position.type %}
+          {% assign product_type = position_type %}
+
+          {% assign has_depended = '' %}
+          {% assign has_depended_label = '' %}
+          {% if position.dependent_options != blank %}
+            {% assign first_option = position.dependent_options[0].option %}
+            {% if first_option.parent_id %}
+              {% assign has_depended = first_option.parent_id %}
+            {% else %}
+              {% assign has_depended = first_option.id %}
+            {% endif %}
+
+            {% assign has_depended_label = position.dependent_options[0].option.label %}
+          {% endif %}
+
+          <li
+            class="{% if template != 'product' %} {% if position.has_dependent_options == '1' or position.has_dependent_options == 1 %}hasdisabled{% endif %}{% endif %}{% if product_type != has_type %} hidden{% endif %}  {{ product_type }} {{ has_type }}"
+            {% if position.has_dependent_options == '1' or position.has_dependent_options == 1 %}
+              has-depended="{{ has_depended }}"
+              hasdisabled-to="{{ has_depended }}"
+            {% endif %}
+          >
+            <input
+              type="radio"
+              name="properties[monogram_position]"
+              id="position-{{ position.id }}"
+              value="{{ position.label }}"
+              class="mono-position customizer hidden"
+              data-image="{{ position.feature_image }}"
+              more-charges="{{ position.additional_charges }}"
+              {% if position.has_dependent_options == '1' or position.has_dependent_options == 1 %}
+                has-depended="{{ has_depended }}"
+                hasdisabled-to="{{ has_depended }}"
+              {% endif %}
+            >
+
+            <label for="position-{{ position.id }}">
+              <span class="icon-check-circle"></span>
+              {% if position.has_dependent_options == '1' or position.has_dependent_options == 1 %}
+                <span class="unavailable">UNAVAILABLE</span>
+              {% endif %}
+
+              <div class="img">
+                {% if position.feature_image != blank %}
+                  <img src="{{ position.feature_image }}">
+                {% else %}
+                  <img src="{{ 'placeholder.png' | asset_url }}">
+                {% endif %}
+              </div>
+
+              {% if position.additional_charges != 'undefined' and position.additional_charges != 'null' %}
+                <span class="additional_charges">+{{ position.additional_charges }} PKR</span>
+              {% endif %}
+
+              {% if position.has_dependent_options == '1' or position.has_dependent_options == 1 %}
+                <div class="why-not-scroll">
+                  <span class="why_not">Choose {{ has_depended_label }} for this option</span>
+                </div>
+              {% endif %}
+
+              <div class="selection">
+                <span class="name">{{ position.label }}</span>
+              </div>
+            </label>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="preview-box" id="previewBox">A B C</div>
+  </div>
+   {% if template.name == 'product' and product.type contains 'Shirts' %}
+    <div class="footer-btns addons hidden">
+      <a href="#" class="mono-prev-addons">Prev</a>
+      <a href="#" class="mono-next-addons">Next</a>
+      <a href="#" class="apply-mono-addons hidden">Apply</a>
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,270 @@
+{% assign display_label = override_label | default: option.label %}
+{% assign display_image = override_image | default: option.shopify_feature_image %}
+{% liquid 
+ if display_image contains "?"
+ assign display_image = display_image | append:"&width=161&height=161"
+ else 
+ assign display_image = display_image | append:"?width=161&height=161"
+ endif
+%}
+{% assign for_id = product_id | default: option.id %}
+
+{% if option.sub_options != blank %}
+  <a
+    href="#"
+    class="option-card{% if option.require_option == '1' or option.require_option == 1 %} required-option{% endif %}{% if option_value == '1' or option_value == 1 %} required-style{% endif %}"
+    data-list="{{ option.sub_options | map: "id" | join:"," }}"
+    data-id="{{ option.id }}"
+    style_name="{{ display_label }}"
+    sub-title="{{ option.sub_title }}"
+    
+    
+  >
+    {% if option.require_option == '1' or option.require_option == 1 %}
+      <span class="required">Required</span>
+    {% else %}
+      <span class="optional">Optional</span>
+      
+    {% endif %}
+  
+    {% if option.is_recommended == '1' or option.is_recommended == 1 %}
+      <span class="recommend">RECOMMENDED</span>
+          {% endif %}
+  <span class="unavailable">UNAVAILABLE </span>
+
+    <span class="icon-check-circle"></span>
+
+    <span class="img">
+      {% if display_image != blank %}
+        <img 
+          src="{{ display_image }}" 
+          onerror="this.onerror=null; this.src='{{ 'placeholder.png' | asset_url }}';"
+          alt="{{ display_label }}" 
+          width="160"
+          height="160"
+        >
+      {% else %}
+        <img src="{{ 'placeholder.png' | asset_url }}" alt="Placeholder image">
+      {% endif %}
+    </span>
+  {% if option.has_additional_charges == '1' or option.has_additional_charges == 1 and option.additional_charges != null %}
+      <span class="additional_charges">+Rs{{ option.additional_charges }} </span>
+    {% endif %}
+    {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+          <div class="product_info">
+<button
+                                  type="button"
+                                  class="info_btn"
+                                  data-toggle="modal"
+                                  data-target="#{{ option.label }}"
+                                >{{ 'info-icon.svg' | inline_asset_content }}</button>
+</div>
+             
+    {% endif %}
+  {% for has_depended_options in option.dependent_options %}
+        {% assign has_depended = has_depended_options.option_id %}
+        {% assign has_depended_label = has_depended_options.label %}
+      {% endfor %}
+     <div class="why-not-scroll">
+<span class="why_not animate "> Choose {{ has_depended_label }} for this option</span>
+     </div>
+    <span class="selection">
+      <div class="scroll-wrapper">
+      <span class="title">{{ display_label }}</span>
+      </div>
+    </span>
+  </a>
+   {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+   
+              <div
+                                  class="modal fade"
+                                  id="{{ option.label }}"
+                                  tabindex="-1"
+                                  role="dialog"
+                                  aria-hidden="true"
+                                >
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">X</span>
+                                        </button>
+                                       <div class="modal-body">
+                                        <span class="modal-title">{{ option.label }}</span>
+                                        <div class="additional_popup_details">{{ option.additional_details }}</div>
+                                      </div>
+                                      <div class="modal-img">
+    {% if option.feature_image != blank %}
+  <img 
+    src="{{ option.feature_image }}" 
+    onerror="this.onerror=null; this.src='{{ 'placeholder.png' | asset_url }}';"
+    alt="{{ option.label | escape }}"
+    width="200"
+    height="200"
+  >
+{% else %}
+  <img 
+    src="{{ 'placeholder.png' | asset_url }}" 
+    alt="Placeholder image"
+    width="200"
+    height="200"
+  >
+{% endif %}
+
+                                        
+                                      </div>
+                                     
+                                    </div>
+                                  </div>
+                                </div>
+    {% endif %}
+{% else %}
+    {% assign first_tab = 1st.label %}
+    {% assign second_tab = 2nd.label %}
+    {% assign thrid_tab = 3rd.label | split: '"' | first %}
+    {% assign main_option = 1st.additional_charges %}
+    {% assign second_option = 2nd.additional_charges %}
+    {% assign thrid_option = 3rd.additional_charges %}
+    {% assign total_price = 0 %}
+
+{% if main_option != blank %}
+  {% assign total_price = total_price | plus: main_option %}
+
+{% endif %}
+
+{% if second_option != blank %}
+  {% assign total_price = total_price | plus: second_option %}
+{% endif %}
+
+{% if third_option != blank %}
+  {% assign total_price = total_price | plus: third_option %}
+{% endif %}
+
+{% if option.additional_charges != blank %}
+  {% assign total_price = total_price | plus: option.additional_charges %}
+ 
+{% endif %}
+
+
+  <input
+    type="radio"
+    id="option-{% if first_tab != blank %}{{- first_tab -}}:{% endif %} {% if second_tab != blank %}{{- second_tab -}},{% endif %}{% if thrid_tab != blank %}{{- thrid_tab -}},{% endif %}{{- display_label -}}-{{ for_id}}"
+    data-name="properties[{{ display_label | escape }}]"
+    data-parent="{{ option.parent_id }}"
+    value="{{ display_label }}"
+    data-main-parent="{{ parent_id }}"
+    child-id="{{ option.id }}"
+    style_name="{{ display_label }}"
+    name="option-{{ option.parent_id }}"
+    {% comment %} more-charges="{% if option.has_additional_charges == '1' or option.has_additional_charges == 1 and option.additional_charges != blank %}
+      {{- option.additional_charges -}} {% else %}
+      {{- custom_price.additional_charges -}}
+    {% endif %}" {% endcomment %}
+    more-charges="{{ total_price }}"
+
+current-title="{{ sub_title }}"
+end-step="{{steps}}"
+    all-selection="{% if first_tab != blank %}{{- first_tab -}}:{% endif %} {% if second_tab != blank %}{{- second_tab -}},{% endif %}{% if thrid_tab != blank %}{{- thrid_tab -}},{% endif %}{{- display_label -}}"
+    select-options="{% if second_tab != blank %}{{- second_tab -}},{% endif %}{% if thrid_tab != blank %}{{- thrid_tab -}},{% endif %}{{- display_label -}}"
+    card-send="{% if second_tab != blank %}{{- second_tab -}},{% endif %}{% if thrid_tab != blank %}{{- thrid_tab -}},{% endif %}{{- display_label -}}"
+    {% assign first_child = 2nd %}
+    select-img="{% if first_child != blank %}{{- first_child.feature_image -}}{% else %}{{ display_image }}{% endif %}"
+     restricted_option_ids="{{ option.restricted_option_ids | join:","  }}"
+  {% for option_Pid in option.restricted_options %}
+    {% assign restricted_option_Pid = option_Pid.parent_id %}
+  {% endfor %}
+     restricted_option_Pid="{{ restricted_option_Pid}}"
+     {% for has_depended_options in option.dependent_options %}
+        {% assign has_depended = has_depended_options.option_id %}
+        {% assign has_depended_label = has_depended_options.label %}
+      {% endfor %}
+      has-depended="{{ has_depended }}"
+  
+    class="hidden"
+  >
+  <label for="option-{% if first_tab != blank %}{{- first_tab -}}:{% endif %} {% if second_tab != blank %}{{- second_tab -}},{% endif %}{% if thrid_tab != blank %}{{- thrid_tab -}},{% endif %}{{- display_label -}}-{{ for_id }}">
+    <span class="icon-check-circle"></span>
+     {% if option.is_recommended == '1' or option.is_recommended == 1 %}
+      <span class="recommend">RECOMMENDED</span>
+          {% endif %}
+      <span class="unavailable">UNAVAILABLE </span>
+    <div class="img">
+      {% if display_image != blank %}
+          <img 
+          src="{{ display_image }}" 
+          onerror="this.onerror=null; this.src='{{ 'placeholder.png' | asset_url }}';"
+          alt="{{ display_label }}" 
+          width="160"
+          height="160"
+        >
+      {% else %}
+        <img src="{{ "placeholder.png" | asset_url }}" alt="Placeholder">
+      {% endif %}
+    </div>
+      <div class="why-not-scroll">
+<span class="why_not  "> Choose {{ has_depended_label }} for this option</span>
+      </div>
+    {% if option.has_additional_charges == '1' or option.has_additional_charges == 1 and option.additional_charges != null %}
+      <span class="additional_charges">+Rs{{ option.additional_charges }} </span>
+    {% endif %}
+   {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+           <div class="product_info">
+<button
+                                  type="button"
+                                  class="info_btn"
+                                  data-toggle="modal"
+                                  data-target="#{{ option.label }}"
+                                >{{ 'info-icon.svg' | inline_asset_content }}</button>
+</div>
+              
+    {% endif %}
+    <div class="selection">
+      <div class="scroll-wrapper">
+      <span class="title">{{ display_label }}</span>
+      </div>
+    </div>
+  </label>
+   {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+      
+              <div
+                                  class="modal fade"
+                                  id="{{ option.label }}"
+                                  tabindex="-1"
+                                  role="dialog"
+                                  aria-hidden="true"
+                                >
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">X</span>
+                                        </button>
+                                      <div class="modal-body">
+                                        <span class="modal-title">{{ option.label }}</span>
+                                        <p>
+                                          {{ option.additional_details }}
+                                        </p>
+                                      </div>
+                                      <div class="modal-img">
+    {% if option.feature_image != blank %}
+  <img 
+    src="{{ option.feature_image }}" 
+    onerror="this.onerror=null; this.src='{{ 'placeholder.png' | asset_url }}';"
+    alt="{{ option.label | escape }}"
+    width="200"
+    height="200"
+  >
+{% else %}
+  <img 
+    src="{{ 'placeholder.png' | asset_url }}" 
+    alt="Placeholder image"
+    width="200"
+    height="200"
+  >
+{% endif %}
+
+                                      </div>
+                                     
+                                    </div>
+                                  </div>
+                                </div>
+    {% endif %}
+{% endif %}

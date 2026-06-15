@@ -1,0 +1,132 @@
+{%- doc -%}
+  Intended for use in a block similar to the button block.
+
+  @param {string} link - link to render
+  @param {object} [block] - The block
+
+  @example
+  {% render 'button', link: '/collections/all' %}
+{%- enddoc -%}
+{% if block.settings.enalbe_custom_btn %}
+          {% if block.settings.button_text != blank and block.settings.button_link != blank %}
+          <a href="{{ block.settings.button_link }}" class="image-button nn">
+            {{ block.settings.button_text }}
+          </a>
+        {% endif %}
+      {% else %}
+<a
+{% assign block_settings = block.settings %}
+
+
+  {% if link == blank %}
+    role="link"
+    aria-disabled="true"
+  {% else %}
+    href="{{ link }}"
+  {% endif %}
+  class="
+    size-style
+    blur-button
+    {{ block_settings.style_class }}
+    {{ block_settings.style_class }}--{{ block.id }}
+  "
+  style="{% render 'size-style', settings: block_settings %}"
+  {%- if block_settings.open_in_new_tab -%}
+    target="_blank"
+    rel="noopener noreferrer"
+  {%- endif -%}
+  {{ block.shopify_attributes }}
+>
+  {{ block_settings.label }}
+</a>
+{% endif %}
+{% stylesheet %}
+  .blur-button {
+     /* display: inline-block;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    min-width: 10rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    
+    /* White text color */
+    color: white;
+    
+    /* Blur background effect */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* Subtle border */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    transition: all 0.3s ease; */
+    position: relative;
+    text-decoration: none;
+    text-decoration-color: currentcolor;
+    overflow: hidden;
+    
+    /* Black text color (will work on white backgrounds) */
+     color:rgb(33, 31, 31);
+    
+    /* Blur background effect */
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* Darker border for visibility */
+    /* border: 1px solid rgba(0, 0, 0, 0.2); */
+    
+    transition: all 0.3s ease;
+
+    &:hover {
+      /* Keep text black on hover */
+      color: black;
+      
+      /* Darker shade on hover */
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-color: rgba(0, 0, 0, 0.4); 
+
+  }
+    }
+  }
+
+
+  /* For dark backgrounds - add this class manually */
+  .blur-button-dark {
+    /* White text color for dark backgrounds */
+    color: white;
+    
+    /* Blur background effect */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* Lighter border */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    &:hover {
+      /* Keep text white on hover */
+      color: white;
+      
+      /* Darker shade on hover */
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      /* border-color: rgba(255, 255, 255, 0.3); */
+    }
+  }
+
+  .link {
+    text-decoration-color: currentcolor;
+
+    &:hover {
+      color: var(--color-primary-hover);
+    }
+  }
+{% endstylesheet %}

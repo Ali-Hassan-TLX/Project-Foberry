@@ -1,0 +1,82 @@
+{% assign sizes = sizestabs.standard_sizes %}
+
+<div
+  class="tab-pane fade {{ sizestabs.type }} {% if sizes != blank %} active show {% endif %}"
+  id="{{ sizestabs.id }}"
+  role="tabpanel"
+  aria-labelledby="{{ sizestabs.type }}-tab"
+>
+  {% if sizes != blank %}
+    <div class="swatches">
+      {% if sizestabs.enable_size_chart == "1" or sizestabs.enable_size_chart == 1 %}
+        <div class="popup" onclick="myFunction()">
+          <span class=" custom-size">Size & Fit Guide <img src="{{ "SCALE-ICON-01-01.svg" | asset_url }}"  ></span>
+          <img src="{{ sizestabs.size_chart }}" class="popupimg" id="myPopup">
+        </div>
+      {% endif %}
+
+      {% for sub_options in sizes %}
+        <div class="standard-sizes">
+          <span class="swatch-title">{{ sub_options.label }}</span>
+          <ul class="swatch-list">
+            {% assign options_string = sub_options.options | remove: '[' | remove: ']' | remove: '"' %}
+            {% assign options_array = options_string | split: ',' %}
+            {% for standered_option in sub_options.options %}
+              <li>
+                {% render 'customizer-size-tabs-options',standered_parent:sub_options, input_options: sizes, standered_option: standered_option %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% elsif sizestabs.measurement_sizes != blank %}
+    {% assign sizes = sizestabs.measurement_sizes %}
+    <div class="measure">
+      <h4>{{ sizestabs.measurement_title }}</h4>
+      <ul class="measure-list">
+        {% for measurement_option in sizes %}
+          <li>
+            {% render 'customizer-size-tabs-options', measurement_option: measurement_option %}
+          </li>
+        {% endfor %}
+        <div class="measure_question">
+        {% for sub_options in sizes %}
+          <div class="choose-swatch">
+            <span class="swatch-title">{{ sub_options.label }}</span>
+            <ul class="swatch-list">
+              {% assign options_string = sub_options.options | remove: '[' | remove: ']' | remove: '"' %}
+              {% assign options_array = options_string | split: ',' %}
+              {% for measure_question in sub_options.options %}
+                {% if measure_question != blank %}
+                  
+                  <li>
+                    {% render 'customizer-size-tabs-options',standered_parent:sub_options, input_options: sizes, standered_option: measure_question, suboption:sizestabs.measurement_title %}
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      </div>
+      </ul>
+    </div>
+
+  {% elsif sizestabs.smart_sizes != blank %}
+    {% assign sizes = sizestabs.smart_sizes %}
+    <div class="measure">
+      <h4>{{ sizestabs.measurement_title }}</h4>
+     
+        {% for smart_size in sizes %}
+        
+            {% render 'customizer-size-tabs-options', smart_sizes: smart_size %}
+ 
+        {% endfor %}
+         <div class="question_btns">
+     <a type="button" class="disabled prev_size">PREV</a>
+     <a type="button" class="next_size">NEXT</a>
+   </div>
+    </div>
+  {% endif %}
+</div>

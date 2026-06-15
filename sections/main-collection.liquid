@@ -1,0 +1,2298 @@
+<script
+  src="{{ 'results-list.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% javascript %}
+  const url = new URL(window.location.href);
+  if (url.hash) {
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        const card = document.getElementById(url.hash.slice(1));
+        if (card) {
+          card.scrollIntoView({ behavior: 'instant' });
+        }
+      },
+      { once: true }
+    );
+  }
+{% endjavascript %}
+
+{% comment %} We always render this full-width, as the child blocks have width: page/full settings {% endcomment %}
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<results-list
+  class="section product-grid-container color-{{ section.settings.color_scheme }}"
+  style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
+  section-id="{{ section.id }}"
+  data-template="{{ collection.handle }}"
+  infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
+>
+  {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
+
+  <div
+    class="collection-wrapper grid gap-style{% if section.settings.product_grid_width == 'full-width' %} collection-wrapper--grid-full-width{% endif %}"
+  >
+    {% content_for 'block',
+      type: 'filters',
+      id: 'filters',
+      results: collection,
+      results_size: collection.products_count
+    %}
+
+    {% assign products_per_page = 24 %}
+
+    {% if section.settings.enable_infinite_scroll == false %}
+      {% assign products_per_page = section.settings.products_per_page %}
+    {% endif %}
+
+    {% paginate collection.products by products_per_page %}
+      {% capture children %}
+     {% for product in collection.products %}
+      {%  unless collection.template_suffix == 'custom-design' %}
+
+    {% assign idx = forloop.index0 %}
+    {% assign position_in_cycle = idx | modulo: 7 %}
+      {% if position_in_cycle > 3 %}
+      {% assign extra_class = 'product-grid-item-3' %}
+          {% else %}
+    {% assign extra_class = '' %}
+    {% endif %}
+    {% endunless %}
+
+      <li
+      id="{{ section.id }}-{{ product.id }}"
+      class="product-grid__item product-grid__item--{{ forloop.index0 }} {{ extra_class }}"
+      data-page="{{ paginate.current_page }}"
+      data-product-id="{{ product.id }}"
+      ref="cards[]" 
+           > 
+        {% # theme-check-disable %}
+          {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+              {% # theme-check-enable %}
+        </li>
+             {% comment %} Multiple Custom Inserts {% endcomment %}
+{% for i in (1..6) %}
+  {% assign enable_key = 'enable_insert_' | append: i %}
+  {% if section.settings[enable_key] %}
+    {% assign index_key = 'image_index_' | append: i %}
+    {% assign insert_at = section.settings[index_key] | plus: 0 %}
+    {% if forloop.parentloop.index == insert_at %}
+
+      {% assign bg_key      = 'background_image_' | append: i %}
+      {% assign brand_key   = 'brand_text_'        | append: i %}
+      {% assign sub_key     = 'brand_subtext_'     | append: i %}
+      {% assign hl_key      = 'headline_'          | append: i %}
+      {% assign hlb_key     = 'headline_bold_'     | append: i %}
+      {% assign bp_txt_key  = 'btn_primary_text_'  | append: i %}
+      {% assign bp_lnk_key  = 'btn_primary_link_'  | append: i %}
+      {% assign bs_txt_key  = 'btn_secondary_text_' | append: i %}
+      {% assign bs_lnk_key  = 'btn_secondary_link_' | append: i %}
+
+      {% comment %} <div class="custom-insert-div">
+        <div class="banner-wrapper banner-wrapper-{{ i }}" style="background-image: url('{{ section.settings[bg_key] | image_url: width: 2000 }}');">
+          <div class="banner-content">
+            <div class="brand-custom">{{ section.settings[brand_key] }}</div>
+            <div class="brand-divider">
+              <div class="brand-line"></div>
+              {% if section.settings[sub_key] != blank %}
+                <span class="brand-shirts">{{ section.settings[sub_key] }}</span>
+              {% endif %}
+            </div>
+            {% if section.settings[hl_key] != blank %}
+              <div class="banner-headline">
+                {{ section.settings[hl_key] }}
+                <strong>{{ section.settings[hlb_key] }}</strong>
+              </div>
+            {% endif %}
+            {% if section.settings[bp_txt_key] != blank or section.settings[bs_txt_key] != blank %}
+              <div class="banner-buttons">
+                {% if section.settings[bp_txt_key] != blank %}
+                  <a href="{{ section.settings[bp_lnk_key] }}" class="btn-primary">{{ section.settings[bp_txt_key] }}</a>
+                {% endif %}
+                {% if section.settings[bs_txt_key] != blank %}
+                  <a href="{{ section.settings[bs_lnk_key] }}" class="btn-secondary">{{ section.settings[bs_txt_key] }}</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div> {% endcomment %}
+
+      <div class="custom-insert-div">
+
+  {% assign ca_key      = 'banner_content_align_'   | append: i %}
+  {% assign ta_key      = 'banner_text_align_'      | append: i %}
+  {% assign mh_key      = 'banner_min_height_'      | append: i %}
+  {% assign ov_col_key  = 'banner_overlay_color_'   | append: i %}
+  {% assign ov_op_key   = 'banner_overlay_opacity_' | append: i %}
+
+  {% assign bt_col_key  = 'brand_text_color_'       | append: i %}
+  {% assign bt_sz_key   = 'brand_text_size_'        | append: i %}
+  {% assign bt_wt_key   = 'brand_text_weight_'      | append: i %}
+  {% assign bt_st_key   = 'brand_text_style_'       | append: i %}
+  {% assign bt_sp_key   = 'brand_text_spacing_'     | append: i %}
+
+  {% assign bs_col_key  = 'brand_subtext_color_'    | append: i %}
+  {% assign bs_sz_key   = 'brand_subtext_size_'     | append: i %}
+  {% assign bs_wt_key   = 'brand_subtext_weight_'   | append: i %}
+  {% assign bs_sp_key   = 'brand_subtext_spacing_'  | append: i %}
+  {% assign bl_col_key  = 'brand_line_color_'       | append: i %}
+
+  {% assign hl_col_key  = 'headline_color_'         | append: i %}
+  {% assign hl_sz_key   = 'headline_size_'          | append: i %}
+  {% assign hl_wt_key   = 'headline_weight_'        | append: i %}
+  {% assign hl_tr_key   = 'headline_transform_'     | append: i %}
+  {% assign hl_sp_key   = 'headline_spacing_'       | append: i %}
+
+  {% assign hlb_col_key = 'headline_bold_color_'    | append: i %}
+  {% assign hlb_sz_key  = 'headline_bold_size_'     | append: i %}
+  {% assign hlb_wt_key  = 'headline_bold_weight_'   | append: i %}
+  {% assign hlb_tr_key  = 'headline_bold_transform_'| append: i %}
+  {% assign hlb_sp_key  = 'headline_bold_spacing_'  | append: i %}
+
+  {% assign ov_opacity  = section.settings[ov_op_key] | default: 0 | times: 1.0 | divided_by: 100 %}
+  {% assign bt_spacing  = section.settings[bt_sp_key]  | default: 0 | times: 1.0 | divided_by: 100 %}
+  {% assign bs_spacing  = section.settings[bs_sp_key]  | default: 28 | times: 1.0 | divided_by: 100 %}
+  {% assign hl_spacing  = section.settings[hl_sp_key]  | default: 0 | times: 1.0 | divided_by: 100 %}
+  {% assign hlb_spacing = section.settings[hlb_sp_key] | default: 0 | times: 1.0 | divided_by: 100 %}
+
+  <div
+    class="banner-wrapper banner-wrapper-{{ i }}"
+    style="
+      background-image: url('{{ section.settings[bg_key] | image_url: width: 2000 }}');
+      min-height: {{ section.settings[mh_key] | default: 420 }}px;
+      justify-content: {{ section.settings[ca_key] | default: 'flex-end' }};
+    "
+  >
+    {% assign ov_op_val = section.settings[ov_op_key] | default: 0 %}
+    {% if ov_op_val > 0 %}
+      <div class="banner-overlay" style="background-color: {{ section.settings[ov_col_key] | default: '#000000' }}; opacity: {{ ov_opacity }};"></div>
+    {% endif %}
+
+    <div
+      class="banner-content"
+      style="text-align: {{ section.settings[ta_key] | default: 'left' }};"
+    >
+
+      <div
+        class="brand-custom"
+        style="
+          color: {{ section.settings[bt_col_key] | default: '#f5ede0' }};
+          font-size: {{ section.settings[bt_sz_key] | default: 40 }}px;
+          font-weight: {{ section.settings[bt_wt_key] | default: '400' }};
+          font-style: {{ section.settings[bt_st_key] | default: 'italic' }};
+          letter-spacing: {{ bt_spacing }}em;
+        "
+      >{{ section.settings[brand_key] }}</div>
+
+      <div class="brand-divider">
+        <div
+          class="brand-line"
+          style="background: linear-gradient(to right, {{ section.settings[bl_col_key] | default: '#c8a97a' }}, transparent);"
+        ></div>
+        {% if section.settings[sub_key] != blank %}
+          <span
+            class="brand-shirts"
+            style="
+              color: {{ section.settings[bs_col_key] | default: '#c8a97a' }};
+              font-size: {{ section.settings[bs_sz_key] | default: 10 }}px;
+              font-weight: {{ section.settings[bs_wt_key] | default: '600' }};
+              letter-spacing: {{ bs_spacing }}em;
+            "
+          >{{ section.settings[sub_key] }}</span>
+        {% endif %}
+      </div>
+
+      {% if section.settings[hl_key] != blank %}
+        <div
+          class="banner-headline"
+          style="
+            color: {{ section.settings[hl_col_key] | default: '#f0e8df' }};
+            font-size: {{ section.settings[hl_sz_key] | default: 32 }}px;
+            font-weight: {{ section.settings[hl_wt_key] | default: '400' }};
+            text-transform: {{ section.settings[hl_tr_key] | default: 'uppercase' }};
+            letter-spacing: {{ hl_spacing }}em;
+          "
+        >
+          {{ section.settings[hl_key] }}
+          {% if section.settings[hlb_key] != blank %}
+            <strong style="
+              display: block;
+              color: {{ section.settings[hlb_col_key] | default: '#ffffff' }};
+              font-size: {{ section.settings[hlb_sz_key] | default: 40 }}px;
+              font-weight: {{ section.settings[hlb_wt_key] | default: '700' }};
+              text-transform: {{ section.settings[hlb_tr_key] | default: 'uppercase' }};
+              letter-spacing: {{ hlb_spacing }}em;
+            ">{{ section.settings[hlb_key] }}</strong>
+          {% endif %}
+        </div>
+      {% endif %}
+      {% if section.settings[bp_txt_key] != blank or section.settings[bs_txt_key] != blank %}
+        <div class="banner-buttons">
+
+          {% if section.settings[bp_txt_key] != blank %}
+            {% assign bp_style_key = 'btn_primary_style_'      | append: i %}
+            {% assign bp_bg_key2   = 'btn_primary_bg_'         | append: i %}
+            {% assign bp_bg2_key   = 'btn_primary_bg2_'        | append: i %}
+            {% assign bp_tc_key    = 'btn_primary_text_color_' | append: i %}
+            {% assign bp_hbg_key   = 'btn_primary_hover_bg_'   | append: i %}
+            {% assign bp_htc_key   = 'btn_primary_hover_text_' | append: i %}
+            {% assign bp_fs_key    = 'btn_primary_font_size_'  | append: i %}
+            {% assign bp_style_key = 'insert_' | append: i | append: '_button_style' %}
+
+            {% assign bp_style = section.settings[bp_style_key] | default: 'outline' %}
+            {% assign bp_bg    = section.settings[bp_bg_key2]   | default: '#c8a97a' %}
+            {% assign bp_bg2   = section.settings[bp_bg2_key]   | default: '#a0784a' %}
+
+            {% if bp_style == 'gradient' %}
+              {% comment %} {% assign bp_bg_css     = 'linear-gradient(135deg, ' | append: bp_bg | append: ', ' | append: bp_bg2 | append: ')' %} {% endcomment %}
+              {% assign bp_border_css = 'none' %}
+              {% assign btn_class = 'btn-primary' %}
+            {% elsif bp_style == 'outline' %}
+              {% assign bp_bg_css     = 'transparent' %}
+              {% assign bp_border_css = '1.5px solid ' | append: bp_bg %}
+            {% else %}
+              {% assign bp_bg_css     = bp_bg %}
+              {% assign bp_border_css = 'none' %}
+            {% endif %}
+
+            
+             <a href="{{ section.settings[bp_lnk_key] }}"
+              class="btn-custom   {% if section.settings[bp_style_key] == 'gradient' %} dib-grad-btn{% else %}btn-primary{% endif %}"
+            ><span class="dib-grad-btn__label">{{ section.settings[bp_txt_key] }}</span></a>
+          {% endif %}
+
+          {% if section.settings[bs_txt_key] != blank %}
+            {% assign bs_style_key = 'btn_secondary_style_'      | append: i %}
+            {% assign bs_bg_key2   = 'btn_secondary_bg_'         | append: i %}
+            {% assign bs_bg2_key   = 'btn_secondary_bg2_'        | append: i %}
+            {% assign bs_tc_key    = 'btn_secondary_text_color_' | append: i %}
+            {% assign bs_hbg_key   = 'btn_secondary_hover_bg_'   | append: i %}
+            {% assign bs_htc_key   = 'btn_secondary_hover_text_' | append: i %}
+            {% assign bs_fs_key    = 'btn_secondary_font_size_'  | append: i %}
+            {% assign bp_style_key = 'insert_' | append: i | append: '_button_style_p' %}
+
+            {% assign bs_style = section.settings[bs_style_key] | default: 'simple' %}
+            {% assign bs_bg    = section.settings[bs_bg_key2]   | default: '#ffffff' %}
+            {% assign bs_bg2   = section.settings[bs_bg2_key]   | default: '#dddddd' %}
+
+            {% if bs_style == 'gradient' %}
+              {% assign bs_bg_css     = 'linear-gradient(135deg, ' | append: bs_bg | append: ', ' | append: bs_bg2 | append: ')' %}
+              {% assign bs_border_css = 'none' %}
+            {% elsif bs_style == 'outline' %}
+              {% assign bs_bg_css     = 'transparent' %}
+              {% assign bs_border_css = '1.5px solid ' | append: bs_bg %}
+            {% else %}
+              {% assign bs_bg_css     = bs_bg %}
+              {% assign bs_border_css = 'none' %}
+            {% endif %}
+
+            
+              <a href="{{ section.settings[bs_lnk_key] }}"
+              class="btn-custom {% if section.settings[bp_style_key] == 'gradient' %}dib-grad-btn{% else %}btn-primary{% endif %}"
+            ><span class="dib-grad-btn__label">{{ section.settings[bs_txt_key] }}</span></a>
+          {% endif %}
+
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+    {% endif %}
+  {% endif %}
+{% endfor %}                                                                                                                                                                                                                                                                                     
+                                                                                                                                                                                                                                                                                                                         
+{% comment %} {% assign mod = forloop.index %}
+{% assign image_index = section.settings.image_index %}
+
+{% if mod == image_index %}
+<div class="custom-insert-div">
+<div class="banner-wrapper">
+
+<div class="banner-content">
+   <div class="brand-custom">{{ section.settings.brand_text }}</div>
+<div class="brand-divider">
+    <div class="brand-line"></div>
+      {% if section.settings.brand_subtext != blank %}
+      <span class="brand-shirts">{{ section.settings.brand_subtext }}</span>
+      {% endif %}
+          </div>
+  {% if section.settings.headline != blank %}
+      <div class="banner-headline">
+  {{ section.settings.headline }}
+<strong>{{ section.settings.headline_bold }}</strong>
+                  </div>
+                  {% endif %}
+                    {% if section.settings.btn_primary_text != blank or section.settings.btn_secondary_text!= blank %}
+                      <div class="banner-buttons">
+                  {% if section.settings.btn_primary_text != blank %}
+                   <a href="{{ section.settings.btn_primary_link }}" class="btn-primary">
+                  {{ section.settings.btn_primary_text }}
+                  </a>
+  {% endif %}
+{% if section.settings.btn_secondary_text != blank %}
+  <a href="{{ section.settings.btn_secondary_link }}" class="btn-secondary">
+                          {{ section.settings.btn_secondary_text }}
+                          </a>
+                    {% endif %}
+                  </div>
+            {% endif %}
+        </div>
+
+  </div>
+    </div>
+{% endif %} {% endcomment %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+{% endfor %}
+{% endcapture %}
+
+      {% render 'product-grid',
+        section: section,
+        children: children,
+        products: collection.products,
+        paginate: paginate,
+        enable_infinite_scroll: section.settings.enable_infinite_scroll,
+        collection: collection
+      %}
+    {% endpaginate %}
+  </div>
+</results-list>
+{% style %}
+.btn-gradient{
+  position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    padding: 0;
+    isolation: isolate;
+}
+.btn-gradient::before{
+  content: "";
+    position: absolute;
+    inset: calc(-1 * var(--grad-thickness));
+    border-radius: calc(var(--btn-radius) + var(--grad-thickness));
+    background: conic-gradient(from var(--grad-start), var(--grad-color-1), var(--grad-color-2), var(--grad-color-3), var(--grad-color-1));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: var(--grad-thickness);
+    z-index: -1;
+    transition: --grad-start 0s;
+}
+   {%  if collection.template_suffix == 'custom-design' %}
+    .product-grid  {
+    grid-template-columns: repeat(18, 1fr)!important;
+    column-gap: 10px!important;
+  }
+  .custom-insert-div{
+    grid-column: span 18 !important;
+  }
+  .product-card{
+    transition: all 0.3s ease;
+    border: 1px solid transparent !important;
+  }
+  .product-card:hover{
+    border-color: #eee !important;
+  }
+  .customize-card-btn.quick-add__button.new-class {
+      position: unset !important;
+      width: 135px !important;
+      height: 35px !important;
+  }
+  @media (max-width: 749px){
+    .product-grid__item{
+      grid-column: span 18 !important;
+    }
+  }
+  .sold-out-badge{
+    font-size: 25px !important;
+    transform: translate(-50%, -50%) rotate(-21deg) !important;
+  }
+  {% else %}
+      .product-grid  {
+    grid-template-columns: repeat(12, 1fr)!important;
+    column-gap: 4px!important;
+  }
+  {% endif %}
+{% endstyle %}
+{% stylesheet %}
+  .product-grid-item-3{
+    grid-column: span 4 !important;
+    gap: 2px;
+  }
+    .main-collection-grid {
+      grid-column: var(--grid-column--mobile);
+
+    .custom-insert-div{
+      grid-column: 12;
+      height: 200px;
+    }
+  .custom-insert-div {
+    width: 100%;
+
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 4px;
+    overflow: hidden;
+    grid-column: span 12;
+    height: 100%;
+  }
+  .product-grid-container {
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+  }
+  .product-grid--template--26796163367224__main-collection .product-grid__item:hover {
+    border: 1px solidrgb(174, 164, 164);
+    border-radius: 8px;
+  }
+  product-card{
+    border-radius: 8px;
+  }
+
+  .brand-custom {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 2.5rem;
+    color: #f5ede0;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+/* .btn-custom:hover {
+  background: var(--hover-bg) !important;
+  color: var(--hover-tc) !important;
+} */
+
+
+  .brand-divider { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+  .brand-line    { flex: 1; height: 1px; background: linear-gradient(to right, #c8a97a, transparent); max-width: 70px; }
+  .brand-shirts  { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.28em; color: #c8a97a; text-transform: uppercase; }
+
+  .banner-headline        { font-size: 2rem; font-weight: 400; color: #f0e8df; text-transform: uppercase; line-height: 1.1; }
+  .banner-headline strong { display: block; font-size: 2.5rem; font-weight: 700; color: #fff; }
+
+  .banner-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; max-width: fit-content !important; }
+
+  .btn-primary {
+    display: block; 
+    border: 2px solid #f9f9f9ff; background: transparent; color: #f5ede0;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    text-align: center; cursor: pointer; transition: all 0.25s; text-decoration: none;
+  }
+  .btn-primary:hover { 
+    background: #212120ff; 
+    color: #ffffffff;
+    border:none;
+   }
+
+  .btn-secondary {
+    display: block; padding: 13px 20px;
+    border: 1.5px solid #ffffff; background: #ffffff; color: #2a1f1a;
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    text-align: center; cursor: pointer; transition: all 0.25s; text-decoration: none;
+  }
+  .btn-secondary:hover { background: transparent; color: #ffffff; }
+
+  @media (max-width: 600px) {
+    .banner-wrapper  { justify-content: center; min-height: 360px; }
+    .banner-content  { width: 100%; padding: 28px 24px; align-items: center; text-align: center; }
+    .banner-buttons  { max-width: 100%; }
+  }
+
+      @media screen and (min-width: 750px) {
+        grid-column: var(--grid-column--desktop);
+      }
+    }
+    .collection-wrapper{
+      /* max-width: 1200px; */
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .collection-wrapper {
+      @media screen and (min-width: 750px) {
+        grid-template-columns:
+          1fr repeat(
+            var(--centered-column-number),
+            minmax(0, calc((var(--page-width) - var(--page-margin) * 2) / var(--centered-column-number)))
+          )
+          1fr;
+      }
+    }
+
+    .collection-wrapper:has(.facets-block-wrapper--full-width),
+    .collection-wrapper:has(.collection-wrapper--full-width) {
+      @media screen and (min-width: 750px) {
+        grid-column: 1 / -1;
+        grid-template-columns:
+          minmax(var(--page-margin), 1fr) repeat(
+            var(--centered-column-number),
+            minmax(0, calc((var(--page-width) - var(--page-margin) * 2) / var(--centered-column-number)))
+          )
+          minmax(var(--page-margin), 1fr);
+      }
+    }
+
+    .collection-wrapper:has(.facets--vertical) .facets-block-wrapper--vertical:not(.hidden) ~ .main-collection-grid {
+      @media screen and (min-width: 750px) {
+        grid-column: var(--facets-vertical-col-width) / var(--full-width-column-number);
+      }
+    }
+
+    .collection-wrapper:has(.facets-block-wrapper--vertical:not(#filters-drawer)):has(.collection-wrapper--full-width) {
+      @media screen and (min-width: 750px) {
+        grid-column: 1 / -1;
+        grid-template-columns: 0fr repeat(var(--centered-column-number), minmax(0, 1fr)) 0fr;
+      }
+    }
+
+    :is(.collection-wrapper--full-width, .collection-wrapper--full-width-on-mobile)
+      [product-grid-view='default']
+      .product-grid__card {
+      @media screen and (max-width: 749px) {
+        padding-inline-start: max(var(--padding-xs), var(--padding-inline-start));
+        padding-inline-end: max(var(--padding-xs), var(--padding-inline-end));
+      }
+    }
+
+    :is(.collection-wrapper--full-width, .collection-wrapper--full-width-on-mobile)
+      [product-grid-view='mobile-single']
+      .product-grid__card {
+      @media screen and (max-width: 749px) {
+        padding-inline-start: max(var(--padding-xs), var(--padding-inline-start));
+        padding-inline-end: max(var(--padding-xs), var(--padding-inline-end));
+      }
+    }
+
+    /* Make product media go edge-to-edge by using negative margins */
+    :is(.collection-wrapper--full-width) .card-gallery,
+    :is(.collection-wrapper--full-width-on-mobile) .card-gallery {
+      @media screen and (max-width: 749px) {
+        margin-inline-start: calc(-1 * max(var(--padding-xs), var(--padding-inline-start)));
+        margin-inline-end: calc(-1 * max(var(--padding-xs), var(--padding-inline-end)));
+      }
+    }
+  /* Mobile: 2 columns layout */
+  @media screen and (max-width: 749px) {
+    .product-grid__item,
+    .product-grid-item-3 {
+      grid-column: span 6 !important;
+    }
+
+    /* FORCE REMOVE ALL GAPS - This is the fix! */
+    .main-collection-grid {
+      /* padding: 0 !important; */
+      margin: 0 !important;
+    }
+
+    .product-grid {
+      --product-grid-gap-mobile: var(--gap-xs) var(--gap-xs) !important;
+      margin-top: var(--gap-xs) !important;
+    }
+
+    /* Remove section padding */
+    results-list.section {
+      --padding-block-start: 0 !important;
+    }
+
+    .section.product-grid-container {
+      padding-top: 0 !important;
+    }
+
+    /* Tighten collection wrapper */
+    .collection-wrapper {
+      gap: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    /* Remove filter area bottom spacing */
+    .facets-block-wrapper,
+    .facets-toggle,
+    .facets-mobile-wrapper {
+      margin-bottom: 0 !important;
+      padding-bottom: var(--gap-xs) !important;
+    }
+  }
+
+  .product-grid-item-3{
+    grid-column: span 4 !important;
+    gap: 2px;
+  }
+
+
+
+  /* Mobile: 2 columns layout - each product takes 6 grid columns */
+  @media screen and (max-width: 749px) {
+    .product-grid__item,
+    .product-grid-item-3 {
+      grid-column: span 6 !important;
+    }
+
+    /* REMOVE LARGE GAP between filters and products */
+    .collection-wrapper {
+      gap: 0 !important;
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    .product-grid-container,
+    .main-collection-grid {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    /* Reduce section padding */
+    results-list.section {
+      --padding-block-start: 0px !important;
+    }
+
+    /* Remove gap from facets area */
+    .facets-block-wrapper,
+    .facets-toggle {
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    /* Ensure product grid starts immediately after filters */
+    .product-grid {
+      margin-top: var(--gap-xs) !important;
+    }
+  }
+
+  .product-grid-item-3{
+    grid-column: span 4 !important;
+    gap: 2px;
+  }
+
+  /* Rest of your existing CSS... */
+  /* Mobile: 2 columns layout - each product takes 6 grid columns */
+  @media screen and (max-width: 749px) {
+    .product-grid__item,
+    .product-grid-item-3 {
+      grid-column: span 6 !important;
+    }
+  }
+
+  .main-collection-grid {
+    grid-column: var(--grid-column--mobile);
+
+    @media screen and (min-width: 750px) {
+      grid-column: var(--grid-column--desktop);
+    }
+  }
+{% endstylesheet %}
+ {% style %}
+   .banner-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 420px;
+    background-image: url('{{section.settings.background_image | image_url: width: 2000 }}');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;  /* content on the right like original */
+  }
+   .banner-content {
+    position: relative;
+    z-index: 2;
+    padding: 50px 50px 50px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 50%;
+  }
+  /* =====================
+   GRADIENT BORDER BUTTON
+===================== */
+
+/* custom animatable property */
+@property --grad-start {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* animation */
+@keyframes dib-spin {
+  to { --grad-start: 360deg; }
+}
+
+/* main button */
+.dib-grad-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border-radius: 0px; /* change if needed */
+  isolation: isolate;
+}
+
+/* border layer */
+.dib-grad-btn::before {
+  content: "";
+  position: absolute;
+  inset: -2px; /* border thickness */
+  border-radius: 0px;
+
+  background: conic-gradient(
+    from var(--grad-start),
+    #ff4d4d,
+    #ffcc00,
+    #6a5acd,
+    #ff4d4d
+  );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  padding: 2px; /* border thickness */
+  z-index: -1;
+}
+
+/* hover animation */
+.dib-grad-btn:hover::before {
+  animation: dib-spin 0.6s linear forwards;
+}
+
+/* inner label */
+.dib-grad-btn__label {
+  display: block;
+  padding: 12px 28px;
+  color: #fff; /* text color */
+  border-radius: 0px;
+  line-height: 1;
+  white-space: nowrap;
+}
+{% endstyle %} 
+
+{% schema %}
+{
+  "name": "t:names.collection_container",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout_type",
+      "label": "t:settings.type",
+      "options": [
+        {
+          "value": "grid",
+          "label": "t:options.grid"
+        },
+        {
+          "value": "organic",
+          "label": "t:options.editorial"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "select",
+      "id": "product_card_size",
+      "label": "t:settings.card_size",
+      "options": [
+        {
+          "value": "small",
+          "label": "t:options.small"
+        },
+        {
+          "value": "medium",
+          "label": "t:options.medium"
+        },
+        {
+          "value": "large",
+          "label": "t:options.large"
+        },
+        {
+          "value": "extra-large",
+          "label": "t:options.extra_large"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "select",
+      "id": "mobile_product_card_size",
+      "label": "t:settings.mobile_card_size",
+      "options": [
+        {
+          "value": "small",
+          "label": "t:options.small"
+        },
+        {
+          "value": "large",
+          "label": "t:options.large"
+        }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_infinite_scroll",
+      "label": "t:settings.auto_load_products",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "t:settings.products_per_page",
+      "min": 8,
+      "max": 36,
+      "step": 4,
+      "default": 24,
+      "visible_if": "{{ section.settings.enable_infinite_scroll == false }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "select",
+      "id": "product_grid_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "centered",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "centered"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_on_mobile",
+      "label": "t:settings.full_width_on_mobile",
+      "default": true,
+      "visible_if": "{{ section.settings.product_grid_width != 'full-width' }}"
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_horizontal",
+      "label": "t:settings.horizontal_gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_vertical",
+      "label": "t:settings.vertical_gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.section_layout"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "custom_banner_repeat",
+      "label": "Number of times to render custom banner",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 1
+    },
+    {
+  "type": "header",
+  "content": "Custom Banner Inserts"
+},
+
+{
+  "type": "checkbox",
+  "id": "enable_insert_1",
+  "label": "Enable Insert 1",
+  "default": false
+},
+{
+  "type": "number",
+  "id": "image_index_1",
+  "label": "Insert 1 — Position (index)",
+  "default": 4,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "image_picker",
+  "id": "background_image_1",
+  "label": "Insert 1 — Background Image",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_text_1",
+  "label": "Insert 1 — Brand Text",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_subtext_1",
+  "label": "Insert 1 — Brand Subtext",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_1",
+  "label": "Insert 1 — Headline",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_bold_1",
+  "label": "Insert 1 — Headline Bold",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_primary_text_1",
+  "label": "Insert 1 — Primary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_primary_link_1",
+  "label": "Insert 1 — Primary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_secondary_text_1",
+  "label": "Insert 1 — Secondary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_secondary_link_1",
+  "label": "Insert 1 — Secondary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 1 — Brand Text Style",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_text_color_1",
+  "label": "Insert 1 — Brand Text Color",
+  "default": "#f5ede0",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_size_1",
+  "label": "Insert 1 — Brand Text Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_weight_1",
+  "label": "Insert 1 — Brand Text Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_style_1",
+  "label": "Insert 1 — Brand Text Font Style",
+  "options": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "italic", "label": "Italic" }
+  ],
+  "default": "italic",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_spacing_1",
+  "label": "Insert 1 — Brand Text Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 1 — Brand Subtext Style",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_subtext_color_1",
+  "label": "Insert 1 — Subtext Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_size_1",
+  "label": "Insert 1 — Subtext Font Size (px)",
+  "min": 8,
+  "max": 32,
+  "step": 1,
+  "default": 10,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_subtext_weight_1",
+  "label": "Insert 1 — Subtext Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "600",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_spacing_1",
+  "label": "Insert 1 — Subtext Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 28,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_line_color_1",
+  "label": "Insert 1 — Divider Line Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 1 — Headline Style",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "color",
+  "id": "headline_color_1",
+  "label": "Insert 1 — Headline Color",
+  "default": "#f0e8df",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "headline_size_1",
+  "label": "Insert 1 — Headline Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 32,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "headline_weight_1",
+  "label": "Insert 1 — Headline Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "headline_transform_1",
+  "label": "Insert 1 — Headline Text Transform",
+  "options": [
+    { "value": "none", "label": "None" },
+    { "value": "uppercase", "label": "Uppercase" },
+    { "value": "lowercase", "label": "Lowercase" },
+    { "value": "capitalize", "label": "Capitalize" }
+  ],
+  "default": "uppercase",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "headline_spacing_1",
+  "label": "Insert 1 — Headline Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 1 — Headline Bold Style",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "color",
+  "id": "headline_bold_color_1",
+  "label": "Insert 1 — Headline Bold Color",
+  "default": "#ffffff",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "headline_bold_size_1",
+  "label": "Insert 1 — Headline Bold Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "headline_bold_weight_1",
+  "label": "Insert 1 — Headline Bold Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "700",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "headline_bold_transform_1",
+  "label": "Insert 1 — Headline Bold Text Transform",
+  "options": [
+    { "value": "none", "label": "None" },
+    { "value": "uppercase", "label": "Uppercase" },
+    { "value": "lowercase", "label": "Lowercase" },
+    { "value": "capitalize", "label": "Capitalize" }
+  ],
+  "default": "uppercase",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "headline_bold_spacing_1",
+  "label": "Insert 1 — Headline Bold Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 1 — Banner Layout",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "banner_content_align_1",
+  "label": "Insert 1 — Content Alignment",
+  "options": [
+    { "value": "flex-start", "label": "Left" },
+    { "value": "center", "label": "Center" },
+    { "value": "flex-end", "label": "Right" }
+  ],
+  "default": "flex-end",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "banner_text_align_1",
+  "label": "Insert 1 — Text Align",
+  "options": [
+    { "value": "left", "label": "Left" },
+    { "value": "center", "label": "Center" },
+    { "value": "right", "label": "Right" }
+  ],
+  "default": "left",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "banner_min_height_1",
+  "label": "Insert 1 — Banner Min Height (px)",
+  "min": 150,
+  "max": 800,
+  "step": 10,
+  "default": 420,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "color",
+  "id": "banner_overlay_color_1",
+  "label": "Insert 1 — Overlay Color",
+  "default": "#000000",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "range",
+  "id": "banner_overlay_opacity_1",
+  "label": "Insert 1 — Overlay Opacity (0–100)",
+  "min": 0,
+  "max": 100,
+  "step": 5,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 1 — Primary Button Style",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_1_button_style",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 1 — Secondary Button Style",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_1_button_style_p",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_1 == true }}"
+},
+
+{
+  "type": "checkbox",
+  "id": "enable_insert_2",
+  "label": "Enable Insert 2",
+  "default": false
+},
+{
+  "type": "number",
+  "id": "image_index_2",
+  "label": "Insert 2 — Position (index)",
+  "default": 8,
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "image_picker",
+  "id": "background_image_2",
+  "label": "Insert 2 — Background Image",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_text_2",
+  "label": "Insert 2 — Brand Text",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_subtext_2",
+  "label": "Insert 2 — Brand Subtext",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_2",
+  "label": "Insert 2 — Headline",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_bold_2",
+  "label": "Insert 2 — Headline Bold",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_primary_text_2",
+  "label": "Insert 2 — Primary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_primary_link_2",
+  "label": "Insert 2 — Primary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_secondary_text_2",
+  "label": "Insert 2 — Secondary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_secondary_link_2",
+  "label": "Insert 2 — Secondary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 2 — Brand Text Style",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_text_color_2",
+  "label": "Insert 2 — Brand Text Color",
+  "default": "#f5ede0",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_size_2",
+  "label": "Insert 2 — Brand Text Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_weight_2",
+  "label": "Insert 2 — Brand Text Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_style_2",
+  "label": "Insert 2 — Brand Text Font Style",
+  "options": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "italic", "label": "Italic" }
+  ],
+  "default": "italic",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_spacing_2",
+  "label": "Insert 2 — Brand Text Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 2 — Brand Subtext Style",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_subtext_color_2",
+  "label": "Insert 2 — Subtext Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_size_2",
+  "label": "Insert 2 — Subtext Font Size (px)",
+  "min": 8,
+  "max": 32,
+  "step": 1,
+  "default": 10,
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_subtext_weight_2",
+  "label": "Insert 2 — Subtext Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "600",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_spacing_2",
+  "label": "Insert 2 — Subtext Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 28,
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_line_color_2",
+  "label": "Insert 2 — Divider Line Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_2_button_style",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_2 == true }}"
+},
+
+{
+  "type": "checkbox",
+  "id": "enable_insert_3",
+  "label": "Enable Insert 3",
+  "default": false
+},
+{
+  "type": "number",
+  "id": "image_index_3",
+  "label": "Insert 3 — Position (index)",
+  "default": 12,
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "image_picker",
+  "id": "background_image_3",
+  "label": "Insert 3 — Background Image",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_text_3",
+  "label": "Insert 3 — Brand Text",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_subtext_3",
+  "label": "Insert 3 — Brand Subtext",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_3",
+  "label": "Insert 3 — Headline",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_bold_3",
+  "label": "Insert 3 — Headline Bold",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_primary_text_3",
+  "label": "Insert 3 — Primary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_primary_link_3",
+  "label": "Insert 3 — Primary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_secondary_text_3",
+  "label": "Insert 3 — Secondary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_secondary_link_3",
+  "label": "Insert 3 — Secondary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 3 — Brand Text Style",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_text_color_3",
+  "label": "Insert 3 — Brand Text Color",
+  "default": "#f5ede0",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_size_3",
+  "label": "Insert 3 — Brand Text Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_weight_3",
+  "label": "Insert 3 — Brand Text Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_style_3",
+  "label": "Insert 3 — Brand Text Font Style",
+  "options": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "italic", "label": "Italic" }
+  ],
+  "default": "italic",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_spacing_3",
+  "label": "Insert 3 — Brand Text Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 3 — Brand Subtext Style",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_subtext_color_3",
+  "label": "Insert 3 — Subtext Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_size_3",
+  "label": "Insert 3 — Subtext Font Size (px)",
+  "min": 8,
+  "max": 32,
+  "step": 1,
+  "default": 10,
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_subtext_weight_3",
+  "label": "Insert 3 — Subtext Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "600",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_spacing_3",
+  "label": "Insert 3 — Subtext Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 28,
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_line_color_3",
+  "label": "Insert 3 — Divider Line Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_3_button_style",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_3 == true }}"
+},
+
+{
+  "type": "checkbox",
+  "id": "enable_insert_4",
+  "label": "Enable Insert 4",
+  "default": false
+},
+{
+  "type": "number",
+  "id": "image_index_4",
+  "label": "Insert 4 — Position (index)",
+  "default": 16,
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "image_picker",
+  "id": "background_image_4",
+  "label": "Insert 4 — Background Image",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_text_4",
+  "label": "Insert 4 — Brand Text",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_subtext_4",
+  "label": "Insert 4 — Brand Subtext",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_4",
+  "label": "Insert 4 — Headline",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_bold_4",
+  "label": "Insert 4 — Headline Bold",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_primary_text_4",
+  "label": "Insert 4 — Primary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_primary_link_4",
+  "label": "Insert 4 — Primary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_secondary_text_4",
+  "label": "Insert 4 — Secondary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_secondary_link_4",
+  "label": "Insert 4 — Secondary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 4 — Brand Text Style",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_text_color_4",
+  "label": "Insert 4 — Brand Text Color",
+  "default": "#f5ede0",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_size_4",
+  "label": "Insert 4 — Brand Text Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_weight_4",
+  "label": "Insert 4 — Brand Text Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_style_4",
+  "label": "Insert 4 — Brand Text Font Style",
+  "options": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "italic", "label": "Italic" }
+  ],
+  "default": "italic",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_spacing_4",
+  "label": "Insert 4 — Brand Text Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 4 — Brand Subtext Style",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_subtext_color_4",
+  "label": "Insert 4 — Subtext Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_size_4",
+  "label": "Insert 4 — Subtext Font Size (px)",
+  "min": 8,
+  "max": 32,
+  "step": 1,
+  "default": 10,
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_subtext_weight_4",
+  "label": "Insert 4 — Subtext Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "600",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_spacing_4",
+  "label": "Insert 4 — Subtext Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 28,
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_line_color_4",
+  "label": "Insert 4 — Divider Line Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_4_button_style",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_4 == true }}"
+},
+
+{
+  "type": "checkbox",
+  "id": "enable_insert_5",
+  "label": "Enable Insert 5",
+  "default": false
+},
+{
+  "type": "number",
+  "id": "image_index_5",
+  "label": "Insert 5 — Position (index)",
+  "default": 20,
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "image_picker",
+  "id": "background_image_5",
+  "label": "Insert 5 — Background Image",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_text_5",
+  "label": "Insert 5 — Brand Text",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_subtext_5",
+  "label": "Insert 5 — Brand Subtext",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_5",
+  "label": "Insert 5 — Headline",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_bold_5",
+  "label": "Insert 5 — Headline Bold",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_primary_text_5",
+  "label": "Insert 5 — Primary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_primary_link_5",
+  "label": "Insert 5 — Primary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_secondary_text_5",
+  "label": "Insert 5 — Secondary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_secondary_link_5",
+  "label": "Insert 5 — Secondary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 5 — Brand Text Style",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_text_color_5",
+  "label": "Insert 5 — Brand Text Color",
+  "default": "#f5ede0",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_size_5",
+  "label": "Insert 5 — Brand Text Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_weight_5",
+  "label": "Insert 5 — Brand Text Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_style_5",
+  "label": "Insert 5 — Brand Text Font Style",
+  "options": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "italic", "label": "Italic" }
+  ],
+  "default": "italic",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_spacing_5",
+  "label": "Insert 5 — Brand Text Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 5 — Brand Subtext Style",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_subtext_color_5",
+  "label": "Insert 5 — Subtext Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_size_5",
+  "label": "Insert 5 — Subtext Font Size (px)",
+  "min": 8,
+  "max": 32,
+  "step": 1,
+  "default": 10,
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_subtext_weight_5",
+  "label": "Insert 5 — Subtext Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "600",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_spacing_5",
+  "label": "Insert 5 — Subtext Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 28,
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_line_color_5",
+  "label": "Insert 5 — Divider Line Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_5_button_style",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_5 == true }}"
+},
+{
+  "type": "checkbox",
+  "id": "enable_insert_6",
+  "label": "Enable Insert 6",
+  "default": false
+},
+{
+  "type": "number",
+  "id": "image_index_6",
+  "label": "Insert 6 — Position (index)",
+  "default": 24,
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "image_picker",
+  "id": "background_image_6",
+  "label": "Insert 6 — Background Image",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_text_6",
+  "label": "Insert 6 — Brand Text",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "text",
+  "id": "brand_subtext_6",
+  "label": "Insert 6 — Brand Subtext",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_6",
+  "label": "Insert 6 — Headline",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "text",
+  "id": "headline_bold_6",
+  "label": "Insert 6 — Headline Bold",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_primary_text_6",
+  "label": "Insert 6 — Primary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_primary_link_6",
+  "label": "Insert 6 — Primary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "text",
+  "id": "btn_secondary_text_6",
+  "label": "Insert 6 — Secondary Button Text",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "url",
+  "id": "btn_secondary_link_6",
+  "label": "Insert 6 — Secondary Button Link",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "header",
+  "content": "Insert 6 — Brand Text Style",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_text_color_6",
+  "label": "Insert 6 — Brand Text Color",
+  "default": "#f5ede0",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_size_6",
+  "label": "Insert 6 — Brand Text Font Size (px)",
+  "min": 12,
+  "max": 80,
+  "step": 1,
+  "default": 40,
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_weight_6",
+  "label": "Insert 6 — Brand Text Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "400",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_text_style_6",
+  "label": "Insert 6 — Brand Text Font Style",
+  "options": [
+    { "value": "normal", "label": "Normal" },
+    { "value": "italic", "label": "Italic" }
+  ],
+  "default": "italic",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_text_spacing_6",
+  "label": "Insert 6 — Brand Text Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 0,
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+
+{
+  "type": "header",
+  "content": "Insert 6 — Brand Subtext Style",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_subtext_color_6",
+  "label": "Insert 6 — Subtext Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_size_6",
+  "label": "Insert 6 — Subtext Font Size (px)",
+  "min": 8,
+  "max": 32,
+  "step": 1,
+  "default": 10,
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "select",
+  "id": "brand_subtext_weight_6",
+  "label": "Insert 6 — Subtext Font Weight",
+  "options": [
+    { "value": "300", "label": "Light" },
+    { "value": "400", "label": "Regular" },
+    { "value": "600", "label": "Semi Bold" },
+    { "value": "700", "label": "Bold" }
+  ],
+  "default": "600",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "range",
+  "id": "brand_subtext_spacing_6",
+  "label": "Insert 6 — Subtext Letter Spacing (em x100)",
+  "min": 0,
+  "max": 50,
+  "step": 1,
+  "default": 28,
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "color",
+  "id": "brand_line_color_6",
+  "label": "Insert 6 — Divider Line Color",
+  "default": "#c8a97a",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+{
+  "type": "select",
+  "id": "insert_6_button_style",
+  "label": "Button Style",
+  "options": [
+    { "value": "simple", "label": "Simple" },
+    { "value": "gradient", "label": "Gradient" }
+  ],
+  "default": "simple",
+  "visible_if": "{{ section.settings.enable_insert_6 == true }}"
+},
+  ],
+  "presets": []
+}
+{% endschema %}

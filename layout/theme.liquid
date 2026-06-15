@@ -1,0 +1,196 @@
+<!doctype html>
+<html
+  {% if request.design_mode %}
+    class="shopify-design-mode"
+  {% endif %}
+  lang="{{ request.locale.iso_code }}"
+>
+  <head>
+    {%- if settings.favicon != blank -%}
+      <link
+        rel="icon"
+        type="image/png"
+        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+      >
+    {%- endif -%}
+
+    {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
+    {% if settings.transition_to_main_product or settings.page_transition_enabled %}
+      <link
+        rel="expect"
+        href="#MainContent"
+        blocking="render"
+        id="view-transition-render-blocker"
+      >
+    {% endif %}
+
+    {%- render 'meta-tags' -%}
+    {%- render 'stylesheets' -%}
+    {%- render 'fonts' -%}
+    {%- render 'custom-fonts' -%}
+    {%- render 'scripts' -%}
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-schemes' -%}
+    <link rel="preload" href="{{ 'overflow-list.css' | asset_url }}" as="style">
+<link rel="stylesheet" href="{{ 'overflow-list.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'base.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'custom-style.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'customizer-new.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'custom-buttons-style.css' | asset_url }}">
+
+
+    {% if request.design_mode %}
+      {%- render 'theme-editor' -%}
+    {% endif %}
+
+    {{ content_for_header }}
+    {% comment %} <link rel="preload" href="{{ 'pic-carousel.js' | asset_url }}" as="script"> {% endcomment %}
+  </head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <body
+    class="page-width-{{ settings.page_width }} {% unless collection.template_suffix == 'custom-design' %} card-hover-effect-{{ settings.card_hover_effect }}{% endunless %}"
+    data-collection="{{ collection.template_suffix }}"
+  >
+
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+    <div id="header-group">
+      {% sections 'header-group' %}
+    </div>
+    <script>
+      // Inline header height calculation to prevent layout shift
+      // Note: Updates in calculateHeaderGroupHeight() and updateTransparentHeaderOffset()utilities.js should be kept in sync with this function
+      (function setHeaderHeighCustomProperties() {
+        /*
+         * Header calculation functions for maintaining CSS variables
+         * Mimic calculateHeaderGroupHeight() in utilities.js
+         */
+        const header = document.querySelector('header-component');
+        const headerGroup = document.querySelector('#header-group');
+        const hasHeaderSection = headerGroup?.querySelector('.header-section');
+
+        if (!header || !headerGroup) return;
+
+        const headerHeight = header.offsetHeight;
+
+        // Calculate the total height of the header group
+        let headerGroupHeight = 0;
+        const children = headerGroup.children;
+        for (let i = 0; i < children.length; i++) {
+          const element = children[i];
+          if (element === header || !(element instanceof HTMLElement)) continue;
+          headerGroupHeight += element.offsetHeight;
+        }
+
+        // Check for transparent header special case
+        if (header.hasAttribute('transparent') && header.parentElement?.nextElementSibling) {
+          headerGroupHeight += headerHeight;
+        }
+
+        // Set CSS variables
+        document.body.style.setProperty('--header-height', `${headerHeight}px`);
+        document.body.style.setProperty('--header-group-height', `${headerGroupHeight}px`);
+
+        /**
+         * Updates CSS custom properties for transparent header offset calculation
+         * Mimic updateTransparentHeaderOffset() in utilities.js
+         */
+
+        if (!hasHeaderSection || !header?.hasAttribute('transparent')) {
+          document.body.style.setProperty('--transparent-header-offset-boolean', '0');
+          return;
+        }
+
+        const hasImmediateSection = hasHeaderSection.nextElementSibling?.classList.contains('shopify-section');
+
+        const shouldApplyOffset = !hasImmediateSection ? '1' : '0';
+        document.body.style.setProperty('--transparent-header-offset-boolean', shouldApplyOffset);
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <main
+      id="MainContent"
+      class="content-for-layout"
+      role="main"
+      data-page-transition-enabled="{{ settings.page_transition_enabled }}"
+      data-product-transition="{{ settings.transition_to_main_product }}"
+      data-template="{{ template }}"
+    >
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+    {% if product %}
+      <script
+        type="application/json"
+        id="product-json-{{ product.id }}"
+      >
+        {{ product | json }}
+      </script>
+    {% endif %}
+    {% render 'search-modal' %}
+
+    {% if settings.quick_add or settings.mobile_quick_add %}
+      {% render 'quick-add-modal' %}
+    {% endif %}
+    <script>
+      const header = document.querySelector('#header-component');
+      const bar = document.querySelector('.custom-announcement-bar');
+
+      if (header && bar) {
+        header.addEventListener('mouseenter', () => {
+          bar.classList.add('header-hover');
+        });
+
+        header.addEventListener('mouseleave', () => {
+          bar.classList.remove('header-hover');
+        });
+      }
+    </script>
+
+    {% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
+      {% for collection in product.collections %}
+        {% if collection.metafields.option_group.customization != blank %}
+          {% assign current_collection = collection %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+      {% assign optional_customization = product.metafields.custom.customization_option_product %}
+      {% assign metaproduct = product.metafields.option_group.customization %}
+
+      {% if metaproduct != blank %}
+        {% assign custom_selections = metaproduct %}
+      {% elsif current_collection and current_collection.metafields.option_group.customization != blank %}
+        {% assign custom_selections = current_collection.metafields.option_group.customization %}
+      {% elsif optional_customization != blank and optional_customization.value != blank %}
+        {% assign optional_product = optional_customization.value %}
+
+        {%- comment -%} 1. Try metafield on product {%- endcomment -%}
+        {% assign optional_meta = optional_product.metafields.option_group.customization %}
+
+        {% if optional_meta != blank %}
+          {% assign custom_selections = optional_meta %}
+
+        {% else %}
+          {%- comment -%} 2. Fallback to collections of referenced product {%- endcomment -%}
+          {% assign found_meta = blank %}
+
+          {% for col in optional_product.collections %}
+            {% if col.metafields.option_group.customization != blank %}
+              {% assign found_meta = col.metafields.option_group.customization %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+
+          {% if found_meta != blank %}
+            {% assign custom_selections = found_meta %}
+          {% endif %}
+        {% endif %}
+      {% endif %}
+      {% if custom_selections != blank %}
+        {% render 'customizer-modal' %}
+      {% endif %}
+    {% endif %}
+
+{% comment %} <script src="{{ 'pic-carousel.js' | asset_url }}" defer></script> {% endcomment %}
+  </body>
+</html>

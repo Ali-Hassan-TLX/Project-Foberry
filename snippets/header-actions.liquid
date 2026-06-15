@@ -1,0 +1,1318 @@
+<script
+  type="module"
+  src="{{ 'cart-icon.js' | asset_url }}"
+  fetchpriority="low"
+></script>
+
+{% capture cart_icon %}
+  <cart-icon
+    class="
+      header-actions__cart-icon
+      {% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}
+    "
+    data-testid="cart-icon"
+  >
+    <span
+      class="svg-wrapper"
+      aria-hidden="true"
+    >
+      {{ 'icon-cart.svg' | inline_asset_content }}
+    </span>
+
+    {% render 'cart-bubble', limit: 100, live_region: true, test_id: test_id, show_bc: true %}
+  </cart-icon>
+{% endcapture %}
+{% style %}
+  .cart_count_drawer .svg-wrapper{
+    display: none !important;
+  }
+  .cart_count_drawer .cart-bubble{
+    top: -8px !important;
+    right: 0px !important;
+    left: 0 !important;
+    margin: 0 !important;
+    min-width: auto !important;
+  }
+{% endstyle %}
+
+<header-actions
+  {{- block.shopify_attributes -}}
+>
+ 
+{% comment %} <a href="#swym-wishlist" class="swym-wishlist header-actions__action header-actions__text-link">
+   
+<svg viewBox="0 0 9.29602 14.3728" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="9.296021" height="14.372841" fill="none" customFrame="#000000">
+	<path id="Path 4" d="M4.5755 10.0111L8.79608 13.3224L8.79608 6.91119L8.79608 0.5L0.5 0.5L0.5 13.3224L4.5755 10.0111Z" fill-rule="nonzero" stroke="currentColor" stroke-width="1.000000" />
+</svg>
+
+</a> {% endcomment %}
+  {% if shop.customer_accounts_enabled %}
+    <script
+      src="{{ 'dialog.js' | asset_url }}"
+      type="module"
+    ></script>
+
+    <anchored-popover-component
+      data-close-on-resize="true"
+      class="account-popover mobile:hidden"
+    >
+      <button
+        class="button header-actions__action button-unstyled header-actions__text-link"
+        aria-haspopup="dialog"
+      >
+        <a
+          href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}"
+          class="header-account-link"
+        >
+          <svg
+            viewBox="0 0 13.9792 15.2316"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="13.979248"
+            height="15.231552"
+            fill="none"
+            customFrame="#000000"
+          >
+            <path id="Path 219" d="M9.50594 8.78319C11.9804 10.0047 13.3042 11.9625 13.4519 14.7307L12.1414 14.7307C12.0969 13.2855 11.5989 12.0317 10.5538 11.0222C9.54231 10.0439 8.31319 9.56206 6.91249 9.56932C4.35017 9.58269 1.86394 11.5519 1.76482 14.7316L0.503708 14.7316C0.430069 12.7191 1.61836 10.0459 4.41573 8.80022C3.03566 7.77208 2.33287 6.4099 2.44414 4.69237C2.52788 3.39769 3.1097 2.3275 4.11754 1.5106C6.05959 -0.0623932 8.89174 0.24144 10.4745 2.18028C12.033 4.08873 11.8457 7.12035 9.50594 8.78319ZM6.94563 8.26854C8.74165 8.25645 10.1581 6.87151 10.1893 5.09856C10.2221 3.24919 8.77684 1.78618 6.94038 1.79869C5.16301 1.81084 3.75664 3.18687 3.72589 4.9752C3.70583 5.8419 4.03621 6.68004 4.64224 7.29991C5.24828 7.91978 6.07874 8.26903 6.94563 8.26854Z" fill="currentColor" fill-rule="nonzero" />
+            <path id="Path 219" d="M13.4519 14.7307L12.1414 14.7307C12.0969 13.2855 11.5989 12.0317 10.5538 11.0222C9.54231 10.0439 8.31319 9.56206 6.91249 9.56932C4.35017 9.58269 1.86394 11.5519 1.76482 14.7316L0.503708 14.7316C0.430069 12.7191 1.61836 10.0459 4.41573 8.80022C3.03566 7.77208 2.33287 6.4099 2.44414 4.69237C2.52788 3.39769 3.1097 2.3275 4.11754 1.5106C6.05959 -0.0623932 8.89174 0.24144 10.4745 2.18028C12.033 4.08873 11.8457 7.12035 9.50594 8.78319C11.9804 10.0047 13.3042 11.9625 13.4519 14.7307ZM10.1893 5.09856C10.2221 3.24919 8.77684 1.78618 6.94038 1.79869C5.16301 1.81084 3.75664 3.18687 3.72589 4.9752C3.70583 5.8419 4.03621 6.68004 4.64224 7.29991C5.24828 7.91978 6.07874 8.26903 6.94563 8.26854C8.74165 8.25645 10.1581 6.87151 10.1893 5.09856Z" fill-rule="nonzero" stroke="rgb(112,112,112)" stroke-opacity="0" stroke-width="1.000000" />
+          </svg>
+        </a>
+      </button>
+      <div
+        class="account-popover__panel details-content color-{{ settings.popover_color_scheme }}"
+        id="account-popover"
+        popover="auto"
+        ref="popover"
+      >
+        {% render 'account-actions' %}
+      </div>
+    </anchored-popover-component>
+
+    <dialog-component
+      class="account-drawer"
+      {{ block.shopify_attributes }}
+    >
+      {% render 'account-button', attributes: 'on:click="/showDialog"' %}
+      <dialog
+        ref="dialog"
+        class="color-{{ settings.popover_color_scheme }} dialog-modal dialog-drawer dialog-bottom-sheet account-drawer__dialog"
+        scroll-lock
+        aria-labelledby="account-drawer-heading"
+      >
+        <button
+          ref="closeButton"
+          on:click="/closeDialog"
+          class="button button-unstyled close-button account-drawer__close-button"
+          aria-label="{{ 'actions.close_dialog' | t }}"
+          autofocus
+        >
+          <span
+            class="svg-wrapper"
+            aria-hidden="true"
+          >
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        </button>
+        {% render 'account-actions' %}
+      </dialog>
+    </dialog-component>
+  {% endif %}
+
+  {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
+    <script
+      src="{{ 'cart-drawer.js' | asset_url }}"
+      type="module"
+      fetchpriority="low"
+    ></script>
+
+    <cart-drawer-component
+      class="cart-drawer"
+      {{ block.shopify_attributes }}
+      {% if settings.auto_open_cart_drawer %}
+        auto-open
+      {% endif %}
+    >
+      <button
+        class="button header-actions__action button-unstyled header-actions__text-link"
+        on:click="/open"
+        aria-haspopup="dialog"
+      >
+         <span class="mobile:hidden">Bag</span>  <span class="desktop:hidden svg-wrapper"><svg class="mm-icon-cart" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<path d="M15.5652 7.26465H4.43558C4.15618 7.26465 3.92969 7.49114 3.92969 7.77054V15.8648C3.92969 16.1442 4.15618 16.3707 4.43558 16.3707H15.5652C15.8446 16.3707 16.0711 16.1442 16.0711 15.8648V7.77054C16.0711 7.49114 15.8446 7.26465 15.5652 7.26465Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+	<path d="M12.5296 7.26477V6.25299C12.5296 5.98465 12.423 5.7273 12.2333 5.53755C12.0435 5.34781 11.7862 5.24121 11.5178 5.24121H8.48248C8.21414 5.24121 7.95679 5.34781 7.76705 5.53755C7.5773 5.7273 7.4707 5.98465 7.4707 6.25299V7.26477" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg></span> {% render 'cart-bubble' %}
+      </button>
+
+      <dialog
+        ref="dialog"
+        class="cart-drawer__dialog dialog-modal dialog-drawer color-{{ settings.drawer_color_scheme }}{% if cart.empty? %} cart-drawer--empty{%endif%}"
+        aria-labelledby="{% if cart.empty? %}cart-drawer-heading-empty{% else %}cart-drawer-heading{% endif %}"
+        scroll-lock
+        cart-summary-sticky="true"
+      >
+        <div class="cart-drawer__inner">
+          <cart-items-component
+            class="cart-items-component"
+            data-section-id="{{ section.id }}"
+          >
+            {%- if cart.empty? -%}
+              <div class="cart-drawer__header">
+                <button
+                  ref="closeButton"
+                  on:click="cart-drawer-component/close"
+                  class="button close-button cart-drawer__close-button button-unstyled"
+                  aria-label="{{ 'actions.close_dialog' | t }}"
+                >
+                  <span class="svg-wrapper">
+                    {{- 'icon-close.svg' | inline_asset_content -}}
+                  </span>
+                </button>
+              </div>
+
+              <div
+                class="cart-drawer__content motion-reduce"
+                aria-label="{{ 'accessibility.cart' | t }}"
+              >
+                <h2
+                  class="cart-drawer__heading h4 cart-drawer__heading--empty"
+                  id="cart-drawer-heading-empty"
+                >
+                  {{ 'content.your_cart_is_empty' | t }}
+                </h2>
+
+                <div class="cart-drawer__items">
+                  {% render 'cart-products', drawer_context: 'drawer' %}
+                </div>
+              </div>
+            {%- else -%}
+              <div
+                class="cart-drawer__header"
+                id="cart-drawer-header"
+              >
+                <h2
+                  class="cart-drawer__heading h4"
+                  id="cart-drawer-heading"
+                >
+                  {{ 'content.cart_title' | t }} 
+                  <div class="cart_count_drawer">
+                   {{ cart_icon }}
+                  </div>
+                </h2>
+
+                <button
+                  ref="closeButton"
+                  on:click="cart-drawer-component/close"
+                  class="button close-button cart-drawer__close-button button-unstyled"
+                  aria-label="{{ 'actions.close_dialog' | t }}"
+                >
+                  <span class="svg-wrapper">
+                    {{- 'icon-close.svg' | inline_asset_content -}}
+                  </span>
+                </button>
+              </div>
+              {% comment %} {{ cart.total_price }} {% endcomment %}
+              {% render 'announcement_bar' %} 
+              {% render 'free-shipping' %} 
+              <scroll-hint
+                class="cart-drawer__content motion-reduce"
+                aria-label="{{ 'accessibility.cart' | t }}"
+                style="--header-height: 60px;"
+              >
+                <scroll-hint
+                  class="cart-drawer__items"
+                >
+                  {% render 'cart-products', drawer_context: 'drawer' %}
+                  {% comment %} {% assign ymal_collection = collections[settings.ymal_collection] %}
+
+{% if ymal_collection != blank and ymal_collection.products.size > 0 %} {% endcomment %}
+
+ {% comment %} <div class="ymal-wrap">
+  <h2 class="ymal-title">{{ settings.ymal_title | default: 'You May Also Like' }}</h2>
+
+  <div class="ymal-track">
+    {% for product in ymal_collection.products limit: settings.ymal_limit %}
+      <a href="{{ product.url }}" class="ymal-card">
+
+        <div class="ymal-card__img">
+          {% if product.featured_image != blank %}
+            <img
+              src="{{ product.featured_image | img_url: '200x200', crop: 'center' }}"
+              alt="{{ product.featured_image.alt | escape }}"
+              loading="lazy"
+              width="90"
+              height="90"
+            >
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'ymal-placeholder' }}
+          {% endif %}
+        </div>
+
+        <div class="ymal-card__info">
+          <p class="ymal-card__name">{{ product.title | truncate: 50 }}</p>
+
+          {% if settings.ymal_show_vendor %}
+            <p class="ymal-card__vendor">{{ product.vendor }}</p>
+          {% endif %}
+
+          <div class="ymal-card__price">
+            {% if product.compare_at_price > product.price %}
+              <s class="ymal-price--compare">{{ product.compare_at_price | money }}</s>
+              <span class="ymal-price--sale">{{ product.price | money }}</span>
+            {% else %}
+              <span class="ymal-price--regular">{{ product.price | money }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </a>
+    {% endfor %}
+  </div>
+
+</div>
+
+
+<style>
+.ymal-wrap {
+  padding: 24px 0;
+}
+.ymal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+.ymal-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+.ymal-track::-webkit-scrollbar { height: 4px; }
+.ymal-track::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+.ymal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 0 0 calc(34% - 15px);
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
+
+.ymal-card__img {
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+.ymal-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ymal-placeholder {
+  width: 100%;
+  height: 100%;
+  fill: #ddd;
+}
+.ymal-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ymal-card__name {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ymal-card__vendor {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+}
+.ymal-card__price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.ymal-price--regular { font-size: 13px; font-weight: 600; }
+.ymal-price--sale    { font-size: 13px; font-weight: 600; color: #c0392b; }
+.ymal-price--compare { font-size: 11px; color: #aaa; } 
+</style>  {% endcomment %}
+{% assign ymal_collection = collections[settings.ymal_collection] %}
+
+{% if ymal_collection != blank and ymal_collection.products.size > 0 %}
+<div class="ymal-wrap">
+  <h2 class="ymal-title">{{ settings.ymal_title | default: 'You May Also Like' }}</h2>
+
+  <div class="ymal-track">
+    {% for product in ymal_collection.products limit: settings.ymal_limit %}
+      {% assign product_images = product.images %}
+      <div class="ymal-card" data-index="{{ forloop.index0 }}">
+
+        <div class="ymal-card__img-wrap">
+
+          {% if product.tags contains 'new' or product.tags contains 'New' %}
+            <span class="ymal-badge">New</span>
+          {% endif %}
+
+          <div class="ymal-card__img-slider" data-product-id="{{ product.id }}">
+            {% for image in product_images limit: 3 %}
+              <div class="ymal-slide {% if forloop.first %}active{% endif %}">
+                <a href="{{ product.url }}">
+                  <img
+                    src="{{ image | img_url: '400x400', crop: 'center' }}"
+                    alt="{{ image.alt | escape }}"
+                    loading="lazy"
+                    width="400"
+                    height="400"
+                  >
+                </a>
+              </div>
+            {% endfor %}
+
+            {% if product_images.size > 1 %}
+              <button class="ymal-arrow ymal-arrow--prev" aria-label="Previous image">&#8249;</button>
+              <button class="ymal-arrow ymal-arrow--next" aria-label="Next image">&#8250;</button>
+            {% endif %}
+          </div>
+
+          <a href="{{ product.url }}" class="ymal-cart-btn" aria-label="View {{ product.title }}">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.5652 7.26465H4.43558C4.15618 7.26465 3.92969 7.49114 3.92969 7.77054V15.8648C3.92969 16.1442 4.15618 16.3707 4.43558 16.3707H15.5652C15.8446 16.3707 16.0711 16.1442 16.0711 15.8648V7.77054C16.0711 7.49114 15.8446 7.26465 15.5652 7.26465Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12.5296 7.26477V6.25299C12.5296 5.98465 12.423 5.7273 12.2333 5.53755C12.0435 5.34781 11.7862 5.24121 11.5178 5.24121H8.48248C8.21414 5.24121 7.95679 5.34781 7.76705 5.53755C7.5773 5.7273 7.4707 5.98465 7.4707 6.25299V7.26477" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+
+        </div>
+
+        <div class="ymal-card__info">
+          <a href="{{ product.url }}" class="ymal-card__name">{{ product.title | truncate: 50 }}</a>
+
+          {% if settings.ymal_show_vendor %}
+            <p class="ymal-card__vendor">{{ product.vendor }}</p>
+          {% endif %}
+
+   <div class="ymal-card__price">
+     {% assign discount = 15 %}
+{% assign multibuy_price = product.price | times: 0.85 %}
+   {% comment %} {% if product.compare_at_price > product.price %}  {% endcomment %}
+    <span class="ymal-price--regular">{{ product.price | money }}</span>
+    <span class="ymal-price--sale">{{ multibuy_price | money }} MULTIBUY</span>
+  {% comment %} {% else %}
+    <span class="ymal-price--regular">{{ product.price | money }}</span>
+  {% endif %}  {% endcomment %}
+</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+.ymal-wrap {
+  padding: 20px 0 10px;
+  border-top: 1px solid var(--color-border, #e8e8e8);
+}
+.ymal-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 14px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e9e9e8;
+}
+.ymal-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.ymal-track::-webkit-scrollbar { display: none; }
+
+.ymal-card {
+  flex: 0 0 calc(33.333% - 8px);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ── Image wrapper ── */
+.ymal-card__img-wrap {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+  aspect-ratio: 1 / 1;
+}
+
+/* ── Slider ── */
+.ymal-card__img-slider {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.ymal-slide {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+.ymal-slide.active {
+  display: block;
+}
+.ymal-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Arrows ── */
+.ymal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: opacity 0.2s;
+}
+.ymal-card__img-wrap:hover .ymal-arrow { opacity: 1; }
+.ymal-arrow--prev { left: 22px; }
+.ymal-arrow--next { right: 22px; }
+
+/* ── Badge ── */
+.ymal-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #fff;
+  color: #111;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+  z-index: 3;
+  letter-spacing: 0.03em;
+}
+
+/* ── Cart icon button ── */
+.ymal-cart-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: transparent;
+  border-radius: 10px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  color: #333;
+  transition: opacity 0.2s;
+  text-decoration: none;
+  border: 1px solid gray;
+}
+.ymal-card__img-wrap:hover .ymal-cart-btn { opacity: 1; }
+
+/* ── Info ── */
+.ymal-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ymal-card__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ymal-card__vendor {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+}
+.ymal-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+}
+.ymal-price--regular { font-size: 12px; font-weight: 500; color: #111; }
+.ymal-price--sale    { font-size: 12px; font-weight: 600; color: #2e7d32; }
+.ymal-price--compare { font-size: 11px; color: #aaa; }
+@media (max-width: 768px) {
+  .ymal-arrow--prev{
+    left: 12px;
+  }
+  .ymal-arrow--next {
+    right: 12px;
+}
+}
+</style>
+
+<script>
+(function() {
+  function initYmalSliders() {
+    document.querySelectorAll('.ymal-card__img-slider').forEach(function(slider) {
+      if (slider.dataset.ymalInit) return;
+      slider.dataset.ymalInit = 'true';
+
+      var slides = slider.querySelectorAll('.ymal-slide');
+      var current = 0;
+
+      function goTo(n) {
+        slides[current].classList.remove('active');
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.add('active');
+      }
+
+      var prev = slider.querySelector('.ymal-arrow--prev');
+      var next = slider.querySelector('.ymal-arrow--next');
+
+      if (prev) prev.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation(); goTo(current - 1);
+      });
+      if (next) next.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation(); goTo(current + 1);
+      });
+    });
+  }
+
+  // Run on load
+  document.addEventListener('DOMContentLoaded', initYmalSliders);
+
+  // Re-run when cart drawer opens (Shopify cart drawer fires this event)
+  document.addEventListener('cart-drawer:open', initYmalSliders);
+
+  // Fallback: observe DOM for when drawer becomes visible
+  var observer = new MutationObserver(function() { initYmalSliders(); });
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+{% endif %}
+
+{% comment %} {% endif %} {% endcomment %}
+<div class="cart-actions">
+      {% if settings.show_cart_note %}
+        <script
+          type="module"
+          src="{{ 'cart-note.js' | asset_url }}"
+        ></script>
+
+        <cart-note style="display: flex;">
+          <accordion-custom
+            class="cart-note"
+            {% if settings.cart_note_open_by_default %}
+              open-by-default-on-desktop
+              open-by-default-on-mobile
+            {% endif %}
+          >
+            <details
+              class="details"
+              {% if settings.cart_note_open_by_default %}
+                open
+              {% endif %}
+            >
+              <summary class="cart-note__summary">
+                <span class="cart-note__label cart-primary-typography">
+                  {{ 'content.seller_note' | t }}
+                </span>
+
+                <span class="svg-wrapper icon-plus">
+                  {{- 'icon-plus.svg' | inline_asset_content -}}
+                </span>
+              </summary>
+
+              <div class="details-content cart-note__inner">
+                <label
+                  for="cart-note"
+                  class="visually-hidden"
+                >
+                  {{- 'content.seller_note' | t -}}
+                </label>
+                <textarea
+                  form="cart-form"
+                  on:input="/updateCartNote"
+                  id="cart-note"
+                  class="cart-note__instructions"
+                  name="note"
+                >{{ cart.note }}</textarea>
+              </div>
+            </details>
+          </accordion-custom>
+        </cart-note>
+      {% endif %}
+            {% if settings.show_cart_note and settings.show_add_discount_code %}
+        <div class="cart-actions__divider"></div>
+      {% endif %}
+    </div>
+    {% if settings.show_add_discount_code %}
+        {% liquid
+          assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+          for item in cart.items
+            for allocation in item.line_level_discount_allocations
+              if allocation.discount_application.type == 'discount_code'
+                assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
+              endif
+            endfor
+          endfor
+
+          assign discount_codes = discount_codes | uniq
+
+          # Evaluate the boolean expression for the disclosure state
+          if discount_codes.size == 0
+            assign disclosure_expanded = false
+          else
+            assign disclosure_expanded = true
+          endif
+        %}
+
+        <disclosure-custom class="cart-discount">
+          <button
+            aria-controls="cart-discount-disclosure"
+            aria-expanded="{% if disclosure_expanded %}true{% else %}false{% endif %}"
+            aria-label="{% if disclosure_expanded %}{{ 'actions.close' | t }}{% else %}{{ 'actions.open' | t }}{% endif %} {{ 'accessibility.discount_menu' | t }}"
+            class="disclosure-trigger"
+            data-disclosure-open="{{ 'actions.open' | t }} {{ 'accessibility.discount_menu' | t }}"
+            data-disclosure-close="{{ 'actions.close' | t }} {{ 'accessibility.discount_menu' | t }}"
+            on:click="/toggleDisclosure"
+            ref="disclosureTrigger"
+            type="button"
+          >
+            <span class="disclosure-trigger__label cart-primary-typography">{{ 'content.discount' | t }}</span>
+
+            <span class="svg-wrapper icon-plus">
+              {{- 'icon-plus.svg' | inline_asset_content -}}
+            </span>
+          </button>
+
+          <div
+            class="disclosure-content"
+            {% unless disclosure_expanded %}
+              inert
+            {% endunless %}
+            ref="disclosureContent"
+          >
+            <div id="cart-discount-disclosure">
+              <cart-discount-component
+                data-section-id="{{ section.id }}"
+              >
+                <div class="cart-discount__content">
+                  <form
+                    on:submit="/applyDiscount"
+                    onsubmit="return false;"
+                    class="cart-discount__form"
+                  >
+                    <label
+                      for="cart-discount"
+                      class="visually-hidden"
+                    >
+                      {{- 'accessibility.discount' | t -}}
+                    </label>
+                    <input
+                      id="cart-discount"
+                      class="cart-discount__input"
+                      type="text"
+                      name="discount"
+                      size="8"
+                      placeholder="{{ 'content.discount_code' | t }}"
+                      required
+                    >
+                    <button
+                      type="submit"
+                      class="button button--primary cart-discount__button"
+                    >
+                      {{ 'actions.apply' | t }}
+                    </button>
+                  </form>
+                </div>
+                <div
+                  class="cart-discount__error hidden"
+                  role="alert"
+                  ref="cartDiscountError"
+                >
+                  <span class="svg-wrapper">
+                    {{- 'icon-error.svg' | inline_asset_content -}}
+                  </span>
+                  <small
+                    class="cart-discount__error-text cart-primary-typography hidden"
+                    ref="cartDiscountErrorDiscountCode"
+                  >
+                    {{ 'content.discount_code_error' | t: code: 'test' }}
+                  </small>
+                  <small
+                    class="cart-discount__error-text cart-primary-typography hidden"
+                    ref="cartDiscountErrorShipping"
+                  >
+                    {{ 'content.shipping_discount_error' | t }}
+                  </small>
+                </div>
+                <ul class="cart-discount__codes">
+                  {% for discount_code in discount_codes %}
+                    <li
+                      class="cart-discount__pill"
+                      data-discount-code="{{ discount_code }}"
+                      aria-label="{{ 'accessibility.discount_applied' | t: code: discount_code }}"
+                    >
+                      <p class="cart-discount__pill-code">
+                        {{ discount_code }}
+                      </p>
+                      <button
+                        type="button"
+                        on:click="/removeDiscount"
+                        class="cart-discount__pill-remove svg-wrapper svg-wrapper--smaller button-unstyled"
+                        aria-label="{{ 'actions.remove_discount' | t: code: discount_code }}"
+                      >
+                        {{- 'icon-filters-close.svg' | inline_asset_content -}}
+                      </button>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </cart-discount-component>
+            </div>
+          </div>
+        </disclosure-custom>
+      {% endif %}
+                </scroll-hint>
+
+                <div
+                  class="cart-drawer__summary"
+                >
+                  {% render 'cart-summary' %}
+                </div>
+              </scroll-hint>
+            {%- endif -%}
+          </cart-items-component>
+        </div>
+      </dialog>
+    </cart-drawer-component>
+  {% else %}
+    <a
+      href="{{ routes.cart_url }}"
+      class="header-actions__action header-actions__text-link"
+    >
+        <span class="mobile:hidden">Bag</span>  <span class="desktop:hidden svg-wrapper"><svg class="mm-icon-cart" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<path d="M15.5652 7.26465H4.43558C4.15618 7.26465 3.92969 7.49114 3.92969 7.77054V15.8648C3.92969 16.1442 4.15618 16.3707 4.43558 16.3707H15.5652C15.8446 16.3707 16.0711 16.1442 16.0711 15.8648V7.77054C16.0711 7.49114 15.8446 7.26465 15.5652 7.26465Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+	<path d="M12.5296 7.26477V6.25299C12.5296 5.98465 12.423 5.7273 12.2333 5.53755C12.0435 5.34781 11.7862 5.24121 11.5178 5.24121H8.48248C8.21414 5.24121 7.95679 5.34781 7.76705 5.53755C7.5773 5.7273 7.4707 5.98465 7.4707 6.25299V7.26477" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg></span> {% render 'cart-bubble' %}
+    </a>
+  {% endif %}
+</header-actions>
+
+{% stylesheet %}
+    .account-popover {
+      --account-popover-min-width: 22rem;
+      --account-actions-max-width: 22rem;
+    }
+
+    .account-popover__summary {
+      padding: 0;
+
+      &:hover {
+        color: var(--color-foreground);
+      }
+    }
+
+    .account-popover__panel {
+      --account-popover-opacity: 0;
+      --account-popover-y: 20px;
+
+      position-anchor: --account-button-trigger;
+      border-radius: var(--style-border-radius-popover);
+      margin: 0;
+      left: unset;
+      width: max-content;
+      min-width: var(--account-popover-min-width);
+      box-shadow: var(--shadow-popover);
+      border: var(--style-border-popover);
+      background-color: var(--color-background);
+      overflow-y: hidden;
+      opacity: var(--account-popover-opacity);
+      translate: 0 var(--account-popover-y);
+      transition-property: display, opacity, translate;
+      transition-duration: 0.3s;
+      transition-timing-function: var(--ease-out-quad);
+      transition-behavior: allow-discrete;
+      top: calc(anchor(bottom) + var(--header-padding));
+      right: anchor(right);
+
+      &:popover-open {
+        --account-popover-opacity: 1;
+        --account-popover-y: 0px;
+      }
+
+      @supports not (position-anchor: --account-button-trigger) {
+        top: calc(var(--anchor-top) * 1px + var(--minimum-touch-target) + var(--header-padding));
+        right: calc(var(--anchor-right) * 1px);
+      }
+
+      @supports not selector(:popover-open) {
+        &.\:popover-open {
+          --account-popover-opacity: 1;
+          --account-popover-y: 0px;
+        }
+      }
+    }
+
+    @starting-style {
+      .account-popover__panel {
+        --account-popover-opacity: 0.7;
+        --account-popover-y: 20px;
+      }
+
+      .account-popover__panel:popover-open {
+        --account-popover-opacity: 0.7;
+        --account-popover-y: 20px;
+      }
+    }
+
+    .account-drawer {
+      @media screen and (min-width: 750px) {
+        display: none;
+      }
+    }
+
+    .account-drawer__dialog {
+      --animation-speed: 0.24s;
+      --dialog-drawer-opening-animation: move-and-fade;
+      --dialog-drawer-closing-animation: move-and-fade;
+
+      height: fit-content;
+      margin: 0;
+      inset-block-end: 0;
+      inset-block-start: auto;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    .dialog-drawer.account-drawer__dialog[open] {
+      --start-x: 0px;
+      --end-x: 0px;
+      --start-y: 100%;
+      --start-opacity: 1;
+    }
+
+    .dialog-drawer.account-drawer__dialog.dialog-closing {
+      --start-x: 0px;
+      --end-x: 0px;
+      --end-y: 100%;
+      --start-opacity: 1;
+    }
+  .header-actions__text-link + .header-actions__text-link {
+    margin-inline-start: var(--gap-md);
+  }
+
+    .account-drawer__close-button {
+      z-index: 1;
+      inset-block-start: var(--padding-xs);
+      inset-inline-end: var(--padding-xs);
+      color: var(--color-foreground);
+      background-color: transparent;
+    }
+
+    .account-drawer__close-button .svg-wrapper {
+      display: flex;
+      width: var(--button-size);
+      height: var(--button-size);
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes account-drawer-slide-in {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes account-drawer-slide-out {
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(100%);
+      }
+    }
+
+    .cart-drawer {
+      --cart-drawer-padding: var(--padding-lg) var(--padding-xl);
+      --cart-drawer-padding-desktop: var(--padding-xl) var(--padding-2xl);
+      --cart-font-size--2xs: var(--font-size--2xs);
+      --cart-font-size--xs: var(--font-size--xs);
+      --cart-font-size--sm: var(--font-size--sm);
+      --cart-font-size--md: var(--font-size--md);
+      --cart-font-size--lg: var(--font-size--lg);
+      --cart-font-size--xl: var(--font-size--xl);
+      --cart-font-size--2xl: var(--font-size--2xl);
+    }
+
+    .cart-drawer__dialog {
+      position: fixed;
+      overflow: hidden;
+      border-radius: 0;
+      width: var(--sidebar-width-new);
+      max-width: 95vw;
+      height: 100%;
+      margin: 0 0 0 auto;
+      padding: 0;
+      border-left: var(--style-border-drawer);
+      box-shadow: var(--shadow-drawer);
+      background-color: var(--color-background);
+    }
+
+    .cart-items-component {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Needed to ensure the drawer is full height */
+    .cart-drawer__dialog:modal {
+      max-height: 100dvh;
+      overflow-y: hidden;
+    }
+
+    .cart-drawer__inner {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .cart-drawer__content {
+      height: calc(100% - var(--header-height));
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      background-color: var(--color-background);
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .cart-drawer__heading {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      margin-bottom: 0;
+      border-bottom: 1px solid #e9e9e8;
+
+      @media screen and (max-width: 749px) {
+        margin-bottom: 0;
+      }
+    }
+
+    .cart-drawer__close-button {
+      margin-right: calc(var(--padding-sm) * -1);
+      top: var(--margin-sm);
+
+      @media screen and (max-width: 749px) {
+        top: var(--margin-2xs);
+      }
+    }
+
+    .cart-drawer--empty .cart-drawer__content {
+      text-align: center;
+      min-height: auto;
+    }
+
+    .cart-drawer--empty .cart-drawer__heading {
+      margin-bottom: var(--margin-md);
+    }
+
+    .cart-drawer__items .cart-items__table-row {
+      padding-bottom: var(--gap-xl);
+      border-bottom: var(--style-border-width) solid var(--color-border);
+      margin-bottom: var(--gap-xl);
+    }
+
+    .cart-drawer__items .cart-items__table-row:has(+ .cart-items__nested-line) {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .cart-drawer__items .cart-items__table-row:last-child {
+      border-bottom: none;
+    }
+
+    .cart-drawer__summary {
+      --cart-drawer-summary-padding: var(--padding-lg);
+
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--gap-xl);
+      padding-left: 20px;
+      padding-right: 20px;
+      /* padding: var(--cart-drawer-summary-padding); */
+      margin-top: auto;
+      background-color: var(--color-background);
+      /* stylelint-disable-next-line color-named */
+      mask-image: linear-gradient(to bottom, transparent, black var(--cart-drawer-summary-padding));
+
+      @media screen and (min-width: 750px) {
+        --cart-drawer-summary-padding: var(--padding-2xl);
+      }
+    }
+
+    .cart-drawer__dialog[cart-summary-sticky='false'] .cart-drawer__summary {
+      position: static;
+      mask-image: none;
+    }
+
+    .cart-drawer__dialog[cart-summary-sticky='false'] .cart-drawer__items {
+      overflow: unset;
+    }
+
+  
+    .cart-actions summary,
+    .cart-actions .disclosure-trigger {
+      padding-inline: 0;
+      padding-block: var(--padding-sm);
+      line-height: 1.2;
+      /* min-height: var(--minimum-touch-target); */
+    }
+
+    .cart-drawer__summary .cart__summary-totals:not(:has(.cart__original-total-container:empty)) {
+      border-block-start: var(--style-border-width) solid var(--color-border);
+      padding-block-start: var(--padding-2xl);
+    }
+
+    .cart-drawer__summary .cart-note {
+      @media screen and (min-width: 750px) {
+        margin-block-start: var(--margin-3xs);
+      }
+    }
+
+    .cart-drawer__heading--empty {
+      display: flex;
+      justify-content: center;
+    }
+
+    .cart-drawer__items {
+      display: flex;
+      flex-direction: column;
+      padding-inline: var(--cart-drawer-padding);
+      overflow-y: auto;
+
+      @media screen and (min-width: 750px) {
+        padding-inline: var(--cart-drawer-padding-desktop);
+      }
+    }
+
+    .cart-drawer__items .cart-items__table-row {
+      padding-bottom: var(--gap-xl);
+      border-bottom: var(--style-border-width) solid var(--color-border);
+      margin-bottom: var(--gap-xl);
+    }
+
+    .cart-drawer__items .cart-items__table-row:last-child {
+      border-bottom: none;
+      padding-block-end: 0;
+      margin-block-end: 0;
+    }
+
+    .cart-drawer--empty .cart-drawer__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      margin-top: 0;
+    }
+
+    .cart-drawer:not(:has(.cart-form)) .cart-drawer__content {
+      justify-content: center;
+    }
+
+    .cart-drawer__header {
+      background-color: var(--color-background);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: var(--cart-drawer-padding);
+      border-bottom: var(--style-border-width) solid none;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+
+      @media screen and (min-width: 750px) {
+        padding: var(--cart-drawer-padding-desktop);
+        padding-bottom: 0px;
+      }
+    }
+
+    .cart-drawer--empty .cart-drawer__header {
+      justify-content: right;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .cart-drawer--empty .cart-drawer__heading {
+      text-align: center;
+    }
+
+    .cart-drawer:not(:has(.cart-form)) .cart-items__wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    header-actions {
+      display: flex;
+
+      @media screen and (max-width: 749px) {
+        justify-self: flex-end;
+      }
+    }
+
+    .header__column--right header-actions {
+      margin-inline-start: calc(var(--gap-md) * -1);
+    }
+
+    .header-actions__action {
+      --button-color: var(--color-foreground);
+
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+    }
+    .header-actions__text-link {
+    font-size: 15px;
+    font-weight: 400;
+    text-decoration: none;
+    color: var(--color-foreground);
+    padding-inline: var(--padding-xs);
+    min-height: var(--minimum-touch-target);
+    display: flex;
+    align-items: center;
+  } 
+    .header-actions__action .svg-wrapper {
+      height: var(--button-size);
+      width: var(--button-size);
+    }
+
+    .header-actions__action svg {
+      width:14px;
+      height:14px;
+    }
+
+    .header-actions__cart-icon {
+      --cart-bubble-size: 20px;
+      --cart-bubble-top: 4.5px;
+      --cart-bubble-right: 2.5px;
+
+      position: relative;
+    }
+
+    .header-actions__cart-icon .cart-bubble {
+      position: absolute;
+      width: var(--cart-bubble-size, 20px);
+      top: var(--cart-bubble-top);
+      right: var(--cart-bubble-right);
+    }
+
+    .cart-drawer__heading .cart-bubble {
+      width: fit-content;
+      border-radius: var(--style-border-radius-buttons-primary);
+      aspect-ratio: auto;
+      padding: var(--cart-padding);
+    }
+
+    .cart-drawer__heading .cart-bubble[data-maintain-ratio] {
+      aspect-ratio: 1;
+      min-width: 26px;
+      background: white !important;
+    }
+
+    .header-actions__cart-icon .cart-bubble__text,
+    .cart-drawer__heading .cart-bubble__text {
+      font-family: var(--font-paragraph--family);
+      font-weight: var(--font-paragraph--weight);
+    }
+
+    .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
+      /* Create donut mask where the cart bubble sits */
+      mask: radial-gradient(
+        calc(var(--cart-bubble-size) + 2px) at calc(100% - var(--cart-bubble-right)) var(--cart-bubble-top),
+        transparent 45.45%,
+        #fff 45.45%,
+        #fff 100%
+      );
+    }
+ 
+    .cart-drawer__heading .cart-bubble__text {
+      color: var(--color-foreground);
+      font-size: var(--font-size--xs);
+    }
+   
+    .cart-bubble--animating .cart-bubble__text {
+      --start-y: -1em;
+      --start-opacity: 1;
+      /* Set initial transform state before animation starts */
+      transform: translate(0, var(--start-y, -1em));
+      opacity: var(--start-opacity, 1);
+      animation: move-and-fade var(--animation-speed) var(--animation-easing);
+    }
+
+    cart-icon:has(.cart-bubble__text-count:empty) {
+      --cart-bubble-size: 10px;
+      --cart-bubble-top: 9px;
+      --cart-bubble-right: 9px;
+
+      .svg-wrapper {
+        --cart-bubble-top: 4px;
+        --cart-bubble-right: 4px;
+      }
+    }
+{% endstylesheet %}

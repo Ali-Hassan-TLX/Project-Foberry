@@ -1,0 +1,158 @@
+{% liquid
+  assign product_resource = closest.product
+  assign text_color = block.settings.text_color
+  assign original_price = block.settings.original_price
+  assign discount_font = block.settings.discount_font
+  assign original_font = block.settings.original_font
+  assign discount_font_weight = block.settings.discount_font_weight
+  assign original_font_weight = block.settings.original_font_weight
+  assign show_offer = block.settings.show_offer
+
+  for collection in product_resource.collections
+    if collection.metafields.custom.products_promotions != blank
+      assign current_collection = collection
+      break
+    endif
+  endfor
+
+  if current_collection and current_collection.metafields.custom.products_promotions != blank
+    assign custom_selections = current_collection.metafields.custom.products_promotions.value
+    assign products_number = custom_selections.products_number
+    assign discounts_apply = custom_selections.discounts | plus: 0
+  endif
+
+  assign discount_amount = product_resource.price | times: discounts_apply | divided_by: 100
+  assign discounted_price = product_resource.price | minus: discount_amount
+%}
+
+<style>
+    .block-{{ block.id }} .multi-buy-prices-wraper {
+      display: block;
+      width: 100%;
+      border-radius: 10px;
+      
+      .original-price {
+          display: block;
+          font-size: {{original_font}}px;
+          font-weight: 600;
+          font-weight: {{original_font_weight}};
+      }
+      
+      .discount-price {
+          font-weight: {{discount_font_weight}};
+          display: block;
+          color: {{ text_color }};
+          font-size: {{discount_font}}px;
+      }
+          .discount-price small{
+  font-weight: {{ block.settings.offer_font_weight }};
+  font-size: {{ block.settings.offer_font_size }}px;
+}
+    }
+</style>
+
+{% if current_collection != blank %}
+  <div class="block-{{ block.id }}">
+    <div class="multi-buy-prices-wraper">
+        {% if original_price %}
+            <span class="original-price">{{ product_resource.price | money }}</span>
+        {% endif %}
+      <span class="discount-price">
+        {{ discounted_price | money }} MULTIBUY
+        {% if show_offer %}
+          <small>({{ discounts_apply }}% OFF when you buy {{ products_number }})</small>
+        {% endif %}
+      </span>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Multi buy prices",
+  "tag": null,
+  "settings": [
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color"
+    },
+    {
+    "type": "checkbox",
+    "id": "original_price",
+    "label": "Show original price",
+    "default": true
+    },
+    {
+    "type": "checkbox",
+    "id": "show_offer",
+    "label": "Show Offer",
+    "default": false
+    },
+    {
+        "type": "range",
+        "id": "discount_font",
+        "label": "Discount font size",
+        "min": 12 ,
+        "max": 24 ,
+        "step": 1 ,
+        "unit": "px",
+        "default": 18 ,
+    },
+    {
+        "type": "range",
+        "id": "discount_font_weight",
+        "label": "Discount font weight",
+        "min": 100 ,
+        "max": 900 ,
+        "step": 100 ,
+        "default": 500 ,
+    },
+    {
+        "type": "range",
+        "id": "original_font",
+        "label": "Original font size",
+        "min": 12 ,
+        "max": 24 ,
+        "step": 1 ,
+        "unit": "px",
+        "default": 18 ,
+    },
+    {
+        "type": "range",
+        "id": "original_font_weight",
+        "label": "Original font weight",
+          "min": 100 ,
+        "max": 900 ,
+        "step": 100 ,
+        "default": 400 ,
+    },
+    {
+  "type": "range",
+  "id": "offer_font_size",
+  "label": "Offer font size",
+  "min": 10,
+  "max": 20,
+  "step": 1,
+  "unit": "px",
+  "default": 12
+},
+{
+  "type": "range",
+  "id": "offer_font_weight",
+  "label": "Offer font weight",
+  "min": 100,
+  "max": 900,
+  "step": 100,
+  "default": 400
+}
+
+  ],
+  "presets": [
+    {
+      "name": "Multi buy prices",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,36 @@
+{% liquid
+  assign background_color = block.settings.bg_color
+
+%}
+<style>
+ .block-{{ block.id }}{
+        .breadcrumbs-wraper {
+          display: block;
+          width: 100%;
+          background: {{ background_color }};
+          }
+
+   }
+</style>
+
+<div class="breadcrumbs-wraper">
+{%  render 'breadcrumbs' %}
+</div>
+{% schema %}
+{
+  "name": "Breadcrumbs",
+  "tag": null,
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Breadcrumbs"
+    }
+  ]
+}
+{% endschema %}

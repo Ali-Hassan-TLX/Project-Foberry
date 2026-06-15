@@ -1,0 +1,928 @@
+{% comment %}
+  Section: Dual Image Banner
+  Shopify Fabric 2.0 Compatible
+  Full-width split banner with left/right images, mobile images,
+  content overlay, button styles, gradient border button with fill-on-hover
+{% endcomment %}
+
+{%- liquid
+  assign section_height = section.settings.section_height
+  assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
+-%}
+
+<section
+  class="dual-image-banner"
+  id="dual-image-banner-{{ section.id }}"
+  style="
+    --overlay-opacity: {{ overlay_opacity }};
+    --gap: {{ section.settings.gap_between }}px;
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="dual-image-banner__inner {% if section.settings.full_width %}full-width{% else %}container{% endif %}">
+
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign img_desktop = block.settings.image
+        assign img_mobile = block.settings.image_mobile
+        assign heading = block.settings.heading
+        assign subheading = block.settings.subheading
+        assign btn_label = block.settings.button_label
+        assign btn_url = block.settings.button_url
+        assign content_position = block.settings.content_position
+        assign text_align = block.settings.text_alignment
+        assign heading_size = block.settings.heading_size
+        assign subheading_size = block.settings.subheading_size
+        assign heading_color = block.settings.heading_color
+        assign subheading_color = block.settings.subheading_color
+        assign btn_type = block.settings.button_type
+        assign btn_style = block.settings.button_style
+        assign btn_color = block.settings.button_color
+        assign btn_text_color = block.settings.button_text_color
+        assign btn_border_color = block.settings.button_border_color
+        assign btn_size = block.settings.button_size
+        assign btn_radius = block.settings.button_border_radius
+        assign grad_color_1 = block.settings.gradient_color_1
+        assign grad_color_2 = block.settings.gradient_color_2
+        assign grad_color_3 = block.settings.gradient_color_3
+        assign grad_angle = block.settings.gradient_angle
+        assign grad_thickness = block.settings.gradient_border_thickness
+        assign grad_bg = block.settings.gradient_bg_color
+        assign grad_text = block.settings.gradient_text_color
+      -%}
+
+      <div
+        class="dual-image-banner__panel"
+        {{ block.shopify_attributes }}
+        style="
+          --heading-size: {{ heading_size }}px;
+          --subheading-size: {{ subheading_size }}px;
+          --heading-color: {{ heading_color }};
+          --subheading-color: {{ subheading_color }};
+          --btn-color: {{ btn_color }};
+          --btn-text-color: {{ btn_text_color }};
+          --btn-border-color: {{ btn_border_color }};
+          --btn-radius: {{ btn_radius }}px;
+          --grad-color-1: {{ grad_color_1 }};
+          --grad-color-2: {{ grad_color_2 }};
+          --grad-color-3: {{ grad_color_3 }};
+          --grad-angle: {{ grad_angle }}deg;
+          --grad-thickness: {{ grad_thickness }}px;
+          --grad-bg: {{ grad_bg }};
+          --grad-text: {{ grad_text }};
+        "
+      >
+        {%- comment %} Desktop Image {%- endcomment %}
+        <div class="dual-image-banner__image-wrap">
+          {%- if img_desktop != blank -%}
+            {{
+              img_desktop
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'lazy',
+                class: 'dual-image-banner__img dual-image-banner__img--desktop',
+                widths: '400, 600, 800, 1000, 1200',
+                sizes: '(min-width: 768px) 50vw, 100vw',
+                alt: img_desktop.alt | escape
+            }}
+          {%- else -%}
+            <div class="dual-image-banner__placeholder">
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+
+          {%- if img_mobile != blank -%}
+            {{
+              img_mobile
+              | image_url: width: 800
+              | image_tag:
+                loading: 'lazy',
+                class: 'dual-image-banner__img dual-image-banner__img--mobile',
+                widths: '400, 600, 800',
+                sizes: '100vw',
+                alt: img_mobile.alt | escape
+            }}
+          {%- endif -%}
+
+          <div class="dual-image-banner__overlay"></div>
+        </div>
+
+        {%- comment %} Content {%- endcomment %}
+        {%- if heading != blank or subheading != blank or btn_label != blank -%}
+          <div class="dual-image-banner__content dual-image-banner__content--{{ content_position }} dual-image-banner__content--align-{{ text_align }}">
+
+            {%- if subheading != blank -%}
+              <p class="dual-image-banner__subheading">{{ subheading }}</p>
+            {%- endif -%}
+
+            {%- if heading != blank -%}
+              <{{ block.settings.heading_tag }} class="dual-image-banner__heading">
+                {{ heading }}
+              </{{ block.settings.heading_tag }}>
+            {%- endif -%}
+
+            {%- if btn_label != blank -%}
+              <div class="dual-image-banner__btn-wrap">
+
+                {%- if btn_type == 'gradient' -%}
+                  {%- comment %}
+                    Gradient border button.
+                    Animated conic-gradient border rotates on hover to complete the circle.
+                    Inside stays solid — only the border animates.
+                  {%- endcomment %}
+                  <a
+                    href="{{ btn_url | default: '#' }}"
+                    class="dib-grad-btn dual-image-banner__btn--{{ btn_size }}"
+                    style="border-radius: var(--btn-radius);"
+                  >
+                    <span class="dib-grad-btn__label">{{ btn_label }}</span>
+                  </a>
+
+                {%- else -%}
+                  <a
+                    href="{{ btn_url | default: '#' }}"
+                    class="dual-image-banner__btn dual-image-banner__btn--{{ btn_style }} dual-image-banner__btn--{{ btn_size }}"
+                  >
+                    {{- btn_label -}}
+                  </a>
+                {%- endif -%}
+
+              </div>
+            {%- endif -%}
+
+          </div>
+        {%- endif -%}
+
+      </div>
+    {%- endfor -%}
+
+  </div>
+</section>
+
+ <style>
+  /* =====================
+     SECTION BASE
+  ===================== */
+  #dual-image-banner-{{ section.id }} {
+    padding-top: var(--section-padding-top);
+    padding-bottom: var(--section-padding-bottom);
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+  }
+
+  #dual-image-banner-{{ section.id }} .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__panel {
+    position: relative;
+    flex: 1 1 calc(50% - var(--gap) / 2);
+    min-width: 280px;
+    overflow: hidden;
+    height: {{ section_height }}px;
+  }
+
+  /* =====================
+     IMAGES
+  ===================== */
+  #dual-image-banner-{{ section.id }} .dual-image-banner__image-wrap {
+    position: absolute;
+    inset: 0;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__img--mobile {
+    display: none;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__placeholder {
+    width: 100%;
+    height: 100%;
+    background: #e8e5e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, var(--overlay-opacity));
+    pointer-events: none;
+  }
+
+  /* =====================
+     CONTENT
+  ===================== */
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content {
+    position: absolute;
+    z-index: 2;
+    padding: 32px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--top-left      { top: 0; left: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--top-center     { top: 0; left: 0; right: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--top-right      { top: 0; right: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--middle-left    { top: 50%; transform: translateY(-50%); left: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--middle-center  { top: 50%; transform: translateY(-50%); left: 0; right: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--middle-right   { top: 50%; transform: translateY(-50%); right: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--bottom-left    { bottom: 0; left: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--bottom-center  { bottom: 0; left: 0; right: 0; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--bottom-right   { bottom: 0; right: 0; }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--align-left   { text-align: left; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--align-center { text-align: center; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__content--align-right  { text-align: right; }
+
+  /* =====================
+     TYPOGRAPHY
+  ===================== */
+  #dual-image-banner-{{ section.id }} .dual-image-banner__heading {
+    font-size: var(--heading-size);
+    color: var(--heading-color);
+    margin: 0 0 12px;
+    line-height: 1.15;
+    font-weight: {{ section.settings.heading_weight }};
+    letter-spacing: {{ section.settings.heading_letter_spacing }}em;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__subheading {
+    font-size: var(--subheading-size);
+    color: var(--subheading-color);
+    margin: 0 0 10px;
+    font-weight: {{ section.settings.subheading_weight }};
+    letter-spacing: {{ section.settings.subheading_letter_spacing }}em;
+    text-transform: {% if section.settings.subheading_uppercase %}uppercase{% else %}none{% endif %};
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn-wrap {
+    margin-top: 20px;
+  }
+
+  /* =====================
+     SIMPLE BUTTON
+  ===================== */
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn {
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border-radius: var(--btn-radius);
+    transition: all 0.25s ease;
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--small  { padding: 8px 20px; font-size: 12px; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--medium { padding: 12px 28px; font-size: 14px; }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--large  { padding: 16px 36px; font-size: 16px; }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--filled {
+    background-color: var(--btn-color);
+    color: var(--btn-text-color);
+    border: 2px solid var(--btn-color);
+  }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--filled:hover { opacity: 0.85; }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--outlined {
+    background-color: transparent;
+    color: var(--btn-text-color);
+    border: 2px solid var(--btn-border-color);
+  }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--outlined:hover {
+    background-color: var(--btn-color);
+    color: var(--btn-text-color);
+    border-color: var(--btn-color);
+  }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--ghost {
+    background-color: transparent;
+    color: var(--btn-text-color);
+    border: none;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--ghost:hover { opacity: 0.7; }
+
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--pill {
+    background-color: var(--btn-color);
+    color: var(--btn-text-color);
+    border: 2px solid var(--btn-color);
+    border-radius: 999px;
+  }
+  #dual-image-banner-{{ section.id }} .dual-image-banner__btn--pill:hover { opacity: 0.85; }
+
+  /* =====================
+     GRADIENT BORDER BUTTON
+  ===================== */
+
+  /* =====================
+     GRADIENT BORDER BUTTON
+     Approach: conic-gradient spins from a partial arc (resting)
+     to a full 360° circle on hover — only the BORDER animates.
+     Inside stays solid. overflow:hidden clips the rotating pseudo.
+  ===================== */
+
+  @property --grad-start {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes dib-spin-{{ section.id }} {
+    to { --grad-start: 360deg; }
+  }
+
+  #dual-image-banner-{{ section.id }} .dib-grad-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    padding: 0;
+    isolation: isolate;
+  }
+
+  /* Size: padding on the inner label span */
+  #dual-image-banner-{{ section.id }} .dib-grad-btn.dual-image-banner__btn--small  .dib-grad-btn__label { padding: 8px 20px; font-size: 12px; }
+  #dual-image-banner-{{ section.id }} .dib-grad-btn.dual-image-banner__btn--medium .dib-grad-btn__label { padding: 12px 28px; font-size: 14px; }
+  #dual-image-banner-{{ section.id }} .dib-grad-btn.dual-image-banner__btn--large  .dib-grad-btn__label { padding: 16px 36px; font-size: 16px; }
+
+  /*
+    ::before — the border layer
+    Resting: partial conic arc (shows colors but not fully circled)
+    Hover:   full 360° conic → complete circle of gradient colors
+    Mask trick cuts out the center, leaving only the border ring.
+  */
+  #dual-image-banner-{{ section.id }} .dib-grad-btn::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--grad-thickness));
+    border-radius: calc(var(--btn-radius) + var(--grad-thickness));
+    background: conic-gradient(
+      from var(--grad-start),
+      var(--grad-color-1),
+      var(--grad-color-2),
+      var(--grad-color-3),
+      var(--grad-color-1)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    padding: var(--grad-thickness);
+    z-index: -1;
+    transition: --grad-start 0s;
+  }
+
+  /* Hover: spin one full circle (0deg → 360deg) */
+  #dual-image-banner-{{ section.id }} .dib-grad-btn:hover::before {
+    animation: dib-spin-{{ section.id }} 0.6s linear forwards;
+  }
+
+  /* Inner label — solid background, never changes */
+  #dual-image-banner-{{ section.id }} .dib-grad-btn__label {
+    position: relative;
+    z-index: 1;
+    display: block;
+    color: var(--grad-text);
+    background: var(--grad-bg);
+    border-radius: calc(var(--btn-radius) - var(--grad-thickness));
+    margin: var(--grad-thickness);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* =====================
+     MOBILE
+  ===================== */
+  @media screen and (max-width: 767px) {
+    #dual-image-banner-{{ section.id }} .dual-image-banner__inner {
+      flex-direction: column;
+      gap: {{ section.settings.gap_mobile }}px;
+    }
+
+    #dual-image-banner-{{ section.id }} .dual-image-banner__panel {
+      width: 100%;
+      flex: 0 0 auto;
+      min-width: 0;
+      height: {{ section.settings.section_height_mobile }}px;
+    }
+
+    #dual-image-banner-{{ section.id }} .dual-image-banner__image-wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #dual-image-banner-{{ section.id }} .dual-image-banner__img--desktop {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #dual-image-banner-{{ section.id }} .dual-image-banner__img--mobile {
+      display: none;
+    }
+
+    #dual-image-banner-{{ section.id }} .dual-image-banner__content {
+      padding: 20px;
+    }
+  }
+
+  /* Mobile image swap — only when toggle on AND mobile image uploaded */
+  {%- if section.settings.show_mobile_image_per_block -%}
+    {%- for block in section.blocks -%}
+      {%- if block.settings.image_mobile != blank -%}
+        @media screen and (max-width: 767px) {
+          #dual-image-banner-{{ section.id }} [id="shopify-block-{{ block.id }}"] .dual-image-banner__img--desktop { display: none; }
+          #dual-image-banner-{{ section.id }} [id="shopify-block-{{ block.id }}"] .dual-image-banner__img--mobile { display: block; width: 100%; height: 100%; object-fit: cover; }
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+</style> 
+
+{% schema %}
+{
+  "name": "Dual Image Banner",
+  "tag": "section",
+  "class": "dual-image-banner-section",
+  "max_blocks": 2,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "label": "Section Height (Desktop)",
+      "min": 300,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "section_height_mobile",
+      "label": "Section Height (Mobile)",
+      "min": 200,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "gap_between",
+      "label": "Gap Between Panels (Desktop)",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Gap Between Panels (Mobile)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mobile_image_per_block",
+      "label": "Use mobile images when uploaded",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Overlay"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image Overlay Opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Global Heading Typography"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extrabold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Heading Letter Spacing",
+      "min": -0.5,
+      "max": 0.2,
+      "step": 0.1,
+      "unit": "em",
+      "default": -0.1
+    },
+    {
+      "type": "header",
+      "content": "Global Subheading Typography"
+    },
+    {
+      "type": "select",
+      "id": "subheading_weight",
+      "label": "Subheading Font Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "subheading_letter_spacing",
+      "label": "Subheading Letter Spacing",
+      "min": 0,
+      "max": 0.3,
+      "step": 0.1,
+      "unit": "em",
+      "default": 0.2
+    },
+    {
+      "type": "checkbox",
+      "id": "subheading_uppercase",
+      "label": "Subheading Uppercase",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "panel",
+      "name": "Image Panel",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Images"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Mobile Image",
+          "info": "Optional. Displays only on screens smaller than 768px."
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Dress The Real You"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading HTML Tag",
+          "options": [
+            { "value": "h1", "label": "H1" },
+            { "value": "h2", "label": "H2" },
+            { "value": "h3", "label": "H3" },
+            { "value": "h4", "label": "H4" },
+            { "value": "p",  "label": "Paragraph" }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "header",
+          "content": "Content Position & Alignment"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content Position",
+          "options": [
+            { "value": "top-left",      "label": "Top Left" },
+            { "value": "top-center",    "label": "Top Center" },
+            { "value": "top-right",     "label": "Top Right" },
+            { "value": "middle-left",   "label": "Middle Left" },
+            { "value": "middle-center", "label": "Middle Center" },
+            { "value": "middle-right",  "label": "Middle Right" },
+            { "value": "bottom-left",   "label": "Bottom Left" },
+            { "value": "bottom-center", "label": "Bottom Center" },
+            { "value": "bottom-right",  "label": "Bottom Right" }
+          ],
+          "default": "bottom-left"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [
+            { "value": "left",   "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right",  "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "header",
+          "content": "Heading Style"
+        },
+        {
+          "type": "range",
+          "id": "heading_size",
+          "label": "Heading Font Size",
+          "min": 18,
+          "max": 100,
+          "step": 2,
+          "unit": "px",
+          "default": 42
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Heading Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "header",
+          "content": "Subheading Style"
+        },
+        {
+          "type": "range",
+          "id": "subheading_size",
+          "label": "Subheading Font Size",
+          "min": 10,
+          "max": 32,
+          "step": 1,
+          "unit": "px",
+          "default": 13
+        },
+        {
+          "type": "color",
+          "id": "subheading_color",
+          "label": "Subheading Color",
+          "default": "#e0dcd6"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "select",
+          "id": "button_type",
+          "label": "Button Type",
+          "options": [
+            { "value": "simple",   "label": "Simple Button" },
+            { "value": "gradient", "label": "Gradient Border Button" }
+          ],
+          "default": "simple",
+          "info": "Gradient: shows a gradient border at rest; on hover the gradient floods the full button."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button Label",
+          "default": "Discover"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button Link"
+        },
+        {
+          "type": "header",
+          "content": "Simple Button Settings"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button Style",
+          "options": [
+            { "value": "filled",   "label": "Filled" },
+            { "value": "outlined", "label": "Outlined" },
+            { "value": "ghost",    "label": "Ghost / Underline" },
+            { "value": "pill",     "label": "Pill" }
+          ],
+          "default": "outlined"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button Size",
+          "options": [
+            { "value": "small",  "label": "Small" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "large",  "label": "Large" }
+          ],
+          "default": "medium",
+          "info": "Applies to both Simple and Gradient button types."
+        },
+        {
+          "type": "color",
+          "id": "button_color",
+          "label": "Button Background Color",
+          "default": "#1a1a1a"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Button Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_border_color",
+          "label": "Button Border Color",
+          "default": "#ffffff",
+          "info": "Used for Outlined style."
+        },
+        {
+          "type": "range",
+          "id": "button_border_radius",
+          "label": "Button Border Radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "info": "Applies to both Simple and Gradient button types."
+        },
+        {
+          "type": "header",
+          "content": "Gradient Button Settings"
+        },
+        {
+          "type": "color",
+          "id": "gradient_color_1",
+          "label": "Gradient Color 1",
+          "default": "#ff4d4d"
+        },
+        {
+          "type": "color",
+          "id": "gradient_color_2",
+          "label": "Gradient Color 2",
+          "default": "#ffcc00"
+        },
+        {
+          "type": "color",
+          "id": "gradient_color_3",
+          "label": "Gradient Color 3",
+          "default": "#6a5acd"
+        },
+        {
+          "type": "range",
+          "id": "gradient_angle",
+          "label": "Gradient Angle",
+          "min": 0,
+          "max": 360,
+          "step": 5,
+          "unit": "deg",
+          "default": 90
+        },
+        {
+          "type": "range",
+          "id": "gradient_border_thickness",
+          "label": "Border Thickness",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "unit": "px",
+          "default": 2
+        },
+        {
+          "type": "color",
+          "id": "gradient_bg_color",
+          "label": "Button Background Color",
+          "default": "#000000",
+          "info": "Background inside the gradient border (resting state)."
+        },
+        {
+          "type": "color",
+          "id": "gradient_text_color",
+          "label": "Button Text Color",
+          "default": "#ffffff"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dual Image Banner",
+      "blocks": [
+        {
+          "type": "panel",
+          "settings": {
+            "subheading": "New Collection",
+            "heading": "Dress The Real You",
+            "button_label": "Discover",
+            "button_type": "simple",
+            "content_position": "bottom-left",
+            "heading_size": 42,
+            "button_style": "outlined"
+          }
+        },
+        {
+          "type": "panel",
+          "settings": {
+            "subheading": "Essentials",
+            "heading": "Made To Last",
+            "button_label": "Shop Now",
+            "button_type": "gradient",
+            "content_position": "bottom-left",
+            "heading_size": 42
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

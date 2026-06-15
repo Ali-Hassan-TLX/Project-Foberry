@@ -1,0 +1,55 @@
+{% liquid
+  assign product_resource = closest.product
+  assign text_color = block.settings.text_color
+  for collection in product_resource.collections
+    if collection.metafields.custom.products_promotions != blank
+      assign current_collection = collection
+      break
+    endif
+  endfor
+  if current_collection and current_collection.metafields.custom.products_promotions != blank
+    assign custom_selections = current_collection.metafields.custom.products_promotions.value
+  endif
+  assign card_promotion = custom_selections.card_promotion
+%}
+{% comment %}
+  echo current_collection | json
+{% endcomment %}
+<style>
+  .block-{{ block.id }}{
+         .card-promotion-wraper {
+           display: block;
+           width: 100%;
+           color: {{ text_color }};
+           cursor: pointer;
+           border-radius: 10px;
+           }
+   }
+</style>
+{% if current_collection != blank %}
+  <div class="block-{{ block.id }}">
+    <div class="card-promotion-wraper">
+      <div class="text">{{ card_promotion | metafield_tag }}</div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Card Product Promotion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Card Product Promotion",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

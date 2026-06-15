@@ -1,0 +1,35 @@
+<div class="create-size hidden">
+  {% comment %}
+  {{ size_options }}
+  {% endcomment %}
+  <h2>CREATE A SIZE</h2>
+  <div class="create-sizes-row">
+    <div class="smart-sizes d-none hidden">
+      <div class="holder">
+        <div class="head">
+          <h3>Smart Sizes</h3>
+          <span class="tag most-popular">Most Popular</span>
+        </div>
+        <p>
+          Answer a few simple questions about your body and let our algorithm calculate you ideal custom size. Smart
+          Sizes is based on millions of customer data points and is incredibly accurate.
+        </p>
+      </div>
+    </div>
+    <ul class="create-size-list nav nav-tabs" id="myTab3" role="tablist">
+      {% for allsizes in size_options %}
+        
+      <li>
+      
+        {% render 'customizer-sizes-nav', nav_tabs:allsizes %}
+      </li>
+      {% endfor %}
+     
+    </ul>
+<div class="tab-content" id="myTabContent3">
+  {% for alltabs in size_options %}
+        {% render 'customizer-sizes-tabs', sizestabs:alltabs %}
+  {% endfor %}
+        </div>
+  </div>
+</div>

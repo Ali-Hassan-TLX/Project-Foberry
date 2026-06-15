@@ -1,0 +1,148 @@
+{% layout none %}
+
+{%- capture contentForQuerystring -%}{{ content_for_header }}{%- endcapture -%}
+
+{% comment %} Use string splitting to pull the value from content_for_header and apply some string clean up {% endcomment %}
+{%- assign newpageUrl = contentForQuerystring
+  | split: '"pageurl":"'
+  | last
+  | split: '"'
+  | first
+  | split: '.myshopify.com'
+  | last
+  | replace: '\/', '/'
+  | replace: '%20', ' '
+  | replace: '\u0026', '&'
+-%}
+{%- assign pageQuerystring = newpageUrl | split: '?' -%}
+
+{% assign phandles = pageQuerystring | split: '&' %}
+
+{% assign phandles = phandles[1] | split: '=' | last %}
+{% assign phandles = phandles | remove: ']' | remove: '"' %}
+{% assign handles_arry = phandles | split: ',' | uniq %}
+<div class="recently_items_list">
+{% for handle in handles_arry limit: 12 %}
+  {% assign recent_product = all_products[handle] %}
+  {% if recent_product != blank   %}
+<div class="resource-list__item">
+  {% content_for 'block',
+              type: '_product-card',
+              id: 'static-product-card',
+              closest.product: recent_product
+            %}
+</div>
+  {% endif %}
+{% endfor %}
+</div>
+{% liquid
+  assign block_settings = block.settings
+  case block_settings.layout_type
+    when 'grid'
+      assign classes = 'resource-list--grid'
+    when 'carousel'
+      assign classes = 'resource-list--carousel'
+  endcase
+%}
+
+
+
+<div class="block-resource-list
+   spacing-style
+      gap-style"
+  style="
+      {%  render 'spacing-style', settings: block_settings %}
+      {%  render 'gap-style', value: block_settings.gap %}
+        --resource-list-column-gap-desktop: {{ block_settings.columns_gap }}px;
+      --resource-list-row-gap-desktop: {{ block_settings.rows_gap }}px;
+      --resource-list-columns-mobile: repeat(auto-fill, minmax(9.25rem, 1fr));
+      --border-radius: {{ block_settings.border_radius }}px;
+        "
+>
+<recently-viewed data-section-id="{{section.id }}" class="resource-list resource-list--grid" id="recently-viewed-products" data-testid="resource-list-grid" data-tab-body="recently-viewed" recently-viewed-products>
+</recently-viewed>
+<div>
+<script
+  src="{{ 'recent-view.js' | asset_url }}"
+  type="module"
+></script>
+{% schema %}
+{
+  "name": "Recently Products",
+
+  "class": "recently-view-products recent-view",
+
+  "settings": [
+    {
+      "type": "range",
+      "id": "columns_gap",
+      "label": "t:settings.horizontal_gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 10,
+    },
+    {
+      "type": "range",
+      "id": "rows_gap",
+      "label": "t:settings.vertical_gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 10,
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Recently Products"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,287 @@
+{% liquid
+  assign hover_background_color = block.settings.hover_bg_color
+  assign background_color = block.settings.bg_color
+  assign product_size_guide = block.settings.size_guide_text
+  assign size_guide_title = block.settings.size_guide_title
+  assign size_guide = product.metafields.custom.size_guide.value
+
+  # show_size_guide_condition
+  assign assign_collection = null
+  for collection in product.collections
+    if collection.metafields.option.add_ons != blank
+      assign assign_collection = collection
+      break
+    endif
+  endfor
+  assign single_product = product.metafields.option.add_ons
+  if single_product != blank
+    assign product_data = single_product
+  elsif assign_collection
+    assign product_data = assign_collection.metafields.option.add_ons
+  endif
+  for collection in product.collections
+    if collection.metafields.option_group.customization != blank
+      assign current_collection = collection
+      break
+    endif
+  endfor
+  assign metaproduct = product.metafields.option_group.customization
+  if metaproduct != blank
+    assign customization = metaproduct
+  elsif current_collection and current_collection.metafields.option_group.customization != blank
+    assign customization = current_collection.metafields.option_group.customization
+  endif
+  assign show_size_guide =
+  if customization == blank
+    assign show_size_guide = false
+  endif
+  if product_data != blank
+    assign show_size_guide = true
+  endif
+  # show_size_guide_condition
+
+  for collection in product.collections
+    if collection.metafields.custom.size_guide != blank
+      assign size_guide_collection = collection
+      break
+    endif
+  endfor
+  if size_guide_collection and size_guide_collection.metafields.custom.size_guide != blank
+    assign size_guide_details = size_guide_collection.metafields.custom.size_guide.value
+  endif
+  assign page_details = size_guide_details.page_or_fields
+  assign page_handle = size_guide_details.size_page 
+
+
+%}
+
+{% if product_size_guide != blank and show_size_guide %}
+  <div class="block-{{ block.id }}">
+    <div class="size-guide-wraper">
+      <div class="size-guide-product-title-wraper">
+        <span class="size-guide-title">{{ size_guide_title }} </span>
+      </div>
+      <div class="size-guide-product-text">
+        <p class="text">{{ product_size_guide }}</p>
+        <svg
+          height="24px"
+          class="icon"
+          width="24px"
+          version="1.1"
+          id="Capa_1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 203.544 203.544"
+          xml:space="preserve"
+          fill="#000000"
+          transform="rotate(-45)matrix(-1, 0, 0, -1, 0, 0)"
+          stroke="#000000"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <path style="fill:#000000;" d="M41.717,0L0.002,41.722l161.821,161.821l41.719-41.719L41.717,0z M41.717,8.049l153.78,153.776 l-33.673,33.673l-4.452-4.459l23.245-23.255c0.92-0.913,0.92-2.391,0-3.303c-0.913-0.913-2.391-0.923-3.303,0l-23.255,23.245 l-7.233-7.226l14.974-14.977c0.916-0.913,0.916-2.394,0-3.307c-0.92-0.923-2.387-0.923-3.307,0l-14.977,14.97l-5.973-5.98 l14.974-14.967c0.905-0.913,0.905-2.405,0-3.314c-0.923-0.913-2.405-0.913-3.321,0l-14.967,14.967l-5.73-5.726l14.97-14.97 c0.916-0.913,0.916-2.391,0-3.303c-0.913-0.923-2.391-0.923-3.31,0l-14.974,14.97l-6.471-6.488l23.252-23.245 c0.913-0.923,0.913-2.405,0-3.314c-0.923-0.913-2.398-0.913-3.314,0l-23.248,23.255l-4.477-4.481l15.729-15.718 c0.913-0.913,0.913-2.391-0.011-3.314c-0.909-0.913-2.387-0.913-3.303,0l-15.725,15.729l-5.977-5.98l15.722-15.729 c0.916-0.913,0.916-2.391,0-3.303c-0.913-0.923-2.391-0.923-3.303,0l-15.729,15.718l-5.726-5.726l15.722-15.718 c0.916-0.923,0.916-2.401,0-3.314c-0.916-0.913-2.398-0.913-3.31,0l-15.725,15.718l-6.546-6.546L106,93.147 c0.913-0.913,0.905-2.391-0.011-3.303c-0.913-0.913-2.394-0.913-3.303-0.011l-23.255,23.259l-7.226-7.229l14.967-14.977 c0.916-0.913,0.916-2.391-0.011-3.303c-0.902-0.923-2.384-0.913-3.296,0l-14.974,14.967l-5.984-5.98l14.977-14.967 c0.905-0.913,0.905-2.401,0-3.303c-0.916-0.923-2.394-0.923-3.307-0.011L59.611,93.265l-5.73-5.737l14.963-14.967 c0.92-0.913,0.913-2.391,0-3.314c-0.905-0.909-2.387-0.909-3.303,0L50.575,84.225l-6.481-6.474l23.255-23.259 c0.905-0.913,0.905-2.401-0.004-3.314c-0.916-0.913-2.398-0.913-3.314,0L40.786,74.433l-4.47-4.477l15.718-15.718 c0.913-0.913,0.913-2.391,0-3.303c-0.916-0.923-2.394-0.923-3.314,0L32.999,66.653l-5.973-5.977l15.718-15.718 c0.916-0.923,0.916-2.401,0-3.314c-0.913-0.913-2.391-0.913-3.31,0L23.722,57.362l-5.737-5.726l15.722-15.729 c0.916-0.902,0.916-2.384,0-3.303c-0.916-0.913-2.394-0.913-3.307,0L14.672,48.332l-6.617-6.628L41.717,8.049z"></path> </g> </g> </g>
+        </svg>
+      </div>
+    </div>
+    <div class="size-guide-popup-wraper">
+      <div class="size-guide-popup-content">
+        <div class="close-pop-up">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M10.0303 8.96965C9.73741 8.67676 9.26253 8.67676 8.96964 8.96965C8.67675 9.26255 8.67675 9.73742 8.96964 10.0303L10.9393 12L8.96966 13.9697C8.67677 14.2625 8.67677 14.7374 8.96966 15.0303C9.26255 15.3232 9.73743 15.3232 10.0303 15.0303L12 13.0607L13.9696 15.0303C14.2625 15.3232 14.7374 15.3232 15.0303 15.0303C15.3232 14.7374 15.3232 14.2625 15.0303 13.9696L13.0606 12L15.0303 10.0303C15.3232 9.73744 15.3232 9.26257 15.0303 8.96968C14.7374 8.67678 14.2625 8.67678 13.9696 8.96968L12 10.9393L10.0303 8.96965Z" fill="#000000"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM2.75 12C2.75 6.89137 6.89137 2.75 12 2.75C17.1086 2.75 21.25 6.89137 21.25 12C21.25 17.1086 17.1086 21.25 12 21.25C6.89137 21.25 2.75 17.1086 2.75 12Z" fill="#000000"></path> </g>
+          </svg>
+        </div>
+        {% if page_details %}
+          <h2 class="size-guide-page-heading">{{ pages[page_handle].title  }}</h2>
+          <div class="size-guide-page-content">
+            {{ pages[page_handle].content  }}
+          </div>
+        {% else %}
+          <h2 class="popup-heading">
+            {{ size_guide_details.heading }}
+          </h2>
+          <div class="size-description">
+            {{ size_guide_details.description | metafield_tag }}
+          </div>
+          <div class="size-guide-images">
+            {% for image in size_guide_details.images.value %}
+              <div class="size-guide-image">
+                <img
+                  src="{{ image | image_url: width: 800 }}"
+                  alt="Size Guide Image"
+                  width="800"
+                  height="auto"
+                >
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<style>
+        .block-{{ block.id }}{
+        .size-guide-wraper {
+        display: flex;
+        width: 100%;
+        gap: 60px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0px;
+        {% comment %} padding: 20px 20px; {% endcomment %}
+
+      }
+      .size-guide-product-title-wraper {
+      display: block;
+  }
+  .size-guide-title{
+      background: {{ background_color }};
+      display: flex;
+      padding: 2px 5px;
+    }
+  .size-guide-product-text{
+      background: {{ background_color }};
+      display: flex;
+      padding: 2px 10px;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: .3s;
+      .text{
+        margin:0px
+      }
+    }
+    .size-guide-product-text:hover{
+      background: {{ hover_background_color }};
+  }
+    .size-guide-popup-wraper{
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      padding: 0px;
+      position: fixed;
+      background: #0000006b;
+      left: 100%;
+      right: -100%;
+      top: 0;
+      bottom: 0;
+      z-index: 12;
+      transition: 0.5s;
+  }
+  .size-guide-popup-wraper.size_guide_active{
+      left: 0;
+      right: 0;
+  }
+  .size-guide-popup-content {
+   display: block;
+   width: 100%;
+   height: 100%;
+   max-width: 40%;
+   background: #ffffff;
+   padding: 20px;
+   overflow: auto;
+  }
+  .close-pop-up {
+      display: flex;
+      justify-content: end;
+
+      svg{
+      cursor:pointer;
+      width: 30px;
+      }
+  }
+  .size-description {
+      display: block;
+      padding: 10px 0px;
+  }
+  .size-guide-image{
+      border: 1px solid #000000;
+      margin-bottom: 5px;
+      display: block;
+      width: 100%;
+      img{
+        object-fit: contain;
+      }
+  }
+
+  @media(max-width:768px){
+      .size-guide-popup-content {
+          max-width: 100%;
+      }
+  }
+
+        }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const openBtn = document.querySelector('.size-guide-product-text');
+    const popup = document.querySelector('.size-guide-popup-wraper');
+    const closeBtn = document.querySelector('.close-pop-up');
+    const header = document.getElementById('header-group');
+
+    if (!popup) return;
+
+    // OPEN POPUP
+    if (openBtn) {
+      openBtn.addEventListener('click', function () {
+        popup.classList.add('size_guide_active');
+        document.body.style.overflow = 'hidden';
+        if (header) header.classList.add('hidden');
+      });
+    }
+
+    // CLOSE BUTTON
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        popup.classList.remove('size_guide_active');
+        document.body.style.overflow = 'auto';
+        if (header) header.classList.remove('hidden');
+      });
+    }
+
+    // CLICK OUTSIDE POPUP
+    popup.addEventListener('click', function (e) {
+      if (e.target === popup) {
+        popup.classList.remove('size_guide_active');
+        document.body.style.overflow = 'auto';
+        if (header) header.classList.remove('hidden');
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Size Guide",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "size_guide_title",
+      "label": "Size Guide Title",
+      "default": "FIND MY SIZE"
+    },
+    {
+      "type": "text",
+      "id": "size_guide_text",
+      "label": "Size Guide Text",
+      "default": "Size Guide"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color"
+    },
+    {
+      "type": "color",
+      "id": "hover_bg_color",
+      "label": "Hover Background Color"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Size Guide"
+    }
+  ]
+}
+{% endschema %}

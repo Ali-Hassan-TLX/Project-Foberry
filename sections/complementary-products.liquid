@@ -1,0 +1,1292 @@
+{% liquid
+  assign current_product = product
+  assign products = current_product.metafields.custom.complementary_products.value
+%}
+
+<style>
+  .complementary-products-wraper {
+    display: flex;
+    gap: 5px;
+  }
+  .complementary-products {
+    display: flex;
+    gap: 5px;
+    height: max-content;
+    overflow: auto;
+  }
+  .complementary-products-wraper {
+    .quick-add__button {
+      display: none !important;
+    }
+    product-card-link {
+      width: 100%;
+      min-width: calc((100% - 200px) / 3);
+    }
+  }
+  .currently-open-product {
+    height: {{ section.settings.currently_product_height }}px;
+    width: 25%;
+    display: flex;
+    justify-content: end;
+    align-items: flex-start;
+    position: relative;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0px 0px 20px 20px;
+    .shop-by-look {
+      left: 20px;
+      position: unset !important;
+    }
+  }
+
+  /* ── DRAWER OVERLAY ── */
+  .complementary-products-drawer-wraper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    padding: 0px;
+    position: fixed;
+    background: rgba(0,0,0,0.4);
+    left: 100%;
+    right: -100%;
+    top: 0;
+    bottom: 0;
+    z-index: 99999;
+    transition: 0.4s ease;
+  }
+  .complementary-products-drawer-wraper.complementary_products_active {
+    left: 0;
+    right: 0;
+  }
+
+  /* ── DRAWER PANEL ── */
+  .complementary-products-drawer-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 520px;
+    height: 100%;
+    background: #ffffff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── DRAWER HEADER ── */
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e8e8e8;
+    flex-shrink: 0;
+  }
+  .drawer-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  .shop-heading{
+    border-bottom:none;
+  }
+  .close-pop-up {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a1a;
+  }
+  .close-pop-up svg { width: 20px; height: 20px; }
+
+  /* ── SCROLLABLE LIST ── */
+  .drawer-complementary-products {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* ══════════════════════════════
+     PRODUCT CARD — new design
+     ══════════════════════════════ */
+  .cp-product-card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    background: #fff;
+    margin-bottom: 2px;
+    gap: 15px;
+    padding: 5px 15px;
+  }
+
+  /* Left: large square image */
+  .cp-product-image {
+    width: 220px;
+    position: relative;
+    overflow: hidden;
+    flex: 0 0 30%;
+  }
+  .cp-product-image img {
+    flex: 0 0 30%;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    mix-blend-mode: multiply;
+  }
+
+  /* Bookmark dot — top left of image */
+  .cp-wishlist-dot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .cp-wishlist-dot svg {
+    width: 14px;
+    height: 14px;
+    color: #1a1a1a;
+  }
+
+  /* Right: product info */
+  .cp-product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .cp-product-title {
+    font-size: 12px;
+    color: #1a1a1a;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .cp-product-origin {
+    font-size: 10px;
+    color: #888;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .cp-product-price {
+    font-size: 10px;
+    color: #1a1a1a;
+    font-weight: 400;
+    margin: 0 0 6px 0;
+  }
+
+  /* Actions: bookmark btn + select size */
+  .cp-product-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .cp-bookmark-btn {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    padding: 0;
+  }
+  .cp-bookmark-btn:hover { border-color: #1a1a1a; }
+  .cp-bookmark-btn svg {
+    width: 15px;
+    height: 15px;
+    color: #1a1a1a;
+  }
+
+  .cp-size-open {
+    
+    height: 30px;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    padding: 0 14px;
+    font-size: 13px;
+    color: #1a1a1a;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 400;
+    transition: border-color 0.15s;
+    white-space: nowrap;
+  }
+  .cp-size-open:hover { border-color: #1a1a1a; }
+
+  /* Single-variant direct add */
+  .cp-add-btn {
+    padding: 0px 15px;
+    height: 30px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .cp-add-btn:hover:not(:disabled) { background: #333; }
+  .cp-add-btn.added { background: #555; cursor: default; }
+  .cp-add-btn:disabled { background: #c8c8c8; cursor: not-allowed; }
+
+  /* ── DRAWER FOOTER ── */
+  .drawer-footer {
+    flex-shrink: 0;
+    padding: 16px 24px;
+    border-top: 1px solid #e8e8e8;
+    background: #fff;
+  }
+  .drawer-skip-btn {
+    display: block;
+    width: 100%;
+    height: 50px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    text-align: center;
+    line-height: 50px;
+    text-decoration: none;
+    transition: background 0.2s;
+    border-radius: 2px;
+  }
+  .drawer-skip-btn:hover { background: #333; }
+
+  /* ══════════════════════════════
+     SIZE MODAL
+     ══════════════════════════════ */
+  .cp-size-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(0,0,0,0.45);
+    align-items: center;
+    justify-content: center;
+   
+  }
+  .cp-size-modal.active { display: flex; }
+
+  .cp-size-modal-content {
+    background: #f0f0f0;
+    width: 100%;
+    max-width: 520px;
+   
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .cp-modal-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .cp-modal-back,
+  .cp-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+  .cp-modal-back svg,
+  .cp-close svg { width: 22px; height: 22px; }
+
+  .cp-modal-title-area {
+    text-align: center;
+    padding: 4px 24px 14px;
+    flex-shrink: 0;
+  }
+  .cp-modal-title-area h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  .cp-size-guide-link {
+    display: none;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #888;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  .cp-col-headers {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    padding: 6px 16px 8px;
+    flex-shrink: 0;
+  }
+  .cp-col-headers .cp-ch {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+  .cp-col-headers .cp-ch span {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .cp-size-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 12px;
+  }
+
+  .cp-size-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+        position: sticky;
+    top: 0;
+    z-index: 99;
+    background-color: #f0f0f0;
+  }
+  .cp-size-row-label {
+    font-size: 12px;
+    color: #999;
+    text-align: left;
+    padding-left: 4px;
+  }
+  .cp-size-tile {
+    background: #fff;
+    border: none;
+    border-radius: 6px;
+    height: 32px;
+    width: 100%;
+    font-size: 12px;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+  }
+    .cp-size-tile.tags__sgd{
+    font-weight: 500;
+    background: none;
+    font-size: 14px;
+
+  }
+  .cp-size-tile:hover { background: #e8e8e8; }
+  .cp-size-tile.selected { background: #1a1a1a; color: #fff; }
+  .cp-size-tile.sold-out { color: #bbb; cursor: not-allowed; }
+  .cp-size-tile.sold-out .sold-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid #f0a070;
+    flex-shrink: 0;
+  }
+  .cp-size-tile-empty {
+    background: #e8e8e8;
+    border-radius: 6px;
+    height: 32px;
+  }
+
+  .cp-modal-footer {
+    flex-shrink: 0;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .cp-modal-price-amount {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+  .cp-modal-price-delivery {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+  }
+  .cp-modal-add-btn {
+    height: 50px;
+    padding: 0 32px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .cp-modal-add-btn:hover { background: #333; }
+  .cp-modal-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  @media(max-width: 768px) {
+    .complementary-products-wraper { flex-direction: column; }
+    .currently-open-product { width: 100%; }
+    .complementary-products-drawer-content { max-width: 100%; }
+    .cp-size-modal-content { max-width: 100%; }
+    .cp-product-image { width: 150px; min-width: 150px; min-height: 200px; }
+  }
+</style>
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--{{ section.settings.section_width }} spacing-style {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %} {% if products == blank %} hidden {% endif %}"
+  style="{% render 'spacing-padding', settings: section.settings %}"
+>
+  {{ section.settings.custom_liquid }}
+  <div class="complementary-products-wraper">
+    <div
+      class="currently-open-product"
+      style="background-image: url('{{ product.featured_image | image_url: width: 800 }}'); background-size: cover; background-position: center;"
+    >
+      <span class="subtitle">Made in Pakistan</span>
+      <h3 class="heading">Buy The look</h3>
+      <button type="button" class="button shop-by-look">| Shop The look ></button>
+    </div>
+
+    <div class="complementary-products">
+      {% if products != blank %}
+        {% for product in products %}
+          {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: product %}
+        {% endfor %}
+      {% else %}
+        <p>No complementary products found</p>
+      {% endif %}
+    </div>
+
+    <!-- ── DRAWER ── -->
+    <div class="complementary-products-drawer-wraper">
+      <div class="complementary-products-drawer-content">
+
+        <div class="drawer-header">
+          <h2 class="shop-heading">Shop the look</h2>
+          <button class="close-pop-up" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <div class="drawer-complementary-products">
+
+          <!-- ── MAIN PRODUCT CARD ── -->
+          <div class="cp-product-card">
+            <div class="cp-product-image">
+              <button class="cp-wishlist-dot" aria-label="Save">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              </button>
+              <img
+                src="{{ current_product.featured_image | image_url: width: 400 }}"
+                alt="{{ current_product.title | escape }}"
+                loading="lazy"
+              >
+            </div>
+            <div class="cp-product-info">
+              <p class="cp-product-title">{{ current_product.title }}</p>
+              <p class="cp-product-origin">
+                {% if current_product.metafields.custom.origin != blank %}{{ current_product.metafields.custom.origin }}{% else %}Made in Pakistan{% endif %}
+              </p>
+              <p class="cp-product-price">{{ current_product.price | money_without_trailing_zeros }}</p>
+              <div class="cp-product-actions">
+                <button class="cp-bookmark-btn" aria-label="Save">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                {% if current_product.variants.size == 1 and current_product.variants.first.title == 'Default Title' %}
+                  <button class="cp-add-btn" data-variant-id="{{ current_product.variants.first.id }}">Add to bag</button>
+                {% else %}
+                  <button class="cp-size-open" data-product-id="{{ current_product.id }}">Select size</button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- SIZE MODAL — MAIN PRODUCT -->
+          {% comment %} <div class="cp-size-modal" id="size-modal-{{ current_product.id }}">
+            <div class="cp-size-modal-content">
+              <div class="cp-modal-topbar">
+                <button class="cp-modal-back cp-close" aria-label="Back">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="cp-close" aria-label="Close">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="cp-modal-title-area">
+                <h3>Select your size</h3>
+                <span class="cp-size-guide-link">View size guide</span>
+              </div>
+              <div class="cp-size-scroll">
+              <div class="cp-size-row">
+                <div class="cp-size-row-label"></div>
+ {% assign unique_types = '' | split: ',' %}
+
+{% for variant in current_product.variants %}
+  {% assign parts = variant.title | split: '/' %}
+  {% assign v_type = parts[1] | strip %}
+
+  {% unless unique_types contains v_type %}
+    {% assign unique_types = unique_types | push: v_type %}
+  {% endunless %}
+{% endfor %}
+
+{% for type in unique_types %}
+  <button class="cp-size-tile tags__sgd">
+    {{ type }}
+  </button>
+{% endfor %}
+              </div>
+
+ {% assign sizes = current_product.variants | map: 'option1' | uniq %}
+{% assign types = current_product.variants | map: 'option2' | uniq %}
+<div class="cp-size-row">
+  <div class="cp-size-row-label"></div>
+  {% for type in types %}
+    <div class="cp-size-tile tags__sgd">{{ type }}</div>
+  {% endfor %}
+</div>
+
+{% for size in sizes %}
+  <div class="cp-size-row">
+    <div class="cp-size-row-label">{{ size }}</div>
+
+    {% for type in types %}
+      {% assign found = false %}
+
+      {% for variant in current_product.variants %}
+        
+        {% assign parts = variant.title | split: '/' %}
+        {% assign v_size = parts[0] | strip %}
+        {% assign v_type = parts[1] | strip %}
+        {{ parts }}
+        {% if v_size == size and v_type == type %}
+          {% assign found = true %}
+
+          {% if variant.available %}
+            <button class="cp-size-tile" data-variant-id="{{ variant.id }}">
+              {{ size }}
+            </button>
+          {% else %}
+            <button class="cp-size-tile sold-out" disabled>
+              <span class="sold-dot"></span>{{ size }}
+            </button>
+          {% endif %}
+
+        {% endif %}
+
+      {% endfor %}
+
+      {% unless found %}
+        <div class="cp-size-tile-empty"></div>
+      {% endunless %}
+
+    {% endfor %}
+  </div>
+{% endfor %} 
+              </div>
+              <div class="cp-modal-footer">
+                <div>
+                  <div class="cp-modal-price-amount">{{ current_product.price | money_without_trailing_zeros }}</div>
+                  {% comment %} <div class="cp-modal-price-delivery">Delivery: 1 to 4 business days</div>  {% endcomment %}
+                </div>
+                <button class="cp-modal-add-btn" disabled>Add to bag</button>
+              </div>
+            </div>
+          </div> {% endcomment %}
+
+          <div class="cp-size-modal" id="size-modal-{{ current_product.id }}">
+  <div class="cp-size-modal-content">
+    <div class="cp-modal-topbar">
+      <button class="cp-modal-back cp-close" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="cp-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="cp-modal-title-area">
+      <h3>Select your size</h3>
+      <span class="cp-size-guide-link">View size guide</span>
+    </div>
+
+    <div class="cp-size-scroll">
+
+      {% assign sizes = current_product.variants | map: 'option1' | uniq %}
+      {% assign types = current_product.variants | map: 'option2' | uniq %}
+
+      <div class="cp-size-row">
+        <div class="cp-size-row-label"></div>
+        {% for type in types %}
+          <div class="cp-size-tile tags__sgd">{{ type }}</div>
+        {% endfor %}
+      </div>
+
+      {% for size in sizes %}
+        <div class="cp-size-row">
+          <div class="cp-size-row-label">{{ size }}</div>
+
+          {% for type in types %}
+            {% assign found = false %}
+
+            {% for variant in current_product.variants %}
+              {% if variant.option1 == size and variant.option2 == type %}
+                {% assign found = true %}
+                {% if variant.available %}
+                  <button class="cp-size-tile" data-variant-id="{{ variant.id }}">
+                    {{ size }}
+                  </button>
+                {% else %}
+                  <button class="cp-size-tile sold-out" disabled>
+                    <span class="sold-dot"></span>{{ size }}
+                  </button>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {% unless found %}
+              <div class="cp-size-tile-empty"></div>
+            {% endunless %}
+
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+    </div>  
+
+    <div class="cp-modal-footer">
+      <div>
+        <div class="cp-modal-price-amount">{{ current_product.price | money_without_trailing_zeros }}</div>
+      </div>
+      <button class="cp-modal-add-btn" disabled>Add to bag</button>
+    </div>
+  </div>
+</div>
+
+
+          <!-- ── COMPLEMENTARY PRODUCT CARDS ── -->
+          {% if products != blank %}
+            {% for complementary_product in products %}
+
+              <div class="cp-product-card">
+                <div class="cp-product-image">
+                  <button class="cp-wishlist-dot" aria-label="Save">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                  </button>
+                  <img
+                    src="{{ complementary_product.featured_image | image_url: width: 400 }}"
+                    alt="{{ complementary_product.title | escape }}"
+                    loading="lazy"
+                  >
+                </div>
+                <div class="cp-product-info">
+                  <p class="cp-product-title">{{ complementary_product.title }}</p>
+                  <p class="cp-product-origin">
+                    {% if complementary_product.metafields.custom.origin != blank %}{{ complementary_product.metafields.custom.origin }}{% else %}Made in Pakistan{% endif %}
+                  </p>
+                  <p class="cp-product-price">{{ complementary_product.price | money_without_trailing_zeros }}</p>
+                  <div class="cp-product-actions">
+                    <button class="cp-bookmark-btn" aria-label="Save">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                    {% if complementary_product.variants.size == 1 and complementary_product.variants.first.title == 'Default Title' %}
+                      <button class="cp-add-btn" data-variant-id="{{ complementary_product.variants.first.id }}">Add to bag</button>
+                    {% else %}
+                      <button class="cp-size-open" data-product-id="{{ complementary_product.id }}">Select size</button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- SIZE MODAL — COMPLEMENTARY PRODUCT -->
+              <div class="cp-size-modal" id="size-modal-{{ complementary_product.id }}">
+                <div class="cp-size-modal-content">
+                  <div class="cp-modal-topbar">
+                    <button class="cp-modal-back cp-close" aria-label="Back">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="cp-close" aria-label="Close">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="cp-modal-title-area">
+                    <h3>Select your size</h3>
+                    <span class="cp-size-guide-link">View size guide</span>
+                  </div>
+                  {% comment %} <div class="cp-col-headers">
+                    <div></div>
+                    <div class="cp-ch">Regular<span>5.5"–6.1"</span></div>
+                    <div class="cp-ch">Long<span>&lt; 6.1"</span></div>
+                  </div> {% endcomment %}
+                  <div class="cp-size-scroll">
+                                <div class="cp-size-row">
+                <div class="cp-size-row-label"></div>
+
+  {% assign types = '' %}
+
+  {% for variant in complementary_product.variants %}
+    {% assign parts = variant.title | split: '/' %}
+    {% assign v_type = parts[1] | strip %}
+
+    {% assign types = types | append: v_type | append: ',' %}
+  {% endfor %}
+
+  {% assign unique_types = types | split: ',' | uniq %}
+
+  {% for type in unique_types %}
+    {% unless type == blank %}
+      {% comment %} {{ type }} {% endcomment %}
+        <button class="cp-size-tile tags__sgd" data-variant-id="{{ variant.id }}">
+             {{ type }}
+          </button>
+    {% endunless %}
+  {% endfor %}
+              </div>
+
+{% comment %} {% assign sizes = complementary_product.variants | map: 'option1' | uniq %}
+
+ {% assign types = "Slim,Smart,Relaxed" | split: "," %} 
+
+
+{% for size in sizes %}
+  <div class="cp-size-row">
+    <div class="cp-size-row-label">{{ size }}</div>
+
+    {% for type in types %}
+      {% assign found = false %}
+
+      {% for variant in complementary_product.variants %}
+        
+        {% assign parts = variant.title | split: '/' %}
+        {% assign v_size = parts[0] | strip %}
+        {% assign v_type = parts[1] | strip %}
+
+        {% if v_size == size and v_type == type %}
+          {% assign found = true %}
+
+          {% if variant.available %}
+            <button class="cp-size-tile" data-variant-id="{{ variant.id }}">
+              {{ size }} / {{ type }}
+            </button>
+          {% else %}
+            <button class="cp-size-tile sold-out" disabled>
+              <span class="sold-dot"></span>{{ size }} / {{ type }}
+            </button>
+          {% endif %}
+
+        {% endif %}
+
+      {% endfor %}
+
+      {% unless found %}
+        <div class="cp-size-tile-empty"></div>
+      {% endunless %}
+
+    {% endfor %}
+  </div>
+{% endfor %} {% endcomment %}
+
+{% assign sizes = complementary_product.variants | map: 'option1' | uniq %}
+
+{% comment %} Dynamic types from variants instead of hardcoded {% endcomment %}
+{% assign types = complementary_product.variants | map: 'option2' | uniq %}
+
+{% for size in sizes %}
+  <div class="cp-size-row">
+    <div class="cp-size-row-label">{{ size }}</div>
+
+    {% for type in types %}
+      {% assign found = false %}
+
+      {% for variant in complementary_product.variants %}
+        {% assign parts = variant.title | split: '/' %}
+        {% assign v_size = parts[0] | strip %}
+        {% assign v_type = parts[1] | strip %}
+
+        {% if v_size == size and v_type == type %}
+          {% assign found = true %}
+
+          {% if variant.available %}
+            <button class="cp-size-tile" data-variant-id="{{ variant.id }}">
+              {{ size }}
+            </button>
+          {% else %}
+            <button class="cp-size-tile sold-out" disabled>
+              <span class="sold-dot"></span>{{ size }}
+            </button>
+          {% endif %}
+
+        {% endif %}
+      {% endfor %}
+
+      {% unless found %}
+        <div class="cp-size-tile-empty"></div>
+      {% endunless %}
+
+    {% endfor %}
+  </div>
+{% endfor %}
+
+                  </div>
+                  <div class="cp-modal-footer">
+                    <div>
+                      <div class="cp-modal-price-amount">{{ complementary_product.price | money_without_trailing_zeros }}</div>
+                      {% comment %} <div class="cp-modal-price-delivery">Delivery: 1 to 4 business days</div> {% endcomment %}
+                    </div>
+                    <button class="cp-modal-add-btn" disabled>Add to bag</button>
+                  </div>
+                </div>
+              </div>
+
+            {% endfor %}
+          {% else %}
+            <p style="padding: 24px; font-size: 13px; color: #888;">No complementary products found</p>
+          {% endif %}
+
+        </div>
+
+        <div class="drawer-footer">
+          <a href="/cart" class="drawer-skip-btn">Go to Cart</a>
+        </div>
+
+      </div>
+    </div>
+    <!-- END DRAWER -->
+
+  </div>
+</div>
+
+<script>
+{% comment %} document.addEventListener("DOMContentLoaded", function () {
+
+  /* ── DRAWER ── */
+  var popup = document.querySelector(".complementary-products-drawer-wraper");
+  if (!popup) return;
+
+  var header = document.getElementById("header-group");
+
+  function openDrawer() {
+    popup.classList.add("complementary_products_active");
+    document.body.style.overflow = "hidden";
+    if (header) header.classList.add("hidden");
+  }
+  function closeDrawer() {
+    popup.classList.remove("complementary_products_active");
+    document.body.style.overflow = "auto";
+    if (header) header.classList.remove("hidden");
+  }
+
+  document.querySelectorAll(".shop-by-look").forEach(function(btn) {
+    btn.addEventListener("click", openDrawer);
+  });
+  var closeBtn = popup.querySelector(".close-pop-up");
+  if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+  popup.addEventListener("click", function(e) { if (e.target === popup) closeDrawer(); });
+
+  /* ── DIRECT ADD (single variant) ── */
+  document.querySelectorAll(".cp-add-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var variantId = this.dataset.variantId;
+      if (!variantId) return;
+      var button = this;
+      button.disabled = true;
+      button.textContent = "Adding...";
+      closeDrawer();
+      fetch("/cart/add.js", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: variantId, quantity: 1 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        button.textContent = "Added to Cart";
+        button.classList.add("added");
+      })
+      .catch(function() {
+        button.textContent = "Add to bag";
+        button.disabled = false;
+      });
+    });
+  });
+
+  /* ── SIZE MODAL: OPEN ── */
+  document.querySelectorAll(".cp-size-open").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var modal = document.getElementById("size-modal-" + this.dataset.productId);
+      if (modal) modal.classList.add("active");
+    });
+  });
+
+  /* ── SIZE MODAL: CLOSE ── */
+  document.querySelectorAll(".cp-size-modal").forEach(function(modal) {
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) modal.classList.remove("active");
+    });
+    modal.querySelectorAll(".cp-close").forEach(function(btn) {
+      btn.addEventListener("click", function() { modal.classList.remove("active"); });
+    });
+  });
+
+  /* ── SIZE TILE: SELECT ── */
+  document.querySelectorAll(".cp-size-tile:not(.sold-out)").forEach(function(tile) {
+    tile.addEventListener("click", function() {
+      var modal = this.closest(".cp-size-modal");
+      modal.querySelectorAll(".cp-size-tile").forEach(function(t) { t.classList.remove("selected"); });
+      this.classList.add("selected");
+      var addBtn = modal.querySelector(".cp-modal-add-btn");
+      addBtn.disabled = false;
+      addBtn.dataset.variantId = this.dataset.variantId;
+    });
+  });
+
+  /* ── SIZE MODAL: ADD TO CART ── */
+  document.querySelectorAll(".cp-modal-add-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var variantId = this.dataset.variantId;
+      if (!variantId) return;
+      var button = this;
+      var modal = button.closest(".cp-size-modal");
+      fetch("/cart/add.js", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: variantId, quantity: 1 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        button.textContent = "Added to Cart";
+        closeDrawer();
+        setTimeout(function() {
+          modal.classList.remove("active");
+          button.textContent = "Add to bag";
+          button.disabled = true;
+          delete button.dataset.variantId;
+          modal.querySelectorAll(".cp-size-tile.selected").forEach(function(t) { t.classList.remove("selected"); });
+        }, 1200);
+      })
+      .catch(function() { button.textContent = "Add to bag"; });
+    });
+  });
+
+}); {% endcomment %}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* ── DRAWER ── */
+  var popup = document.querySelector(".complementary-products-drawer-wraper");
+  if (!popup) return;
+
+  var header = document.getElementById("header-group");
+
+  function openDrawer() {
+    popup.classList.add("complementary_products_active");
+    document.body.style.overflow = "hidden";
+    if (header) header.classList.add("hidden");
+  }
+
+  function closeDrawer() {
+    popup.classList.remove("complementary_products_active");
+    document.body.style.overflow = "auto";
+    if (header) header.classList.remove("hidden");
+  }
+
+  document.querySelectorAll(".shop-by-look").forEach(function(btn) {
+    btn.addEventListener("click", openDrawer);
+  });
+
+  var closeBtn = popup.querySelector(".close-pop-up");
+  if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+
+  popup.addEventListener("click", function(e) {
+    if (e.target === popup) closeDrawer();
+  });
+
+  /* ── DIRECT ADD (single variant) ── */
+  document.querySelectorAll(".cp-add-btn").forEach(function(btn) {
+    btn.addEventListener("click", async function() {
+
+      var variantId = this.dataset.variantId;
+      if (!variantId) return;
+
+      var button = this;
+      button.disabled = true;
+      button.textContent = "Adding...";
+
+      try {
+
+        await fetch("/cart/add.js", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
+        });
+
+        // GET UPDATED CART
+        const cartRes = await fetch('/cart.js');
+        const cartData = await cartRes.json();
+
+        // THEME EVENT
+        const CartUpdateEvent = (await import('@theme/events')).CartUpdateEvent;
+
+        const event = new CartUpdateEvent(cartData, 'cp-add-to-cart', {
+          itemCount: cartData.item_count,
+          source: 'complementary-products'
+        });
+
+        document.dispatchEvent(event);
+
+        // UPDATE HEADER COUNT
+        document.dispatchEvent(new CustomEvent('theme:cart:change', {
+          detail: { cartCount: cartData.item_count }
+        }));
+
+        // CLOSE CUSTOM DRAWER FIRST
+        closeDrawer();
+
+        // OPEN CART DRAWER
+        setTimeout(function () {
+          const cartDrawer = document.querySelector('cart-drawer-component');
+          if (cartDrawer && cartDrawer.open) {
+            cartDrawer.open();
+          }
+        }, 200);
+
+        button.textContent = "Added to Cart";
+        button.classList.add("added");
+
+      } catch (err) {
+        console.error(err);
+        button.textContent = "Add to bag";
+        button.disabled = false;
+      }
+
+    });
+  });
+
+  /* ── SIZE MODAL: OPEN ── */
+  document.querySelectorAll(".cp-size-open").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var modal = document.getElementById("size-modal-" + this.dataset.productId);
+      if (modal) modal.classList.add("active");
+    });
+  });
+
+  /* ── SIZE MODAL: CLOSE ── */
+  document.querySelectorAll(".cp-size-modal").forEach(function(modal) {
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) modal.classList.remove("active");
+    });
+
+    modal.querySelectorAll(".cp-close").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        modal.classList.remove("active");
+      });
+    });
+  });
+
+  /* ── SIZE TILE: SELECT ── */
+  document.querySelectorAll(".cp-size-tile:not(.sold-out)").forEach(function(tile) {
+    tile.addEventListener("click", function() {
+
+      var modal = this.closest(".cp-size-modal");
+
+      modal.querySelectorAll(".cp-size-tile").forEach(function(t) {
+        t.classList.remove("selected");
+      });
+
+      this.classList.add("selected");
+
+      var addBtn = modal.querySelector(".cp-modal-add-btn");
+      addBtn.disabled = false;
+      addBtn.dataset.variantId = this.dataset.variantId;
+    });
+  });
+
+  /* ── SIZE MODAL: ADD TO CART ── */
+  document.querySelectorAll(".cp-modal-add-btn").forEach(function(btn) {
+    btn.addEventListener("click", async function() {
+
+      var variantId = this.dataset.variantId;
+      if (!variantId) return;
+
+      var button = this;
+      var modal = button.closest(".cp-size-modal");
+
+      try {
+
+        await fetch("/cart/add.js", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
+        });
+
+        // GET UPDATED CART
+        const cartRes = await fetch('/cart.js');
+        const cartData = await cartRes.json();
+
+        // THEME EVENT
+        const CartUpdateEvent = (await import('@theme/events')).CartUpdateEvent;
+
+        const event = new CartUpdateEvent(cartData, 'cp-size-add-to-cart', {
+          itemCount: cartData.item_count,
+          source: 'complementary-products'
+        });
+
+        document.dispatchEvent(event);
+
+        // UPDATE HEADER COUNT
+        document.dispatchEvent(new CustomEvent('theme:cart:change', {
+          detail: { cartCount: cartData.item_count }
+        }));
+
+        // CLOSE MODAL + CUSTOM DRAWER
+        modal.classList.remove("active");
+        closeDrawer();
+
+        // OPEN CART DRAWER
+        setTimeout(function () {
+          const cartDrawer = document.querySelector('cart-drawer-component');
+          if (cartDrawer && cartDrawer.open) {
+            cartDrawer.open();
+          }
+        }, 200);
+
+        button.textContent = "Added to Cart";
+
+        setTimeout(function() {
+          button.textContent = "Add to bag";
+          button.disabled = true;
+          delete button.dataset.variantId;
+
+          modal.querySelectorAll(".cp-size-tile.selected").forEach(function(t) {
+            t.classList.remove("selected");
+          });
+
+        }, 1200);
+
+      } catch (err) {
+        console.error(err);
+        button.textContent = "Add to bag";
+      }
+
+    });
+  });
+
+});
+
+</script>
+
+{% comment %} <script>
+function setupSkipButton() {
+  var skipBtn = document.querySelector(".drawer-skip-btn");
+  var cartDrawer = document.querySelector(".cart-drawer");
+  if (!skipBtn || !cartDrawer) { setTimeout(setupSkipButton, 1000); return; }
+  skipBtn.addEventListener("click", function() { cartDrawer.click(); });
+}
+setupSkipButton();
+</script> {% endcomment %}
+
+{% schema %}
+{
+  "name": "Complementary Products",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        { "value": "page-width", "label": "t:options.page" },
+        { "value": "full-width", "label": "t:options.full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "currently_product_height",
+      "label": "First block height",
+      "min": 300,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    { "type": "@theme" },
+    { "type": "group" }
+  ],
+  "presets": [
+    {
+      "name": "Complementary Products",
+      "category": "t:categories.products"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,118 @@
+{% liquid
+    if collection.metafields.custom.products_promotions != blank
+      assign current_collection = collection
+    endif
+  if current_collection and current_collection.metafields.custom.products_promotions != blank
+    assign custom_selections = current_collection.metafields.custom.products_promotions.value
+  endif
+  assign promotion_image = custom_selections.promotion_image
+  assign promotion_text = custom_selections.promotion_text
+  assign promotion_description = custom_selections.promotion_description
+%}
+{% comment %}
+  echo current_collection | json
+{% endcomment %}
+<style>
+  .block-{{ block.id }}{
+         .promotion-wraper {
+           display: block;
+           width: 100%;
+           padding: 5px 20px;
+           background: {{ background_color }};
+           cursor: pointer;
+           border-radius: 5px;
+           box-shadow: 0px 5px 6px #00000015;
+           }
+         .promotion-product-color-wraper {
+           display: flex;
+           align-items: center;
+           }
+         .color-wraper {
+             
+             border-radius: 50%;
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             width: 45px;
+             height: 45px;
+             padding: 8px;
+          }
+         .selected-color{
+             background: rgb({{ color_code }});
+             border-radius:50%;
+                     display: flex;
+                 width: 35px;
+                 height: 35px;
+         }
+         .promotion-product-color {
+             display: block;
+             width: 20%;
+         }
+         .promotion-product-text {
+             display: block;
+             width: 70%;
+         }
+         .promotion-product-icon{
+             display: flex;
+             justify-content: end;
+             width: 10%;
+         }
+         .eligible-heading {
+             font-weight: 600;
+             margin-bottom: 5px;
+         }
+         .promotion-eligible {
+           max-height: 0;
+           overflow: hidden;
+           transition: max-height 0.3s ease-out;
+         }
+         .promotion-product-icon svg{
+           transition: 0.3s;
+         }
+         .promotion-wraper.active{
+           .promotion-eligible {
+             max-height: 200px;
+             padding-top:10px;
+           }
+           .promotion-product-icon svg{
+             transform: rotate(180deg);
+           }
+
+         }
+
+   }
+</style>
+{% if current_collection != blank %}
+  <div class="block-{{ block.id }}">
+    <div class="promotion-wraper">
+      <div class="promotion-product-color-wraper">
+        <div class="promotion-product-color">
+          <span class="color-wraper">
+            {% comment %} <span class="selected-color" color-name="{{  color_name }}" color-code="{{color_code}}"> </span> {% endcomment %}
+            <img src="{{ promotion_image | image_url }}" alt="" loading="lazy">
+          </span>
+        </div>
+        <div class="promotion-product-text">
+          <div class="text">{{ promotion_text | metafield_tag }}</div>
+        </div>
+        <div class="promotion-product-icon">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </div>
+      </div>
+      <div class="promotion-eligible">
+        <h4 class="eligible-heading">How does it work?</h4>
+        <div class="eligible-text">{{- promotion_description | metafield_tag -}}</div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const wrapper = document.querySelector('.block-{{ block.id }} .promotion-wraper');
+    if (wrapper) {
+      wrapper.addEventListener('click', function () {
+        wrapper.classList.toggle('active');
+      });
+    }
+  });
+</script>

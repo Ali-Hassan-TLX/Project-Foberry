@@ -1,0 +1,1111 @@
+{% comment %}
+  Custom Slideshow Section for Shopify Fabric Theme
+  Features: 70/30 split view, chevron navigation, customizable content, form on slide 3
+  v2: Added separate mobile image option per slide
+{% endcomment %}
+
+{{ 'section-slideshow-custom.css' | asset_url | stylesheet_tag }}
+
+<div class="slideshow-wrapper color-{{ section.settings.color_scheme }}">
+  <div class="slideshow-container" data-slideshow>
+    <button class="slideshow-nav slideshow-nav--prev" data-prev aria-label="Previous slide">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <div class="slideshow-track">
+      {% for block in section.blocks %}
+        {% if block.type == 'slide' %}
+          <div class="slideshow-slide" data-slide="{{ forloop.index }}" {{ block.shopify_attributes }}>
+            <div class="slideshow-slide__image-wrapper" style="height: {{ section.settings.media_height }}px;">
+
+              {% comment %} ---- DESKTOP / MOBILE IMAGE LOGIC ---- {% endcomment %}
+              {% if block.settings.mobile_image != blank %}
+                {%- comment -%} Use <picture> to serve different images per breakpoint {%- endcomment -%}
+                <picture>
+                  <source
+                    media="(max-width: 768px)"
+                    srcset="{{ block.settings.mobile_image | image_url: width: 800 }} 800w,
+                            {{ block.settings.mobile_image | image_url: width: 1200 }} 1200w"
+                    sizes="100vw"
+                  >
+                  <source
+                    media="(min-width: 769px)"
+                    srcset="{{ block.settings.image | image_url: width: 1200 }} 1200w,
+                            {{ block.settings.image | image_url: width: 2000 }} 2000w"
+                    sizes="100vw"
+                  >
+                  {{ block.settings.image | image_url: width: 2000 | image_tag:
+                    class: 'slideshow-slide__image',
+                    loading: 'lazy',
+                    alt: block.settings.image.alt | escape
+                  }}
+                </picture>
+              {% elsif block.settings.image != blank %}
+                {{ block.settings.image | image_url: width: 2000 | image_tag:
+                  class: 'slideshow-slide__image',
+                  loading: 'lazy',
+                  alt: block.settings.image.alt | escape
+                }}
+              {% else %}
+                <div class="slideshow-slide__placeholder">
+                  {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {% endif %}
+              {% comment %} ---- END IMAGE LOGIC ---- {% endcomment %}
+
+              {% if block.settings.heading != blank or block.settings.button_label != blank %}
+                <div class="slideshow-slide__content slideshow-slide__content--{{ block.settings.content_position }} slideshow-slide__content--align-{{ block.settings.content_alignment }}" style="{% if block.settings.heading_color != blank %}--heading-color: {{ block.settings.heading_color }};{% endif %} {% if block.settings.content_bg_color != blank %}background-color: {{ block.settings.content_bg_color }};{% endif %}">
+                  {% if block.settings.heading != blank %}
+                    <h2 class="slideshow-slide__heading" style="{% if block.settings.heading_color != blank %}color: {{ block.settings.heading_color }};{% endif %}">{{ block.settings.heading }}</h2>
+                  {% endif %}
+                  {% if block.settings.button_label != blank %}
+                    <a href="{{ block.settings.button_link }}" class="image-button slide-button">
+                      <span class="slideshow-slide__button-text">{{ block.settings.button_label }}</span>
+                      <span class="slideshow-slide__button-arrow"></span>
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+        {% elsif block.type == 'slide_with_form' %}
+          <div class="slideshow-slide slideshow-slide--with-form" data-slide="{{ forloop.index }}" {{ block.shopify_attributes }}>
+            <div class="slideshow-slide__split">
+              <div class="slideshow-slide__image-wrapper" style="height: {{ section.settings.media_height }}px;">
+
+                {% comment %} ---- DESKTOP / MOBILE IMAGE LOGIC ---- {% endcomment %}
+                {% if block.settings.mobile_image != blank %}
+                  <picture>
+                    <source
+                      media="(max-width: 768px)"
+                      srcset="{{ block.settings.mobile_image | image_url: width: 800 }} 800w,
+                              {{ block.settings.mobile_image | image_url: width: 1200 }} 1200w"
+                      sizes="100vw"
+                    >
+                    <source
+                      media="(min-width: 769px)"
+                      srcset="{{ block.settings.image | image_url: width: 1200 }} 1200w,
+                              {{ block.settings.image | image_url: width: 2000 }} 2000w"
+                      sizes="100vw"
+                    >
+                    {{ block.settings.image | image_url: width: 2000 | image_tag:
+                      class: 'slideshow-slide__image',
+                      loading: 'lazy',
+                      alt: block.settings.image.alt | escape
+                    }}
+                  </picture>
+                {% elsif block.settings.image != blank %}
+                  {{ block.settings.image | image_url: width: 2000 | image_tag:
+                    class: 'slideshow-slide__image',
+                    loading: 'lazy',
+                    alt: block.settings.image.alt | escape
+                  }}
+                {% else %}
+                  <div class="slideshow-slide__placeholder">
+                    {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {% endif %}
+                {% comment %} ---- END IMAGE LOGIC ---- {% endcomment %}
+
+                {% if block.settings.heading != blank or block.settings.button_label != blank %}
+                  <div class="slideshow-slide__content slideshow-slide__content--{{ block.settings.content_position }} slideshow-slide__content--align-{{ block.settings.content_alignment }}" style="{% if block.settings.heading_color != blank %}--heading-color: {{ block.settings.heading_color }};{% endif %} {% if block.settings.content_bg_color != blank %}background-color: {{ block.settings.content_bg_color }};{% endif %}">
+                    {% if block.settings.heading != blank %}
+                      <h2 class="slideshow-slide__heading" style="{% if block.settings.heading_color != blank %}color: {{ block.settings.heading_color }};{% endif %}">{{ block.settings.heading }}</h2>
+                    {% endif %}
+                    {% if block.settings.button_label != blank %}
+                      <a href="{{ block.settings.button_link }}" class="image-button slide-button">
+                        <span class="slideshow-slide__button-text">{{ block.settings.button_label }}</span>
+                        <span class="slideshow-slide__button-arrow"></span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="slideshow-slide__form-wrapper" style="{% if block.settings.form_bg_color != blank %}background-color: {{ block.settings.form_bg_color }};{% endif %}">
+                <div class="slideshow-form">
+                  {% if block.settings.form_heading != blank %}
+                    <h3 class="slideshow-form__heading" style="color: {{ block.settings.form_heading_color }};">{{ block.settings.form_heading }}</h3>
+                  {% endif %}
+
+                  <div class="slideshow-form__buttons">
+                    {% if block.settings.button_1_label != blank %}
+                      <a href="{{ block.settings.button_1_link }}" class="slideshow-form__button" style="border-color: {{ block.settings.form_button_border_color }}; color: {{ block.settings.form_button_text_color }};" data-hover-bg="{{ block.settings.form_button_border_color }}">
+                        <span class="slideshow-form__button-text">{{ block.settings.button_1_label }}</span>
+                        <span class="slideshow-form__button-arrow">›</span>
+                      </a>
+                    {% endif %}
+                    {% if block.settings.button_2_label != blank %}
+                      <a href="{{ block.settings.button_2_link }}" class="slideshow-form__button" style="border-color: {{ block.settings.form_button_border_color }}; color: {{ block.settings.form_button_text_color }};" data-hover-bg="{{ block.settings.form_button_border_color }}">
+                        <span class="slideshow-form__button-text">{{ block.settings.button_2_label }}</span>
+                        <span class="slideshow-form__button-arrow">›</span>
+                      </a>
+                    {% endif %}
+                    {% if block.settings.button_3_label != blank %}
+                      <a href="{{ block.settings.button_3_link }}" class="slideshow-form__button" style="border-color: {{ block.settings.form_button_border_color }}; color: {{ block.settings.form_button_text_color }};" data-hover-bg="{{ block.settings.form_button_border_color }}">
+                        <span class="slideshow-form__button-text">{{ block.settings.button_3_label }}</span>
+                        <span class="slideshow-form__button-arrow">›</span>
+                      </a>
+                    {% endif %}
+                    {% if block.settings.button_4_label != blank %}
+  <a href="{{ block.settings.button_4_link }}" class="slideshow-form__button" style="border-color: {{ block.settings.form_button_border_color }}; color: {{ block.settings.form_button_text_color }};" data-hover-bg="{{ block.settings.form_button_border_color }}">
+    <span class="slideshow-form__button-text">{{ block.settings.button_4_label }}</span>
+    <span class="slideshow-form__button-arrow">›</span>
+  </a>
+{% endif %}
+
+{% if block.settings.button_5_label != blank %}
+  <a href="{{ block.settings.button_5_link }}" class="slideshow-form__button" style="border-color: {{ block.settings.form_button_border_color }}; color: {{ block.settings.form_button_text_color }};" data-hover-bg="{{ block.settings.form_button_border_color }}">
+    <span class="slideshow-form__button-text">{{ block.settings.button_5_label }}</span>
+    <span class="slideshow-form__button-arrow">›</span>
+  </a>
+{% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <button class="slideshow-nav slideshow-nav--next" data-next aria-label="Next slide">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  {% if section.blocks.size > 1 %}
+    <div class="slideshow-dots">
+      {% for block in section.blocks %}
+        <button class="slideshow-dot {% if forloop.first %}active{% endif %}" data-dot="{{ forloop.index }}" aria-label="Go to slide {{ forloop.index }}"></button>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  (() => {
+    const slideshow = document.querySelector('[data-slideshow]');
+    if (!slideshow) return;
+
+    const track = slideshow.querySelector('.slideshow-track');
+    const slides = slideshow.querySelectorAll('.slideshow-slide');
+    const prevBtn = slideshow.querySelector('[data-prev]');
+    const nextBtn = slideshow.querySelector('[data-next]');
+    const dots = slideshow.querySelectorAll('[data-dot]');
+    
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+
+    const updateSlideshow = () => {
+      const offset = -(currentIndex * (74 + (5 / window.innerWidth * 100)));
+      track.style.transform = `translateX(${offset}%)`;
+      
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    };
+
+    const goToSlide = (index) => {
+      currentIndex = (index + totalSlides) % totalSlides;
+      updateSlideshow();
+    };
+
+    prevBtn?.addEventListener('click', () => goToSlide(currentIndex - 1));
+    nextBtn?.addEventListener('click', () => goToSlide(currentIndex + 1));
+    
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => goToSlide(i));
+    });
+
+    // Auto-play (optional)
+    {% if section.settings.autoplay %}
+      setInterval(() => goToSlide(currentIndex + 1), {{ section.settings.autoplay_speed | times: 1000 }});
+    {% endif %}
+  })();
+
+class StickyHeading {
+  constructor(wrapper) {
+    this.wrapper = wrapper;
+    this.heading = wrapper.querySelector('.slideshow-slide__content');
+
+    if (!this.heading) return;
+
+    window.addEventListener('scroll', () => this.onScroll());
+  }
+
+  onScroll() {
+    if (window.innerWidth > 768) return;
+
+    const rect = this.wrapper.getBoundingClientRect();
+
+    if (rect.top <= 0 && rect.bottom > 0) {
+      this.heading.style.position = "fixed";
+      this.heading.style.top = "50px";
+      this.heading.style.left = rect.left + "px";
+      this.heading.style.width = rect.width + "px";
+    } else {
+      this.heading.style.position = "absolute";
+      this.heading.style.top = "0";
+      this.heading.style.left = "0";
+      this.heading.style.width = "100%";
+    }
+  }
+}
+
+document.querySelectorAll('.slideshow-slide__image-wrapper').forEach((el) => {
+  new StickyHeading(el);
+});
+</script>
+
+
+<style>
+.slideshow-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--color-background));
+}
+
+.slideshow-container {
+  position: relative;
+  width: 100%;
+  padding: 20px 10px;
+}
+
+.slideshow-track {
+  display: flex;
+  gap: 10px;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slideshow-slide {
+  min-width: calc(75% - 3.5px);
+  position: relative;
+}
+
+.slideshow-slide__image-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Make <picture> and its img fill the wrapper properly */
+.slideshow-slide__image-wrapper picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.slideshow-slide__image,
+.slideshow-slide__placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-button{
+  justify-content: center;
+}
+.slideshow-slide__content {
+  position: absolute;
+  z-index: 2;
+  padding: 2rem;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  border-radius: 8px;
+}
+
+/* Content Alignment Options */
+.slideshow-slide__content--align-left {
+  justify-content: flex-start;
+}
+
+.slideshow-slide__content--align-center {
+  justify-content: center;
+}
+
+.slideshow-slide__content--align-right {
+  justify-content: flex-end;
+}
+
+.slideshow-slide__content--align-space-between {
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  left: 0;
+  right: 0;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.slideshow-slide__content--align-space-between.slideshow-slide__content--top-left,
+.slideshow-slide__content--align-space-between.slideshow-slide__content--top-center,
+.slideshow-slide__content--align-space-between.slideshow-slide__content--top-right {
+  left: 0;
+  right: 0;
+  transform: none;
+}
+
+.slideshow-slide__content--align-space-between.slideshow-slide__content--middle-left,
+.slideshow-slide__content--align-space-between.slideshow-slide__content--middle-center,
+.slideshow-slide__content--align-space-between.slideshow-slide__content--middle-right {
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.slideshow-slide__content--align-space-between.slideshow-slide__content--bottom-left,
+.slideshow-slide__content--align-space-between.slideshow-slide__content--bottom-center,
+.slideshow-slide__content--align-space-between.slideshow-slide__content--bottom-right {
+  left: 0;
+  right: 0;
+  transform: none;
+}
+
+.slideshow-slide__content--top-left {
+  top: 2rem;
+  left: 2rem;
+}
+
+.slideshow-slide__content--top-center {
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.slideshow-slide__content--top-right {
+  top: 2rem;
+  right: 2rem;
+}
+
+.slideshow-slide__content--middle-left {
+  top: 50%;
+  left: 2rem;
+  transform: translateY(-50%);
+}
+
+.slideshow-slide__content--middle-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.slideshow-slide__content--middle-right {
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+}
+
+.slideshow-slide__content--bottom-left {
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px
+}
+
+.slideshow-slide__content--bottom-center {
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.slideshow-slide__content--bottom-right {
+  bottom: -2rem;
+  right: 2rem;
+}
+
+.slideshow-slide__heading {
+  font-size: var(--heading-3, 90px);
+  font-weight: var(--font-regular, 400);
+  margin: 0;
+  color: rgb(var(--color-foreground));
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 0 1 auto;
+}
+
+.slideshow-slide__button {
+  {% comment %} display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease; {% endcomment %}
+    display: inline-block;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    min-width: 10rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    
+    /* White text color */
+    color: white;
+    
+    /* Blur background effect */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* Subtle border */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    transition: all 0.3s ease;
+    justify-content: center;
+}
+
+.slideshow-slide__button.button {
+  {% comment %} --custom-border-color: white;
+  --button-border-color: var(--custom-border-color);
+  --button-border-color: #ffffff !important; {% endcomment %}
+}
+
+.slideshow-slide__button-text,
+.slideshow-slide__button-arrow {
+  position: relative;
+  z-index: 2;
+  transition: color 0.4s ease;
+}
+
+.slideshow-slide__button:hover {
+  {% comment %} color: white !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px); {% endcomment %}
+    /* Keep text white on hover */
+    color: white;
+    
+    /* Darker shade on hover */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.slideshow-slide__button-arrow {
+  font-size: 1.4rem;
+  font-weight: 300;
+  transition: transform 0.3s ease, color 0.4s ease;
+}
+
+.slideshow-slide__button:hover::before {
+  height: 100%;
+}
+
+.slideshow-slide__button:hover .slideshow-slide__button-text,
+.slideshow-slide__button:hover .slideshow-slide__button-arrow {
+  {% comment %} color: #ffffff; {% endcomment %}
+}
+
+.slideshow-slide__button:hover .slideshow-slide__button-arrow {
+  transform: translateX(4px);
+}
+
+/* Slide with Form */
+.slideshow-slide--with-form {
+  min-width: calc(100% - 5px);
+}
+
+.slideshow-slide__split {
+  display: flex;
+  height: 100%;
+}
+
+.slideshow-slide--with-form .slideshow-slide__image-wrapper {
+  width: 70%;
+}
+
+.slideshow-slide__form-wrapper {
+  width: 30%;
+  background: rgb(var(--color-background));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.slideshow-form {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.slideshow-form__heading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 2rem;
+  text-align: center;
+  color: rgb(var(--color-foreground));
+  letter-spacing: 0.5px;
+}
+
+.slideshow-form__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.slideshow-form__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.85rem 1.2rem;
+  text-align: center;
+  border: 1px solid;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.slideshow-form__button-text,
+.slideshow-form__button-arrow {
+  position: relative;
+  z-index: 2;
+  transition: color 0.4s ease;
+}
+
+.slideshow-form__button-arrow {
+  font-size: 1.4rem;
+  font-weight: 300;
+  transition: transform 0.3s ease, color 0.4s ease;
+}
+
+.slideshow-form__button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 0%;
+  background: #000000;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.slideshow-form__button:hover::before {
+  height: 100%;
+}
+
+.slideshow-form__button:hover .slideshow-form__button-text,
+.slideshow-form__button:hover .slideshow-form__button-arrow {
+  color: #ffffff;
+}
+
+.slideshow-form__button:hover .slideshow-form__button-arrow {
+  transform: translateX(4px);
+}
+
+/* Navigation */
+.slideshow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.slideshow-nav:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.slideshow-nav--prev {
+  left: 2rem;
+}
+
+.slideshow-nav--next {
+  right: 2rem;
+}
+
+.slideshow-nav svg {
+  width: 24px;
+  height: 24px;
+  color: rgb(var(--color-foreground));
+}
+
+/* Dots */
+.slideshow-dots {
+  display: none;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 0;
+}
+
+.slideshow-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgb(var(--color-foreground));
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slideshow-dot.active {
+  background: rgb(var(--color-foreground));
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slideshow-wrapper {
+    overflow: visible;
+  }
+
+  .slideshow-container {
+    overflow: visible;
+  }
+
+  .slideshow-track {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transform: none !important;
+    transition: none !important;
+  }
+  .slideshow-slide {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .slideshow-nav,
+  .slideshow-dots {
+    display: none !important;
+  }
+
+  .slideshow-slide__split {
+    flex-direction: column;
+  }
+
+  .slideshow-slide--with-form .slideshow-slide__image-wrapper,
+  .slideshow-slide__form-wrapper {
+    width: 100%;
+  }
+
+  .slideshow-slide__button {
+    display: none !important;
+  }
+
+  .slideshow-slide__content {
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+    align-items: center !important;
+    background-color: transparent !important;
+    padding: 0.5rem 1rem !important;
+    width: 90% !important;
+    max-width: 90% !important;
+  }
+
+  .slideshow-slide__heading {
+    font-size: 2rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .slideshow-slide__image-wrapper {
+    position: relative;
+  }
+
+  .slideshow-slide__content.heading-sticky {
+    position: absolute !important;
+    top: 0rem !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 999;
+    width: 90% !important;
+    max-width: 90% !important;
+    pointer-events: none;
+  }
+  .slideshow-slide__image, .slideshow-slide__placeholder{
+    padding-bottom: 10px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Slideshow Full Frame",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "options": [
+        { "value": "background-1", "label": "Background 1" },
+        { "value": "background-2", "label": "Background 2" },
+        { "value": "inverse", "label": "Inverse" },
+        { "value": "accent-1", "label": "Accent 1" },
+        { "value": "accent-2", "label": "Accent 2" }
+      ],
+      "default": "background-1"
+    },
+    {
+      "type": "range",
+      "id": "media_height",
+      "min": 400,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Media Height",
+      "default": 550
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable Autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Autoplay Speed",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Desktop Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop Image",
+          "info": "Shown on screens wider than 768px"
+        },
+        {
+          "type": "header",
+          "content": "Mobile Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile Image",
+          "info": "Shown on screens 768px and below. If left blank, the desktop image will be used on mobile too."
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Slide Heading"
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Heading Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "content_bg_color",
+          "label": "Content Background Color",
+          "info": "Optional background color behind heading and button"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Image Content Position",
+          "options": [
+            { "value": "top-left", "label": "Top Left" },
+            { "value": "top-center", "label": "Top Center" },
+            { "value": "top-right", "label": "Top Right" },
+            { "value": "middle-left", "label": "Middle Left" },
+            { "value": "middle-center", "label": "Middle Center" },
+            { "value": "middle-right", "label": "Middle Right" },
+            { "value": "bottom-left", "label": "Bottom Left" },
+            { "value": "bottom-center", "label": "Bottom Center" },
+            { "value": "bottom-right", "label": "Bottom Right" }
+          ],
+          "default": "middle-center"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content Alignment",
+          "info": "How heading and button align horizontally",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" },
+            { "value": "space-between", "label": "Space Between" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button Label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "color",
+          "id": "button_color",
+          "label": "Button Background Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Button Text Color",
+          "default": "#ffffff"
+        }
+      ]
+    },
+    {
+      "type": "slide_with_form",
+      "name": "Slide with Form",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Desktop Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop Image",
+          "info": "Shown on screens wider than 768px"
+        },
+        {
+          "type": "header",
+          "content": "Mobile Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile Image",
+          "info": "Shown on screens 768px and below. If left blank, the desktop image will be used on mobile too."
+        },
+        {
+          "type": "header",
+          "content": "Image Content"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Image Heading"
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Image Heading Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "content_bg_color",
+          "label": "Image Content Background Color",
+          "info": "Optional background color behind heading and button"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Image Content Position",
+          "options": [
+            { "value": "top-left", "label": "Top Left" },
+            { "value": "top-center", "label": "Top Center" },
+            { "value": "top-right", "label": "Top Right" },
+            { "value": "middle-left", "label": "Middle Left" },
+            { "value": "middle-center", "label": "Middle Center" },
+            { "value": "middle-right", "label": "Middle Right" },
+            { "value": "bottom-left", "label": "Bottom Left" },
+            { "value": "bottom-center", "label": "Bottom Center" },
+            { "value": "bottom-right", "label": "Bottom Right" }
+          ],
+          "default": "middle-center"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content Alignment",
+          "info": "How heading and button align horizontally",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" },
+            { "value": "space-between", "label": "Space Between" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Image Button Label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Image Button Link"
+        },
+        {
+          "type": "color",
+          "id": "button_color",
+          "label": "Image Button Background Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Image Button Text Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "header",
+          "content": "Form Panel"
+        },
+        {
+          "type": "text",
+          "id": "form_heading",
+          "label": "Form Heading",
+          "default": "OUR OTHER COLLECTIONS"
+        },
+        {
+          "type": "color",
+          "id": "form_heading_color",
+          "label": "Form Heading Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "form_bg_color",
+          "label": "Form Background Color",
+          "default": "#f5f5f5"
+        },
+        {
+          "type": "text",
+          "id": "button_1_label",
+          "label": "Button 1 Label",
+          "default": "Best Sellers"
+        },
+        {
+          "type": "url",
+          "id": "button_1_link",
+          "label": "Button 1 Link"
+        },
+        {
+          "type": "text",
+          "id": "button_2_label",
+          "label": "Button 2 Label",
+          "default": "Classic Shirts"
+        },
+        {
+          "type": "url",
+          "id": "button_2_link",
+          "label": "Button 2 Link"
+        },
+        {
+          "type": "text",
+          "id": "button_3_label",
+          "label": "Button 3 Label",
+          "default": "Casual Shirts"
+        },
+        {
+          "type": "url",
+          "id": "button_3_link",
+          "label": "Button 3 Link"
+        },
+        {
+  "type": "text",
+  "id": "button_4_label",
+  "label": "Button 4 Label"
+},
+{
+  "type": "url",
+  "id": "button_4_link",
+  "label": "Button 4 Link"
+},
+{
+  "type": "text",
+  "id": "button_5_label",
+  "label": "Button 5 Label"
+},
+{
+  "type": "url",
+  "id": "button_5_link",
+  "label": "Button 5 Link"
+},
+        {
+          "type": "color",
+          "id": "form_button_border_color",
+          "label": "Form Buttons Border Color",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "form_button_text_color",
+          "label": "Form Buttons Text Color",
+          "default": "#000000"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Slideshow Full Frame",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide_with_form" }
+      ]
+    }
+  ]
+}
+{% endschema %}

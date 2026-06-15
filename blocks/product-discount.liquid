@@ -1,0 +1,46 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+
+{% if current_variant.compare_at_price > current_variant.price %}
+  {% assign discount_amount = current_variant.compare_at_price | minus: current_variant.price %}
+  {% assign discount_ratio = discount_amount | times: 100 | divided_by: current_variant.compare_at_price %}
+  {% assign discount_percentage = discount_ratio | round %}
+ <div class="discount-wrapper">
+    -{{- discount_percentage -}}%
+</div>
+<style>
+         .discount-wrapper {
+           display: block;
+           width: max-content;
+               padding: 3px 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+           }
+   
+</style>
+
+{% endif %}
+ 
+{% schema %}
+{
+  "name": "Product Discount",
+  "tag": null,
+  "settings": [
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Discount",
+    }
+  ]
+}
+{% endschema %}

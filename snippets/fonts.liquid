@@ -1,0 +1,88 @@
+{% # theme-check-disable %}
+{%- unless settings.type_body_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_body_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_subheading_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_subheading_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_heading_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_heading_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_accent_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_accent_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{% # theme-check-enable %}
+
+<style>
+@font-face{
+  font-family: 'brushscript';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/BRUSHSCI.woff?v=1760616876') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'Old English';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/OldeEnglish.woff?v=1760616876') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'Clarendon';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/Clarendon-Regular.woff?v=1760616876') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'KK';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/BRUSHSCI.woff?v=1760616876') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'Lucida Handwriting';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/LucidaHandwritingStdRg.woff?v=1760616876') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'Diamond';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/DiamondMonogramBook.woff?v=1760625461') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'Monotype Corsiv';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/Monotype-Corsiva-Bold.woff?v=1760625461') format('woff2');
+  font-weight: normal;
+}
+@font-face{
+  font-family: 'Circle';
+  src: url('https://cdn.shopify.com/s/files/1/0733/9101/4200/files/Round_Monogram_Left.woff?v=1760625461') format('woff2');
+  font-weight: normal;
+}
+
+
+
+</style>

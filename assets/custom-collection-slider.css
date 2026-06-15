@@ -1,0 +1,266 @@
+/* =========================================
+   Custom Collection Slider — Fabric 2.0
+   Asset: assets/custom-collection-slider.css
+   ========================================= */
+
+.custom-collection-slider *,
+.custom-collection-slider *::before,
+.custom-collection-slider *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Section ---------- */
+.custom-collection-slider {
+  width: 100%;
+}
+
+.ccs-wrapper {
+  margin: 0 auto;
+}
+
+/* ---------- Header ---------- */
+.ccs-header {
+  margin-bottom: 32px;
+  text-align: center;
+  padding: 0 40px;
+}
+
+.ccs-section-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #111;
+  line-height: 1.1;
+  /* font-size controlled by inline style from section setting */
+}
+
+/* ---------- Outer: arrows + slider, overflow hidden clips peek ---------- */
+.ccs-slider-outer {
+  position: relative;
+}
+
+/* ---------- Slider container clips the overflowing peek cards ---------- */
+.ccs-slider-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+/* ---------- Track ---------- */
+.ccs-track {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.43s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  /* paddingLeft / paddingRight set by JS = PEEK value */
+}
+
+/* ---------- Slide ---------- */
+.ccs-slide {
+  flex-shrink: 0;
+  min-width: 0;
+  /* width set by JS */
+}
+
+/* ---------- Card: aspect ratio matches 1080×1600 images exactly ---------- */
+.ccs-card {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  aspect-ratio: 27 / 40;   /* 1080 ÷ 1600 = 0.675 = 27/40 */
+  background: #ccc;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.ccs-card:hover {
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.18);
+  transform: translateY(-4px);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---------- Image: fills card with no cropping at all ---------- */
+.ccs-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;    /* card ratio = image ratio (27/40) so cover = no crop */
+  object-position: center top;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ccs-card:hover .ccs-img {
+  transform: scale(1.04);
+}
+
+.ccs-img-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0e0;
+}
+
+.ccs-img-placeholder svg {
+  width: 50%;
+  height: 50%;
+  opacity: 0.4;
+}
+
+/* ---------- Gradient overlay — bottom fade only, subtle ---------- */
+.ccs-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.68) 0%,
+    rgba(0, 0, 0, 0.30) 40%,
+    rgba(0, 0, 0, 0.00) 70%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---------- Text content: sits on image at bottom-left ---------- */
+.ccs-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 20px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ccs-label {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  word-break: break-word;
+  /* color + font-size set inline */
+}
+
+.ccs-count {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  /* color set inline */
+}
+
+.ccs-extra {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  /* color set inline */
+}
+
+/* ---------- Arrows: vertically centred on the card image ---------- */
+.ccs-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.90);
+  color: #222;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  transition: background 0.2s ease,
+              color 0.2s ease,
+              opacity 0.22s ease,
+              transform 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.ccs-arrow--prev { left: 12px; }
+.ccs-arrow--next { right: 12px; }
+
+.ccs-arrow:hover {
+  background: var(--ccs-accent, #222);
+  color: #fff;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.ccs-arrow svg {
+  display: block;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.ccs-arrow--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Dots ---------- */
+.ccs-dots {
+  display: none;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.ccs-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.18);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.25s ease, width 0.25s ease, transform 0.2s ease;
+}
+
+.ccs-dot.active {
+  background: var(--ccs-accent, #222);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.ccs-dot:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.38);
+  transform: scale(1.2);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .ccs-arrow--prev { left: 8px; }
+  .ccs-arrow--next { right: 8px; }
+}
+
+@media (max-width: 600px) {
+  .ccs-arrow { width: 38px; height: 38px; }
+  .ccs-arrow--prev { left: 5px; }
+  .ccs-arrow--next { right: 5px; }
+
+  .ccs-content { padding: 16px 14px 14px; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ccs-track,
+  .ccs-card,
+  .ccs-img,
+  .ccs-arrow,
+  .ccs-dot {
+    transition: none !important;
+  }
+}

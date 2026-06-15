@@ -1,0 +1,451 @@
+{% stylesheet %}
+  .sticky-product-section {
+    display: flex;
+    gap: 2px;
+    min-height: 100vh;
+    padding-top: 10px;
+  }
+
+  .sticky-image-container {
+    flex: 0 0 50%;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-content-overlay {
+    position: absolute;
+    padding: 2rem;
+    color: #fff;
+    z-index: 2;
+  }
+
+  .overlay-top-left { top: 0; left: 0; text-align: left; }
+  .overlay-top-center { top: 0; left: 50%; transform: translateX(-50%); text-align: center; }
+  .overlay-top-right { top: 0; right: 0; text-align: right; }
+  .overlay-center-left { top: 50%; left: 0; transform: translateY(-50%); text-align: left; }
+  .overlay-center-center { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+  .overlay-center-right { top: 50%; right: 0; transform: translateY(-50%); text-align: right; }
+  .overlay-bottom-left { bottom: 0; left: 0; text-align: left; }
+  .overlay-bottom-center { bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; }
+  .overlay-bottom-right { bottom: 0; right: 0; text-align: right; }
+
+  .image-heading {
+   /* font-size: 87px; */
+    font-size: var(--heading-3, 90px);
+    font-weight: 400; 
+        margin-bottom: 0;
+    line-height: 60px;
+  }
+    p.image-text {
+    margin-bottom: 0;
+    font-weight: var(--font-light, 300);
+    font-family: var(--header-font);
+    font-size: var(--heading-3, 90px);
+    }
+
+  .image-button {
+    display: inline-block;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    min-width: 10rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    
+    /* White text color */
+    color: white;
+    
+    /* Blur background effect */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* Subtle border */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    transition: all 0.3s ease;
+  }
+
+  .image-button:hover {
+    /* Keep text white on hover */
+    color: white;
+    
+    /* Darker shade on hover */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .products-container {
+    /* width: 50%; */
+    flex: 1;
+    padding: 2px;
+    overflow-y: auto;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    /* padding: 10px 10px; */
+  }
+
+  .product-card {
+    background: #fff;
+    /* border: 1px solid #e5e5e5; */
+    border-radius: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  /* .product-card:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+  } */
+
+  .product-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.7;
+    overflow: hidden;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+
+  .product-image.secondary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  .product-card:hover .product-image.secondary {
+    opacity: 1;
+  }
+
+  .discount-badge {
+    position: absolute;
+    top: 50px;
+    left: 5px;
+    background: #000;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+  }
+
+  .product-info {
+    padding: 10px 0;
+    text-align: left;
+  }
+.product-vendor {
+    font-size: 10px;
+        margin-bottom: 5px;
+}
+  .product-title {
+    font-size: 0.875rem;
+    font-weight: 400;
+    margin-bottom: 0.25rem;
+    color: #000;
+    text-decoration: none;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  } 
+  .product-price {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #666;
+  }
+
+  @media (max-width: 768px) {
+    .sticky-product-section {
+      flex-direction: column;
+    }
+
+    .sticky-image-container,
+    .products-container {
+      width: 100%;
+    }
+
+    .sticky-image-container {
+      position: relative;
+      height: 60vh;
+    }
+
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .image-heading {
+      font-size: 1.75rem;
+    }
+    .image-content-overlay{
+      padding: 1rem;
+    }
+  }
+  @media (max-width: 768px) {
+  .sticky-product-section {
+    flex-direction: column;
+  }
+
+  .sticky-image-container,
+  .products-container {
+    width: 100%;
+  }
+
+  .sticky-image-container {
+    position: relative;
+    height: 60vh;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr); /* <-- change from 1fr to 2 columns */
+  }
+
+  .image-heading {
+    font-size: 1.75rem;
+  }
+  .discount-badge{
+    top: 35px;
+    font-weight: 500;
+  }
+  p.image-text {
+    margin-bottom: 0;
+    font-weight: var(--font-light, 300);
+    font-family: var(--header-font);
+    font-size: var(--heading-3, 25px);
+}
+.image-button {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 4px;
+    /* min-width: 10rem; */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    background: #ffffff1a;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, .2);
+    transition: all .3s ease;
+        justify-content: center;
+}
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+}
+/* MOBILE / DESKTOP IMAGE SWITCH */
+.mobile-only {
+  display: none;
+}
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+  .desktop-only {
+    display: none;
+  }
+}
+
+{% endstylesheet %}
+
+<div class="sticky-product-section">
+  <!-- Left: Sticky Image with Content -->
+  <div class="sticky-image-container">
+    <div class="image-wrapper">
+    {% if section.settings.image or section.settings.mobile_image %}
+
+  {% if section.settings.mobile_image != blank %}
+    <img 
+      class="mobile-only"
+      src="{{ section.settings.mobile_image | img_url: 'master' }}" 
+      alt="{{ section.settings.heading }}">
+  {% endif %}
+
+  {% if section.settings.image != blank %}
+    <img 
+      class="desktop-only"
+      src="{{ section.settings.image | img_url: 'master' }}" 
+      alt="{{ section.settings.heading }}">
+  {% endif %}
+
+{% else %}
+        <div style="background: #f0f0f0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+          <p style="color: #999;">Add an image</p>
+        </div>
+      {% endif %}
+      
+      <div class="image-content-overlay overlay-{{ section.settings.content_position }}">
+        {% if section.settings.heading != blank %}
+          <h2 class="image-heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.text != blank %}
+          <p class="image-text">{{ section.settings.text }}</p>
+        {% endif %}
+        {% if section.settings.button_text != blank and section.settings.button_link != blank %}
+          <a href="{{ section.settings.button_link }}" class="image-button">
+            {{ section.settings.button_text }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Scrollable Products -->
+  <div class="products-container">
+    <div class="products-grid">
+      {% for block in section.blocks %}
+        {% if block.settings.product != blank %}
+          {% assign product = block.settings.product %}
+          <div class="product-card">
+            <a href="{{ product.url }}">
+              <div class="product-image-wrapper">
+                {% if product.compare_at_price > product.price %}
+                  {% assign discount = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price %}
+                  <div class="discount-badge">-{{ discount }}%</div>
+                {% endif %}
+                
+                {% if product.featured_image %}
+                  <img class="product-image primary" src="{{ product.featured_image | img_url: '600x600' }}" alt="{{ product.title }}">
+                  {% if product.images[1] %}
+                    <img class="product-image secondary" src="{{ product.images[1] | img_url: '600x600' }}" alt="{{ product.title }}">
+                  {% endif %}
+                {% else %}
+                  <div style="background: #f5f5f5; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <p style="color: #999;">No image</p>
+                  </div>
+                {% endif %}
+              </div>
+            </a>
+            <div class="product-info">
+              <p class="product-vendor">{{ product.vendor }}</p>
+              <a href="{{ product.url }}" class="product-title">{{ product.title }}</a>
+              <div class="product-price">{{ product.price | money }}</div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Sticky Image + Products",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+  "type": "image_picker",
+  "id": "mobile_image",
+  "label": "Mobile Image",
+  "info": "Optional: Used only on mobile devices"
+},
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Clothes made to fit you, not the other way around"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Your Heading Here"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content Position",
+      "options": [
+        { "value": "top-left", "label": "Top Left" },
+        { "value": "top-center", "label": "Top Center" },
+        { "value": "top-right", "label": "Top Right" },
+        { "value": "center-left", "label": "Center Left" },
+        { "value": "center-center", "label": "Center Center" },
+        { "value": "center-right", "label": "Center Right" },
+        { "value": "bottom-left", "label": "Bottom Left" },
+        { "value": "bottom-center", "label": "Bottom Center" },
+        { "value": "bottom-right", "label": "Bottom Right" }
+      ],
+      "default": "center-left"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky Image + Products",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

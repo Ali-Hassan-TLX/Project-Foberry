@@ -1,0 +1,695 @@
+<style>
+  .section--{{ section.id }}{
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    background: {{ section.settings.bg_color }}!important;
+    border-radius: {{ section.settings.border_radius }}px;
+  }
+  .benefits-heading{
+  text-align:center;
+   font-size: {{section.settings.heading_size}}px;
+   color: {{section.settings.heading_color}};
+     padding-top: {{ section.settings.heading_padding_top }}px;
+    padding-bottom: {{ section.settings.heading_padding_bottom }}px;
+  }
+
+  /* ===== Slider Wrapper ===== */
+  .section--{{ section.id }} .benefits-slider-wrapper {
+    position: relative;
+  }
+
+  /* ===== Slider Track ===== */
+  .section--{{ section.id }} .key-benefits-block-content {
+    display: flex;
+    gap: {{ section.settings.gap }}px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .section--{{ section.id }} .key-benefits-block-content.dragging {
+    cursor: grabbing;
+  }
+
+  .section--{{ section.id }} .key-benefits-block-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ===== Items ===== */
+  .section--{{ section.id }} .benefit-item {
+    flex: 0 0 calc(
+ (100% - ({{ section.settings.gap }}px * ({{ section.settings.items_to_show_desktop }} - 1)))
+ / {{ section.settings.items_to_show_desktop }}
+);
+    text-align: center;
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap:{{ section.settings.item_content_gap }}px;
+  }
+ .section--{{ section.id }} .benefit-item:hover {
+    transform: translateY(-5px);
+}
+  .section--{{ section.id }} .slider-btn.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  /* ===== Image ===== */
+   .benefit-img{
+    display:block;
+    width:{{ section.settings.image_width }}px;
+    height:{{ section.settings.image_height }}px;
+    }
+  .section--{{ section.id }} .benefit-img img {
+    width: 100%;
+    height: 100%;
+
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* ===== Buttons ===== */
+  .section--{{ section.id }} .slider-btn {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+   color: #343131;
+      width: {{ section.settings.arrow_width }}px;
+      height: {{ section.settings.arrow_height }}px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .section--{{ section.id }} .prev { left: 0; }
+  .section--{{ section.id }} .next { right: 0; }
+
+  /* ===== Text ===== */
+  .benefit-title {
+    font-size: {{section.settings.item_title_size}}px;
+    color: {{section.settings.item_title_color}};
+    margin: 0 ;
+    padding:0;
+  }
+
+  .benefit-desc {
+      font-size: {{section.settings.item_description_size}}px;
+      color: {{section.settings.item_description_color}};
+      margin: 0 ;
+      padding:0;
+
+  }
+  /* Mobile */
+  @media (max-width: 767px) {
+    .section--{{ section.id }} .benefit-item {
+      flex: 0 0 calc(
+ (100% - ({{ section.settings.gap }}px * ({{ section.settings.items_to_show_mobile }} - 1)))
+ / {{ section.settings.items_to_show_mobile }}
+);
+    }
+    .benefit-title {
+    font-size: {{section.settings.item_title_siz_mobilee}}px;
+  }
+
+  .benefit-desc {
+      font-size: {{section.settings.item_description_size_mobile}}px;
+  }
+  .benefit-img{
+    width: {{ section.settings.image_width_mobile }}px;
+    height: {{ section.settings.image_height_mobile }}px;
+  }
+  .benefits-heading{
+  text-align:center;
+   font-size: {{section.settings.heading_size_mobile}}px;
+     padding-top: {{ section.settings.heading_padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.heading_padding_bottom_mobile }}px;
+  }
+
+  }
+</style>
+
+<div class="section section--{{ section.id }} section--{{ section.settings.section_width }}">
+  <div class="custom-key-benefits-content">
+    {% if section.settings.main_heading != blank %}
+      <h2 class="benefits-heading">{{ section.settings.main_heading }}</h2>
+    {% endif %}
+  </div>
+
+  <div class="benefits-slider-wrapper">
+    <button class="slider-btn prev">
+      <svg
+        viewBox="0 0 32 32"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        fill="#000000"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="icomoon-ignore"> </g> <path d="M12.792 15.233l-0.754 0.754 6.035 6.035 0.754-0.754-5.281-5.281 5.256-5.256-0.754-0.754-3.013 3.013z" fill="#000000"> </path> </g>
+      </svg>
+    </button>
+
+    <div class="key-benefits-block-content">
+      {% for block in section.blocks %}
+        <div class="benefit-item" {{ block.shopify_attributes }}>
+          {% if block.settings.image != blank %}
+            <div class="benefit-img">
+              <img
+                src="{{ block.settings.image | image_url: width: 400 }}"
+                alt="{{ block.settings.title }}"
+              >
+            </div>
+          {% endif %}
+
+          {% if block.settings.title != blank %}
+            <h3 class="benefit-title">{{ block.settings.title }}</h3>
+          {% endif %}
+
+          {% if block.settings.description != blank %}
+            <p class="benefit-desc">{{ block.settings.description }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <button class="slider-btn next">
+      <svg
+        viewBox="0 0 32 32"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        fill="#000000"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="icomoon-ignore"> </g> <path d="M19.159 16.767l0.754-0.754-6.035-6.035-0.754 0.754 5.281 5.281-5.256 5.256 0.754 0.754 3.013-3.013z" fill="#000000"> </path> </g>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+ document.addEventListener("DOMContentLoaded", () => {
+  const section = document.querySelector(".section--{{ section.id }}");
+  if (!section) return;
+
+  const slider = section.querySelector(".key-benefits-block-content");
+  const nextBtn = section.querySelector(".next");
+  const prevBtn = section.querySelector(".prev");
+
+  /* ===== NEW: ITEM CONTROL ===== */
+  const items = slider.querySelectorAll(".benefit-item");
+  const totalItems = items.length;
+
+  const desktopItems = {{ section.settings.items_to_show_desktop }};
+  const mobileItems = {{ section.settings.items_to_show_mobile }};
+
+  function getItemsToShow() {
+    return window.innerWidth <= 767 ? mobileItems : desktopItems;
+  }
+
+  function checkSlider() {
+    const visible = getItemsToShow();
+
+    if (totalItems <= visible) {
+      nextBtn.style.display = "none";
+      prevBtn.style.display = "none";
+      slider.style.overflow = "hidden";
+      slider.style.justifyContent = "center";
+      return false;
+    } else {
+      nextBtn.style.display = "";
+      prevBtn.style.display = "";
+      slider.style.overflow = "auto";
+      return true;
+    }
+  }
+
+  let sliderActive = checkSlider();
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  /* ===== DRAG ===== */
+  slider.addEventListener("mousedown", (e) => {
+    if (!sliderActive) return;
+    isDown = true;
+    slider.classList.add("dragging");
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  slider.addEventListener("mouseleave", () => {
+    isDown = false;
+    slider.classList.remove("dragging");
+  });
+
+  slider.addEventListener("mouseup", () => {
+    isDown = false;
+    slider.classList.remove("dragging");
+  });
+
+  slider.addEventListener("mousemove", (e) => {
+    if (!isDown || !sliderActive) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  /* ===== TOUCH ===== */
+  slider.addEventListener("touchstart", (e) => {
+    if (!sliderActive) return;
+    startX = e.touches[0].pageX;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  slider.addEventListener("touchmove", (e) => {
+    if (!sliderActive) return;
+    const x = e.touches[0].pageX;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  /* ===== SCROLL AMOUNT ===== */
+  function getScrollAmount() {
+    const item = slider.querySelector(".benefit-item");
+    if (!item) return 300;
+    return item.offsetWidth + {{ section.settings.gap }};
+  }
+
+  /* ===== BUTTON CLICK ===== */
+  nextBtn.addEventListener("click", () => {
+    if (!sliderActive) return;
+    slider.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
+  });
+
+  prevBtn.addEventListener("click", () => {
+    if (!sliderActive) return;
+    slider.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
+  });
+
+  /* ===== DISABLE BUTTONS ===== */
+  function updateButtons() {
+    if (!sliderActive) return;
+
+    const scrollLeft = slider.scrollLeft;
+    const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+    if (scrollLeft <= 0) {
+      prevBtn.classList.add("disabled");
+    } else {
+      prevBtn.classList.remove("disabled");
+    }
+
+    if (scrollLeft >= maxScroll - 1) {
+      nextBtn.classList.add("disabled");
+    } else {
+      nextBtn.classList.remove("disabled");
+    }
+  }
+
+  /* ===== EVENTS ===== */
+  slider.addEventListener("scroll", updateButtons);
+
+  window.addEventListener("resize", () => {
+    sliderActive = checkSlider();
+    updateButtons();
+  });
+
+  /* ===== INIT ===== */
+  updateButtons();
+});
+</script>
+
+{% schema %}
+{
+  "name": "custom key benefits",
+  "class": "custom-key-benefits",
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full Width" }
+      ],
+      "default": "page-width"
+    },
+
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#d6d4d3"
+    },
+
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Main Heading",
+      "default": "How it works"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between blocks",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "item_content_gap",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Gap between blocks content",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Border Radius",
+      "default": 10
+    },
+
+    {
+      "type": "header",
+      "content": "Heading Settings"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 14,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size (Desktop)",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Top (Desktop)",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Bottom (Desktop)",
+      "default": 10
+    },
+
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size (Mobile)",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_top_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Top (Mobile)",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_bottom_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Bottom (Mobile)",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Image size (Desktop)",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Image height (Desktop)",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image_width_mobile",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Image width (Mobile)",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Image height (Mobile)",
+      "default": 80
+    },
+
+    {
+      "type": "header",
+      "content": "Title Settings"
+    },
+    {
+      "type": "range",
+      "id": "item_title_size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Size (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "item_title_color",
+      "label": "Title Color (Desktop)",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "item_title_siz_mobilee",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Description Settings"
+    },
+    {
+      "type": "range",
+      "id": "item_description_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Size (Desktop)",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "item_description_color",
+      "label": "Description Color (Desktop)",
+      "default": "#555555"
+    },
+    {
+      "type": "range",
+      "id": "item_description_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Size (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Arrow size"
+    },
+    {
+      "type": "range",
+      "id": "arrow_width",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Arrow Width",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "arrow_height",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Arrow Height",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Margin Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Margin Bottom",
+      "default": 20
+    },
+    {
+  "type": "range",
+  "id": "items_to_show_desktop",
+  "min": 1,
+  "max": 12,
+  "step": 1,
+  "label": "Items to show (Desktop)",
+  "default": 6
+},
+{
+  "type": "range",
+  "id": "items_to_show_mobile",
+  "min": 1,
+  "max": 4,
+  "step": 1,
+  "label": "Items to show (Mobile)",
+  "default": 2
+}
+  ],
+
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Benefit Title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Description"
+        }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "custom key benefits"
+    }
+  ]
+}
+{% endschema %}

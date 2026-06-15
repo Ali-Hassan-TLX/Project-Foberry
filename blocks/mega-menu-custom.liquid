@@ -1,0 +1,125 @@
+{%- liquid
+  assign menu_handle = block.settings.menu_item_handle | downcase
+-%}
+
+<div class="mega-menu__custom-block" {{ block.shopify_attributes }}>
+  {% if block.settings.custom_image %}
+    <div class="mega-menu__custom-image">
+      <img 
+        src="{{ block.settings.custom_image | image_url: width: 400 }}" 
+        alt="{{ block.settings.custom_image.alt | escape }}"
+        loading="lazy"
+        width="400"
+        height="auto"
+      >
+    </div>
+  {% endif %}
+  
+  {% if block.settings.custom_title %}
+    <h3 class="mega-menu__custom-title">{{ block.settings.custom_title }}</h3>
+  {% endif %}
+  
+  {% if block.settings.custom_text %}
+    <div class="mega-menu__custom-text rte">
+      {{ block.settings.custom_text }}
+    </div>
+  {% endif %}
+  
+  {% if block.settings.custom_link and block.settings.button_text %}
+    <div class="mega-menu__custom-button">
+      <a href="{{ block.settings.custom_link }}" class="button">
+        {{ block.settings.button_text }}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Mega Menu Custom Content",
+  "settings": [
+    {
+      "type": "text",
+      "id": "menu_item_handle",
+      "label": "Menu Item Handle",
+      "info": "Enter the exact menu item handle (e.g., 'shop', 'collections', 'about')"
+    },
+    {
+      "type": "text",
+      "id": "custom_title",
+      "label": "Title"
+    },
+    {
+      "type": "richtext",
+      "id": "custom_text",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "custom_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text"
+    },
+    {
+      "type": "range",
+      "id": "column_span",
+      "label": "Column Span",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2
+    }
+  ],
+  "presets": [
+    {
+      "name": "Mega Menu"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .mega-menu__custom-block {
+    padding: var(--padding-md);
+    background: var(--color-background-secondary);
+    border-radius: 8px;
+    height: 100%;
+  }
+
+  .mega-menu__custom-image {
+    margin-bottom: var(--margin-sm);
+    overflow: hidden;
+    border-radius: 8px;
+  }
+
+  .mega-menu__custom-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .mega-menu__custom-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--margin-xs);
+  }
+
+  .mega-menu__custom-text {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--margin-sm);
+    color: var(--color-foreground-secondary);
+  }
+
+  .mega-menu__custom-button {
+    margin-top: auto;
+  }
+{% endstylesheet %}

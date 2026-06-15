@@ -1,0 +1,652 @@
+{% if section.settings.enable_popup %}
+
+<style>
+  #discount-popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, {{ section.settings.overlay_opacity | divided_by: 100.0 }});
+    align-items: center;
+    justify-content: center;
+  }
+  #discount-popup-overlay.active {
+    display: flex;
+    animation: popupFadeIn 0.4s ease forwards;
+  }
+  @keyframes popupFadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  .discount-popup {
+    position: relative;
+    width: min(96vw, {{ section.settings.popup_width }}px);
+    height: min(90vh, {{ section.settings.popup_height }}px);
+    overflow: hidden;
+    animation: popupSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes popupSlideUp {
+    from { opacity: 0; transform: translateY(40px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Background */
+  .discount-popup__bg {
+    position: absolute;
+    inset: 0;
+    background-color: {{ section.settings.bg_fallback_color }};
+    {% if section.settings.background_image != blank %}
+      background-image: url('{{ section.settings.background_image | image_url: width: 1400 }}');
+      background-size: cover;
+      background-position: {{ section.settings.bg_position }};
+    {% endif %}
+    transition: transform 8s ease;
+  }
+  .discount-popup:hover .discount-popup__bg { transform: scale(1.03); }
+  .discount-popup__gradient {
+    position: absolute; inset: 0;
+    background: {{ section.settings.gradient_overlay }};
+    pointer-events: none;
+  }
+
+  /* Close */
+  .discount-popup__close {
+    position: absolute; top: 14px; right: 18px; z-index: 10;
+    background: none; border: none; cursor: pointer;
+    font-size: 22px; line-height: 1;
+    color: {{ section.settings.close_color }}; opacity: 0.6;
+    transition: opacity 0.2s; padding: 4px 8px;
+  }
+  .discount-popup__close:hover { opacity: 1; }
+
+  /* Content */
+  .discount-popup__content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: {{ section.settings.content_align }};
+    justify-content: center;
+    padding: {{ section.settings.content_padding }}px;
+    text-align: {{ section.settings.text_align }};
+  }
+
+  /* Steps */
+  .discount-popup__step { display: flex; flex-direction: column; align-items: {{ section.settings.content_align }}; width: 100%; }
+  .discount-popup__step.hidden { display: none; }
+
+  /* Brand */
+  .discount-popup__brand {
+    font-family: {{ section.settings.brand_font_family }};
+    font-size: {{ section.settings.brand_font_size }}px;
+    font-weight: {{ section.settings.brand_font_weight }};
+    letter-spacing: {{ section.settings.brand_letter_spacing }}em;
+    color: {{ section.settings.brand_color }};
+    text-transform: {{ section.settings.brand_text_transform }};
+    margin: 0 0 {{ section.settings.brand_margin_bottom }}px;
+  }
+
+  /* Step 1 headline top */
+  .discount-popup__headline-top {
+    font-family: {{ section.settings.headline_top_font }};
+    font-size: {{ section.settings.headline_top_size }}px;
+    font-weight: {{ section.settings.headline_top_weight }};
+    letter-spacing: {{ section.settings.headline_top_spacing }}em;
+    color: {{ section.settings.headline_color }};
+    text-transform: uppercase; margin: 0 0 4px;
+  }
+
+  /* Step 1 headline main */
+  .discount-popup__headline-main {
+    font-family: {{ section.settings.headline_main_font }};
+    font-size: {{ section.settings.headline_main_size }}px;
+    font-weight: {{ section.settings.headline_main_weight }};
+    letter-spacing: -0.02em; line-height: 1;
+    color: {{ section.settings.headline_color }};
+    margin: 0 0 {{ section.settings.headline_margin_bottom }}px;
+  }
+
+  /* Step 2 headline */
+  .discount-popup__step2-headline {
+    font-family: {{ section.settings.headline_main_font }};
+    font-size: {{ section.settings.step2_headline_size }}px;
+    font-weight: {{ section.settings.headline_main_weight }};
+    letter-spacing: -0.01em; line-height: 1.1;
+    color: {{ section.settings.headline_color }};
+    text-transform: uppercase;
+    margin: 0 0 {{ section.settings.step2_headline_margin }}px;
+  }
+
+  /* CTA / Submit buttons */
+  .discount-popup__cta,
+  .discount-popup__submit {
+    display: block;
+    width: {{ section.settings.btn_width }}px;
+    padding: {{ section.settings.btn_padding_v }}px {{ section.settings.btn_padding_h }}px;
+    background: {{ section.settings.btn_bg_color }};
+    color: {{ section.settings.btn_text_color }};
+    font-family: {{ section.settings.btn_font }};
+    font-size: {{ section.settings.btn_font_size }}px;
+    font-weight: {{ section.settings.btn_font_weight }};
+    letter-spacing: {{ section.settings.btn_letter_spacing }}em;
+    text-transform: uppercase; text-align: center; text-decoration: none;
+    border: {{ section.settings.btn_border_width }}px solid {{ section.settings.btn_border_color }};
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+    margin-bottom: {{ section.settings.btn_margin_bottom }}px;
+    box-sizing: border-box;
+  }
+  .discount-popup__cta:hover,
+  .discount-popup__submit:hover {
+    background: {{ section.settings.btn_hover_bg }};
+    color: {{ section.settings.btn_hover_color }};
+    transform: translateY(-1px);
+  }
+
+  /* Email input */
+  .discount-popup__email {
+    display: block;
+    width: {{ section.settings.btn_width }}px;
+    padding: {{ section.settings.btn_padding_v }}px {{ section.settings.btn_padding_h }}px;
+    font-family: {{ section.settings.btn_font }};
+    font-size: {{ section.settings.btn_font_size }}px;
+    color: #1a1a18; background: #ffffff;
+    border: 1.5px solid #cccccc; outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+  }
+  .discount-popup__email::placeholder { color: #aaa; }
+  .discount-popup__email:focus { border-color: #1a1a18; }
+
+  /* Error */
+  .discount-popup__error {
+    display: none;
+    font-family: {{ section.settings.btn_font }};
+    font-size: 11px; color: #c0392b;
+    letter-spacing: 0.05em;
+    margin: -8px 0 10px;
+    width: {{ section.settings.btn_width }}px;
+    text-align: {{ section.settings.text_align }};
+  }
+
+  /* Decline */
+  .discount-popup__decline {
+    background: none; border: none;
+    border-bottom: 1px solid transparent;
+    cursor: pointer;
+    font-family: {{ section.settings.decline_font }};
+    font-size: {{ section.settings.decline_font_size }}px;
+    font-weight: 500; letter-spacing: 0.18em;
+    color: {{ section.settings.decline_color }};
+    text-transform: uppercase; padding: 0;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .discount-popup__decline:hover {
+    color: {{ section.settings.decline_hover_color }};
+    border-bottom-color: {{ section.settings.decline_hover_color }};
+  }
+
+  /* Success */
+  .discount-popup__success {
+    display: none; flex-direction: column;
+    align-items: {{ section.settings.content_align }}; width: 100%;
+  }
+  .discount-popup__success-text {
+    font-family: {{ section.settings.headline_main_font }};
+    font-size: {{ section.settings.step2_headline_size }}px;
+    font-weight: {{ section.settings.headline_main_weight }};
+    color: {{ section.settings.headline_color }};
+    text-align: {{ section.settings.text_align }}; line-height: 1.2;
+  }
+  .discount-popup__success-sub {
+    font-family: {{ section.settings.btn_font }};
+    font-size: {{ section.settings.decline_font_size }}px;
+    color: {{ section.settings.decline_color }};
+    letter-spacing: 0.1em; margin-top: 10px;
+    text-align: {{ section.settings.text_align }};
+  }
+
+  @media screen and (max-width: 768px) {
+    .discount-popup__headline-main,
+    .discount-popup__step2-headline { font-size: {{ section.settings.headline_main_size | times: 0.65 | round }}px; }
+    .discount-popup__cta,
+    .discount-popup__submit,
+    .discount-popup__email,
+    .discount-popup__error { width: 85%; }
+  }
+
+  /* Phone row */
+.discount-popup__phone-row {
+  display: flex;
+  align-items: center;
+  width: {{ section.settings.btn_width }}px;
+  border: 1.5px solid #cccccc;
+  background: #fff;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.discount-popup__phone-row:focus-within { border-color: #1a1a18; }
+
+.discount-popup__phone-flag {
+  border: none; outline: none;
+  background: transparent;
+  padding: {{ section.settings.btn_padding_v }}px 8px;
+  font-size: {{ section.settings.btn_font_size }}px;
+  font-family: {{ section.settings.btn_font }};
+  color: #1a1a18;
+  cursor: pointer;
+  min-width: 80px;
+  border-right: 1px solid #e0e0e0;
+}
+
+.discount-popup__phone-input {
+  flex: 1;
+  border: none; outline: none;
+  background: transparent;
+  padding: {{ section.settings.btn_padding_v }}px {{ section.settings.btn_padding_h }}px;
+  font-family: {{ section.settings.btn_font }};
+  font-size: {{ section.settings.btn_font_size }}px;
+  color: #1a1a18;
+  box-sizing: border-box;
+}
+.discount-popup__phone-input::placeholder { color: #aaa; }
+
+/* SMS consent */
+.discount-popup__sms-consent {
+  width: {{ section.settings.btn_width }}px;
+  font-family: {{ section.settings.btn_font }};
+  font-size: 10px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 14px;
+  text-align: {{ section.settings.text_align }};
+}
+.discount-popup__sms-consent a {
+  color: #1a1a18;
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  .discount-popup__phone-row,
+  .discount-popup__sms-consent { width: 85%; }
+}
+</style>
+
+<div id="discount-popup-overlay" role="dialog" aria-modal="true" aria-label="Discount popup">
+  <div class="discount-popup">
+
+    <div class="discount-popup__bg"></div>
+    <div class="discount-popup__gradient"></div>
+    <button class="discount-popup__close" id="discount-popup-close" aria-label="Close" type="button">&#10005;</button>
+
+    <div class="discount-popup__content">
+
+      {%- comment -%}── STEP 1 ──{%- endcomment -%}
+      <div class="discount-popup__step" id="discount-popup-step1">
+        {% if section.settings.brand_name != blank %}
+          <p class="discount-popup__brand">{{ section.settings.brand_name }}</p>
+        {% endif %}
+        {% if section.settings.headline_top != blank %}
+          <p class="discount-popup__headline-top">{{ section.settings.headline_top }}</p>
+        {% endif %}
+        {% if section.settings.headline_main != blank %}
+          <h2 class="discount-popup__headline-main">{{ section.settings.headline_main }}</h2>
+        {% endif %}
+        {% if section.settings.cta_label != blank %}
+          <button class="discount-popup__cta" id="discount-popup-claim" type="button">
+            {{ section.settings.cta_label }}
+          </button>
+        {% endif %}
+        {% if section.settings.decline_label != blank %}
+          <button class="discount-popup__decline" id="discount-popup-decline1" type="button">
+            {{ section.settings.decline_label }}
+          </button>
+        {% endif %}
+      </div>
+
+      {%- comment -%}── STEP 2 ──{%- endcomment -%}
+      <div class="discount-popup__step hidden" id="discount-popup-step2">
+        {% if section.settings.brand_name != blank %}
+          <p class="discount-popup__brand">{{ section.settings.brand_name }}</p>
+        {% endif %}
+        {% if section.settings.step2_headline != blank %}
+          <h2 class="discount-popup__step2-headline">{{ section.settings.step2_headline }}</h2>
+        {% endif %}
+        <input
+          class="discount-popup__email"
+          id="discount-popup-email"
+          type="email"
+          placeholder="{{ section.settings.email_placeholder }}"
+          autocomplete="email"
+          aria-label="Email address"
+        >
+        <p class="discount-popup__error" id="discount-popup-error">{{ section.settings.email_error_text }}</p>
+        <button class="discount-popup__submit" id="discount-popup-submit" type="button">
+          {{ section.settings.submit_label }}
+        </button>
+        {% if section.settings.decline_label != blank %}
+          <button class="discount-popup__decline" id="discount-popup-decline2" type="button">
+            {{ section.settings.decline_label }}
+          </button>
+        {% endif %}
+      </div>
+
+      {%- comment -%}── STEP 3 (SMS) ──{%- endcomment -%}
+<div class="discount-popup__step hidden" id="discount-popup-step3">
+  {% if section.settings.brand_name != blank %}
+    <p class="discount-popup__brand">{{ section.settings.brand_name }}</p>
+  {% endif %}
+  <h2 class="discount-popup__step2-headline">{{ section.settings.step3_headline }}</h2>
+
+  <div class="discount-popup__phone-row">
+    <select class="discount-popup__phone-flag" id="discount-popup-country" aria-label="Country code">
+      <option value="+1">🇺🇸 +1</option>
+      <option value="+44">🇬🇧 +44</option>
+      <option value="+92">🇵🇰 +92</option>
+      <option value="+61">🇦🇺 +61</option>
+      <option value="+971">🇦🇪 +971</option>
+      <option value="+49">🇩🇪 +49</option>
+      <option value="+33">🇫🇷 +33</option>
+      <option value="+91">🇮🇳 +91</option>
+    </select>
+    <input
+      class="discount-popup__phone-input"
+      id="discount-popup-phone"
+      type="tel"
+      placeholder="{{ section.settings.phone_placeholder }}"
+      autocomplete="tel"
+      aria-label="Phone number"
+    >
+  </div>
+
+  <p class="discount-popup__sms-consent">{{ section.settings.sms_consent_text }}</p>
+  <p class="discount-popup__error" id="discount-popup-phone-error">{{ section.settings.phone_error_text }}</p>
+
+  <button class="discount-popup__submit" id="discount-popup-sms-submit" type="button">
+    {{ section.settings.sms_submit_label }}
+  </button>
+
+  {% if section.settings.decline_label != blank %}
+    <button class="discount-popup__decline" id="discount-popup-decline3" type="button">
+      {{ section.settings.decline_label }}
+    </button>
+  {% endif %}
+</div>
+
+      {%- comment -%}── SUCCESS ──{%- endcomment -%}
+      <div class="discount-popup__success" id="discount-popup-success">
+        <p class="discount-popup__brand">{{ section.settings.brand_name }}</p>
+        <p class="discount-popup__success-text">{{ section.settings.success_title }}</p>
+        <p class="discount-popup__success-sub">{{ section.settings.success_subtitle }}</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var COOKIE_NAME  = 'discount_popup_closed';
+  var COOKIE_DAYS  = {{ section.settings.cookie_days }};
+  var DELAY_MS     = {{ section.settings.show_delay | times: 1000 }};
+  var SHOW_ONCE    = {{ section.settings.show_once }};
+  var USE_KLAVIYO  = {{ section.settings.use_klaviyo }};
+  var KLAVIYO_LIST = '{{ section.settings.klaviyo_list_id }}';
+  var SUCCESS_DELAY = {{ section.settings.success_close_delay | times: 1000 }};
+
+  function getCookie(n) { var m = document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)')); return m ? m[2] : null; }
+  function setCookie(n,v,d) { document.cookie = n+'='+v+'; expires='+new Date(Date.now()+d*864e5).toUTCString()+'; path=/'; }
+  function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  function closePopup() {
+    var el = document.getElementById('discount-popup-overlay');
+    el.style.cssText = 'opacity:0;transition:opacity 0.3s ease;display:flex;';
+    setTimeout(function(){ el.classList.remove('active'); el.style.cssText=''; }, 300);
+    if (SHOW_ONCE) setCookie(COOKIE_NAME, '1', COOKIE_DAYS);
+  }
+
+  function goStep2() {
+    document.getElementById('discount-popup-step1').classList.add('hidden');
+    document.getElementById('discount-popup-step2').classList.remove('hidden');
+    setTimeout(function(){ var i=document.getElementById('discount-popup-email'); if(i) i.focus(); }, 80);
+  }
+
+  function showSuccess() {
+    document.getElementById('discount-popup-step2').classList.add('hidden');
+    document.getElementById('discount-popup-success').style.display = 'flex';
+    setTimeout(closePopup, SUCCESS_DELAY);
+  }
+
+function handleSubmit() {
+  var emailEl  = document.getElementById('discount-popup-email');
+  var errorEl  = document.getElementById('discount-popup-error');
+  var submitEl = document.getElementById('discount-popup-submit');
+  var email    = emailEl.value.trim();
+
+  if (!isEmail(email)) {
+    errorEl.style.display = 'block';
+    emailEl.style.borderColor = '#c0392b';
+    return;
+  }
+  errorEl.style.display = 'none';
+  emailEl.style.borderColor = '#1a1a18';
+  submitEl.textContent = '...';
+  submitEl.disabled = true;
+
+  // Save email, go to step 3 instead of success
+  window._popupEmail = email;
+  goStep3();
+  submitEl.textContent = '{{ section.settings.submit_label }}';
+  submitEl.disabled = false;
+}
+
+function goStep3() {
+  document.getElementById('discount-popup-step2').classList.add('hidden');
+  document.getElementById('discount-popup-step3').classList.remove('hidden');
+  setTimeout(function(){ var i=document.getElementById('discount-popup-phone'); if(i) i.focus(); }, 80);
+}
+
+function handleSmsSubmit() {
+  var phoneEl  = document.getElementById('discount-popup-phone');
+  var errorEl  = document.getElementById('discount-popup-phone-error');
+  var submitEl = document.getElementById('discount-popup-sms-submit');
+  var country  = document.getElementById('discount-popup-country').value;
+  var phone    = phoneEl.value.trim();
+
+  if (!phone || phone.length < 6) {
+    errorEl.style.display = 'block';
+    phoneEl.parentElement.style.borderColor = '#c0392b';
+    return;
+  }
+  errorEl.style.display = 'none';
+  phoneEl.parentElement.style.borderColor = '#1a1a18';
+  submitEl.textContent = '...';
+  submitEl.disabled = true;
+
+  var fullPhone = country + phone.replace(/\D/g,'');
+
+  if (USE_KLAVIYO && KLAVIYO_LIST && window.__klaviyoPublicKey) {
+    fetch('https://a.klaviyo.com/client/subscriptions/?company_id=' + window.__klaviyoPublicKey, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'revision': '2023-12-15' },
+      body: JSON.stringify({ data: { type: 'subscription', attributes: {
+        list_id: KLAVIYO_LIST,
+        email: window._popupEmail || '',
+        phone_number: fullPhone,
+        custom_source: 'Discount Popup SMS'
+      }}})
+    }).then(showSuccess).catch(showSuccess);
+  } else {
+    fetch('/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'form_type=customer&utf8=✓&contact[email]=' + encodeURIComponent(window._popupEmail||'') +
+            '&contact[phone]=' + encodeURIComponent(fullPhone) + '&contact[tags]=discount-popup-sms'
+    }).then(showSuccess).catch(showSuccess);
+  }
+}
+  document.addEventListener('DOMContentLoaded', function () {
+    if (SHOW_ONCE && getCookie(COOKIE_NAME)) return;
+    setTimeout(function(){ document.getElementById('discount-popup-overlay').classList.add('active'); }, DELAY_MS);
+
+    document.getElementById('discount-popup-close').addEventListener('click', closePopup);
+
+    var claim = document.getElementById('discount-popup-claim');
+    var d1    = document.getElementById('discount-popup-decline1');
+    var d2    = document.getElementById('discount-popup-decline2');
+    var sub   = document.getElementById('discount-popup-submit');
+    var email = document.getElementById('discount-popup-email');
+
+    if (claim) claim.addEventListener('click', goStep2);
+    if (d1)    d1.addEventListener('click', closePopup);
+    if (d2)    d2.addEventListener('click', closePopup);
+    if (sub)   sub.addEventListener('click', handleSubmit);
+    var smsSubmit = document.getElementById('discount-popup-sms-submit');
+var d3        = document.getElementById('discount-popup-decline3');
+var phoneEl   = document.getElementById('discount-popup-phone');
+if (smsSubmit) smsSubmit.addEventListener('click', handleSmsSubmit);
+if (d3)        d3.addEventListener('click', closePopup);
+if (phoneEl)   phoneEl.addEventListener('keydown', function(e){ if(e.key==='Enter') handleSmsSubmit(); });
+    if (email) email.addEventListener('keydown', function(e){ if(e.key==='Enter') handleSubmit(); });
+
+    {% if section.settings.close_on_overlay_click %}
+    document.getElementById('discount-popup-overlay').addEventListener('click', function(e){
+      if (e.target === this) closePopup();
+    });
+    {% endif %}
+
+    {% if section.settings.close_on_esc %}
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePopup(); });
+    {% endif %}
+  });
+})();
+</script>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Discount Popup",
+  "tag": "div",
+  "class": "discount-popup-section",
+  "settings": [
+
+    { "type": "header", "content": "⚙️ Popup Behaviour" },
+    { "type": "checkbox", "id": "enable_popup",           "label": "Enable popup",                   "default": true },
+    { "type": "range",    "id": "show_delay",             "label": "Show delay (seconds)",           "min": 0, "max": 30, "step": 1, "default": 2 },
+    { "type": "checkbox", "id": "show_once",              "label": "Show once per visitor (cookie)", "default": true },
+    { "type": "range",    "id": "cookie_days",            "label": "Hide for (days) after closing",  "min": 1, "max": 90, "step": 1, "default": 7 },
+    { "type": "checkbox", "id": "close_on_overlay_click", "label": "Close on outside click",         "default": true },
+    { "type": "checkbox", "id": "close_on_esc",           "label": "Close on ESC key",               "default": true },
+
+    { "type": "header", "content": "📐 Popup Size" },
+    { "type": "range", "id": "popup_width",  "label": "Max width (px)",  "min": 400, "max": 1400, "step": 10, "default": 900 },
+    { "type": "range", "id": "popup_height", "label": "Max height (px)", "min": 300, "max": 900,  "step": 10, "default": 580 },
+
+    { "type": "header", "content": "🖼️ Background" },
+    { "type": "image_picker", "id": "background_image", "label": "Background image" },
+    {
+      "type": "select", "id": "bg_position", "label": "Image position", "default": "center right",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "center right",  "label": "Center right" },
+        { "value": "center left",   "label": "Center left" },
+        { "value": "top center",    "label": "Top center" },
+        { "value": "bottom center", "label": "Bottom center" }
+      ]
+    },
+    { "type": "color", "id": "bg_fallback_color", "label": "Fallback background color", "default": "#e8e4dc" },
+    { "type": "text",  "id": "gradient_overlay",  "label": "Gradient overlay (CSS)", "default": "linear-gradient(105deg, rgba(245,242,235,0.15) 0%, transparent 60%)", "info": "Any valid CSS background value" },
+    { "type": "range", "id": "overlay_opacity",   "label": "Page overlay darkness (%)", "min": 0, "max": 90, "step": 5, "default": 45 },
+
+    { "type": "header", "content": "📝 Layout" },
+    {
+      "type": "select", "id": "content_align", "label": "Content alignment", "default": "center",
+      "options": [{ "value": "flex-start","label": "Left"},{"value": "center","label": "Center"},{"value": "flex-end","label": "Right"}]
+    },
+    {
+      "type": "select", "id": "text_align", "label": "Text align", "default": "center",
+      "options": [{"value":"left","label":"Left"},{"value":"center","label":"Center"},{"value":"right","label":"Right"}]
+    },
+    { "type": "range", "id": "content_padding", "label": "Content padding (px)", "min": 16, "max": 100, "step": 4, "default": 40 },
+
+    { "type": "header", "content": "🏷️ Brand Name" },
+    { "type": "text",  "id": "brand_name",           "label": "Brand name",        "default": "Brisk" },
+    { "type": "color", "id": "brand_color",          "label": "Color",             "default": "#1a1a18" },
+    { "type": "range", "id": "brand_font_size",      "label": "Font size (px)",    "min": 12, "max": 60, "step": 1, "default": 28 },
+    { "type": "select","id": "brand_font_weight",    "label": "Font weight",       "default": "300", "options": [{"value":"300","label":"Light"},{"value":"400","label":"Regular"},{"value":"600","label":"Semi Bold"},{"value":"700","label":"Bold"}] },
+    { "type": "text",  "id": "brand_font_family",    "label": "Font family",       "default": "var(--font-heading-family, Georgia, serif)" },
+    { "type": "select","id": "brand_text_transform", "label": "Text transform",    "default": "none", "options": [{"value":"none","label":"None"},{"value":"uppercase","label":"Uppercase"},{"value":"capitalize","label":"Capitalize"}] },
+    { "type": "range", "id": "brand_letter_spacing", "label": "Letter spacing (em)","min": 0, "max": 0.5, "step": 0.1, "default": 0.3 },
+    { "type": "range", "id": "brand_margin_bottom",  "label": "Space below (px)",  "min": 0, "max": 60, "step": 2, "default": 14 },
+
+    { "type": "header", "content": "✏️ Step 1 — Headline" },
+    { "type": "text",  "id": "headline_top",         "label": "Top line",               "default": "You've got" },
+    { "type": "text",  "id": "headline_main",        "label": "Main headline",          "default": "10% OFF" },
+    { "type": "color", "id": "headline_color",       "label": "Color",                  "default": "#1a1a18" },
+    { "type": "range", "id": "headline_top_size",    "label": "Top line size (px)",     "min": 10, "max": 40, "step": 1, "default": 14 },
+    { "type": "select","id": "headline_top_weight",  "label": "Top line weight",        "default": "600", "options": [{"value":"400","label":"Regular"},{"value":"600","label":"Semi Bold"},{"value":"700","label":"Bold"},{"value":"900","label":"Black"}] },
+    { "type": "range", "id": "headline_top_spacing", "label": "Top line letter spacing (em)", "min": 0, "max": 0.5, "step": 0.1, "default": 0.2 },
+    { "type": "text",  "id": "headline_top_font",    "label": "Top line font family",   "default": "var(--font-body-family, sans-serif)" },
+    { "type": "range", "id": "headline_main_size",   "label": "Main headline size (px)","min": 24, "max": 120, "step": 2, "default": 68 },
+    { "type": "select","id": "headline_main_weight", "label": "Main headline weight",   "default": "900", "options": [{"value":"600","label":"Semi Bold"},{"value":"700","label":"Bold"},{"value":"800","label":"Extra Bold"},{"value":"900","label":"Black"}] },
+    { "type": "text",  "id": "headline_main_font",   "label": "Main headline font",     "default": "var(--font-heading-family, sans-serif)" },
+    { "type": "range", "id": "headline_margin_bottom","label": "Space below headline (px)","min": 0,"max": 80,"step": 2,"default": 28 },
+
+    { "type": "header", "content": "📧 Step 2 — Email Capture" },
+    { "type": "text",  "id": "step2_headline",       "label": "Step 2 headline",             "default": "Claim 10% Off" },
+    { "type": "range", "id": "step2_headline_size",  "label": "Step 2 headline size (px)",   "min": 20, "max": 80, "step": 2, "default": 40 },
+    { "type": "range", "id": "step2_headline_margin","label": "Space below step 2 headline (px)", "min": 0, "max": 60, "step": 2, "default": 24 },
+    { "type": "text",  "id": "email_placeholder",    "label": "Email placeholder",           "default": "Enter your email address" },
+    { "type": "text",  "id": "submit_label",         "label": "Submit button label",         "default": "Secure My Discount" },
+    { "type": "text",  "id": "email_error_text",     "label": "Validation error message",    "default": "Please enter a valid email address." },
+
+    { "type": "header", "content": "📱 Step 3 — SMS Capture" },
+{ "type": "text", "id": "step3_headline", "label": "Step 3 headline", "default": "Prefer Text?" },
+{ "type": "text", "id": "phone_placeholder", "label": "Phone placeholder", "default": "331-2003922" },
+{ "type": "textarea", "id": "sms_consent_text", "label": "SMS consent text", "default": "By submitting this form, you consent to receive informational (e.g. order updates) and/or marketing texts from this store. Msg & data rates may apply. Unsubscribe at any time by replying STOP." },
+{ "type": "text", "id": "sms_submit_label", "label": "SMS submit button label", "default": "Sign Up" },
+{ "type": "text", "id": "phone_error_text", "label": "Phone validation error", "default": "Please enter a valid phone number." },
+
+    { "type": "header", "content": "✅ Success State" },
+    { "type": "text",  "id": "success_title",        "label": "Success title",               "default": "You're in! 🎉" },
+    { "type": "text",  "id": "success_subtitle",     "label": "Success subtitle",            "default": "Check your inbox for your discount code." },
+    { "type": "range", "id": "success_close_delay",  "label": "Auto-close delay after success (seconds)", "min": 1, "max": 10, "step": 1, "default": 3 },
+
+    { "type": "header", "content": "📬 Email Integration" },
+    { "type": "checkbox", "id": "use_klaviyo",    "label": "Use Klaviyo", "default": false, "info": "Requires Klaviyo JS snippet on your theme. Falls back to Shopify /contact if unchecked." },
+    { "type": "text",     "id": "klaviyo_list_id","label": "Klaviyo List ID", "info": "Found in your Klaviyo list settings." },
+
+    { "type": "header", "content": "🔲 Buttons & Input" },
+    { "type": "text",  "id": "cta_label",          "label": "Step 1 button label",       "default": "Claim" },
+    { "type": "color", "id": "btn_bg_color",       "label": "Button background",         "default": "#1a1a18" },
+    { "type": "color", "id": "btn_text_color",     "label": "Button text color",         "default": "#f5f2eb" },
+    { "type": "color", "id": "btn_hover_bg",       "label": "Button hover background",   "default": "#333333" },
+    { "type": "color", "id": "btn_hover_color",    "label": "Button hover text color",   "default": "#ffffff" },
+    { "type": "color", "id": "btn_border_color",   "label": "Button border color",       "default": "#1a1a18" },
+    { "type": "range", "id": "btn_border_width",   "label": "Button border width (px)",  "min": 0, "max": 4, "step": 1, "default": 0 },
+    { "type": "range", "id": "btn_width",          "label": "Button / input width (px)", "min": 120, "max": 600, "step": 10, "default": 280 },
+    { "type": "range", "id": "btn_padding_v",      "label": "Vertical padding (px)",     "min": 8, "max": 40, "step": 1, "default": 16 },
+    { "type": "range", "id": "btn_padding_h",      "label": "Horizontal padding (px)",   "min": 8, "max": 60, "step": 1, "default": 32 },
+    { "type": "range", "id": "btn_font_size",      "label": "Font size (px)",            "min": 10, "max": 24, "step": 1, "default": 13 },
+    { "type": "select","id": "btn_font_weight",    "label": "Font weight",               "default": "700", "options": [{"value":"400","label":"Regular"},{"value":"600","label":"Semi Bold"},{"value":"700","label":"Bold"},{"value":"900","label":"Black"}] },
+    { "type": "range", "id": "btn_letter_spacing", "label": "Letter spacing (em)",       "min": 0, "max": 0.5, "step": 0.1, "default": 0.2 },
+    { "type": "text",  "id": "btn_font",           "label": "Font family",               "default": "var(--font-body-family, sans-serif)" },
+    { "type": "range", "id": "btn_margin_bottom",  "label": "Space below button (px)",   "min": 0, "max": 60, "step": 2, "default": 18 },
+
+    { "type": "header", "content": "🔗 Decline Link" },
+    { "type": "text",  "id": "decline_label",       "label": "Decline text",    "default": "No thanks, I'll pay full price" },
+    { "type": "color", "id": "decline_color",       "label": "Color",           "default": "#555555" },
+    { "type": "color", "id": "decline_hover_color", "label": "Hover color",     "default": "#1a1a18" },
+    { "type": "range", "id": "decline_font_size",   "label": "Font size (px)",  "min": 8, "max": 18, "step": 1, "default": 10 },
+    { "type": "text",  "id": "decline_font",        "label": "Font family",     "default": "var(--font-body-family, sans-serif)" },
+
+    { "type": "header", "content": "✕ Close Button" },
+    { "type": "color", "id": "close_color", "label": "Close icon color", "default": "#1a1a18" }
+
+  ],
+  "presets": [
+    { "name": "Discount Popup" }
+  ]
+}
+{% endschema %}
+

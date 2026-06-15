@@ -1,0 +1,30 @@
+{% if closest.collection != blank %}
+  {% assign collection = closest.collection %}
+
+  {% if block.settings.hide_if_zero and collection.products_count == 0 %}
+  {% else %}
+    <div class="collection-card__count">
+      {{ collection.products_count }}
+    </div>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product count",
+  "tag": null,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_if_zero",
+      "label": "Hide when collection is empty",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product count"
+    }
+  ]
+}
+{% endschema %}

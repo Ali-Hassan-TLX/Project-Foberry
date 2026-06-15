@@ -1,0 +1,2053 @@
+{% comment %}
+  Shop The Look Section
+  Custom section for Shopify Fabric theme
+{% endcomment %}
+
+<style>
+  .shop-the-look-section {
+    position: relative;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .shop-the-look-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .shop-the-look-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+    z-index: 2;
+  }
+
+  .shop-the-look-content {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    margin: 0 auto;
+    padding-left: 40px;
+    padding-right: 40px;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .shop-the-look-left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .shop-the-look-badge {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .shop-the-look-title {
+    font-size: var(--heading-3, 90px);
+    font-weight: var(--font-light, 300);
+    color: #ffffff;
+    line-height: 1.1;
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  .shop-the-look-thumbnails {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 30px;
+  }
+
+  .thumbnail-item {
+    background: #ffffff;
+    border-radius: 0;
+    overflow: hidden;
+    display: block;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 90px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-decoration: none;
+  }
+
+  .thumbnail-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .thumbnail-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 3/4;
+  }
+
+  .thumbnail-info {
+    display: none;
+  }
+
+  .shop-the-look-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .product-display-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .product-thumbnails-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .main-product-card {
+    background: #ffffff;
+    border-radius: 0;
+    overflow: hidden;
+    max-width: 350px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+  }
+
+  .main-product-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .main-product-image {
+    width: 100%;
+    height: 450px;
+    display: block;
+  }
+
+  .main-product-info {
+    padding: 30px;
+    background: #f8f8f8;
+  }
+
+  .main-product-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+  }
+
+  .main-product-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .main-product-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #000000;
+    text-decoration: none;
+    padding: 16px 30px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+  }
+
+  .main-product-link:hover {
+    background: #333333;
+    gap: 14px;
+  }
+
+  .main-product-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Hero wrapper — groups bg image + text overlay */
+  .stl-hero-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+  }
+
+  .shop-the-look-section {
+    padding-top: var(--section-padding-top);
+    padding-bottom: var(--section-padding-bottom);
+  }
+
+  /* =====================
+     DRAWER STYLES
+  ===================== */
+
+  .stl-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+
+  .stl-drawer-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .stl-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 480px;
+    max-width: 100vw;
+    height: 100%;
+    background: #fff;
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .stl-drawer.is-open {
+    transform: translateX(0);
+  }
+
+  /* ---- Header ---- */
+  .stl-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px;
+    border-bottom: 1px solid #e5e5e5;
+    flex-shrink: 0;
+    background: #fff;
+  }
+
+  .stl-drawer-header h3 {
+    font-size: 16px;
+    font-weight: 400;
+    color: #111;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+
+  .stl-drawer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111;
+    transition: opacity 0.2s ease;
+  }
+
+  .stl-drawer-close:hover {
+    opacity: 0.6;
+  }
+
+  .stl-drawer-close svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ---- Scrollable Body ---- */
+  .stl-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stl-drawer-body::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .stl-drawer-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  .stl-drawer-body::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+  }
+
+  /* ---- Product Card ---- */
+  .stl-drawer-product {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e5e5;
+    gap: 16px;
+  }
+
+  .stl-drawer-product-top {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .stl-drawer-product-image {
+    width: 100px;
+    flex-shrink: 0;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    display: block;
+    background: #f0f0f0;
+  }
+
+  .stl-drawer-product-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  .stl-drawer-product-vendor {
+    font-size: 11px;
+    font-weight: 400;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .stl-drawer-product-title {
+    font-size: 14px;
+    font-weight: 400;
+    color: #111;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .stl-drawer-product-price {
+    font-size: 14px;
+    font-weight: 400;
+    color: #111;
+    margin-top: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .stl-drawer-product-price .currency {
+    font-size: 11px;
+    color: #888;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  /* ---- Size + Add Row ---- */
+  .stl-drawer-product-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .stl-size-select-wrapper {
+    position: relative;
+    flex: 1;
+  }
+
+  .stl-size-select {
+    width: 100%;
+    height: 48px;
+    padding: 0 36px 0 14px;
+    border: 1px solid #d0d0d0;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 400;
+    color: #111;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .stl-size-select:focus {
+    border-color: #888;
+  }
+
+  .stl-size-select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #555;
+    pointer-events: none;
+  }
+
+  .stl-add-btn {
+    height: 48px;
+    padding: 0 24px;
+    background: #b0b0b0;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.25s ease;
+    white-space: nowrap;
+    min-width: 90px;
+  }
+
+  .stl-add-btn:hover,
+  .stl-add-btn.size-selected {
+    background: #111;
+  }
+
+  .stl-add-btn.adding {
+    background: #555;
+  }
+
+  .stl-add-btn.added {
+    background: #3a7d44;
+  }
+
+  /* ---- Footer ---- */
+  .stl-drawer-footer {
+    flex-shrink: 0;
+    background: #111;
+    padding: 0;
+  }
+
+  .stl-drawer-skip-btn {
+    display: block;
+    width: 100%;
+    padding: 20px 24px;
+    background: #111;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .stl-drawer-skip-btn:hover {
+    background: #333;
+  }
+
+  /* Empty state */
+  .stl-drawer-empty {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    padding: 60px 24px;
+  }
+
+  /* =====================
+     RESPONSIVE
+  ===================== */
+
+  @media (max-width: 1024px) {
+    .shop-the-look-content {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .shop-the-look-title {
+      font-size: 56px;
+    }
+
+    .shop-the-look-right {
+      justify-content: center;
+    }
+
+    .product-display-wrapper {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .product-thumbnails-vertical {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  /* =====================
+     MOBILE-ONLY: hidden on desktop
+  ===================== */
+  .stl-mobile-images-row { display: none; }
+  .stl-mobile-cta        { display: none; }
+
+  /* =====================
+     TABLET
+  ===================== */
+  @media (max-width: 1024px) {
+    .shop-the-look-content {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .shop-the-look-title {
+      font-size: 56px;
+    }
+    .shop-the-look-right {
+      justify-content: center;
+    }
+    .product-display-wrapper {
+      flex-direction: column;
+      align-items: center;
+    }
+    .product-thumbnails-vertical {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  /* =====================
+     MOBILE ≤768px
+  ===================== */
+  @media (max-width: 768px) {
+
+    /* Outer section: plain block, no padding */
+    .shop-the-look-section {
+      display: block !important;
+      padding: 0 !important;
+      min-height: 0 !important;
+    }
+
+    /* Hero wrapper: fixed height, bg image fills it, text overlays it */
+    .stl-hero-wrapper {
+      position: relative;
+      width: 100%;
+      height: 420px;        /* full-looking hero height */
+      overflow: hidden;
+      display: block;
+      min-height: 0;
+    }
+
+    /* BG image fills the hero wrapper */
+    .shop-the-look-bg {
+      position: absolute !important;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* Overlay inside hero */
+    .shop-the-look-overlay {
+      position: absolute !important;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+    }
+
+    /* Content (badge + title) inside hero */
+    .shop-the-look-content {
+      position: absolute !important;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex !important;
+      align-items: flex-start !important;
+      padding: 30px 20px !important;
+      z-index: 3;
+      grid-template-columns: unset;
+      gap: 0;
+    }
+
+    .shop-the-look-left {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 0;
+    }
+
+    .shop-the-look-title {
+      font-size: 36px;
+    }
+
+    /* Hide desktop product card on mobile */
+    .shop-the-look-right {
+      display: none !important;
+    }
+
+    /* 3-image grid: shown BELOW the hero on mobile */
+    .stl-mobile-images-row {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      width: 100%;
+      background: rgb(255 255 255 / 1.0);
+        padding: 10px;
+    }
+
+    .stl-mobile-img-cell {
+      display: block;
+      overflow: hidden;
+      background: #eee;
+    }
+
+    .stl-mobile-img-cell img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* CTA button below the 3 images */
+    .stl-mobile-cta {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 17px 20px;
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.4px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom:30px;
+      margin-top:10px;
+    }
+
+    .stl-mobile-cta::before {
+      content: '|';
+      opacity: 0.45;
+      margin-right: 2px;
+    }
+
+    .stl-mobile-cta svg {
+      width: 13px;
+      height: 13px;
+      opacity: 0.75;
+    }
+
+    /* Full-width drawer on mobile */
+    .stl-drawer {
+      width: 100vw;
+    }
+
+    .stl-drawer-product-actions {
+      grid-template-columns: 1fr auto;
+    }
+  }
+</style>
+
+<style>
+  .complementary-products-wraper {
+    display: flex;
+    gap: 5px;
+  }
+  .complementary-products {
+    display: flex;
+    gap: 5px;
+    height: max-content;
+    overflow: auto;
+  }
+  .complementary-products-wraper {
+    .quick-add__button {
+      display: none !important;
+    }
+    product-card-link {
+      width: 100%;
+      min-width: calc((100% - 200px) / 3);
+    }
+  }
+  .currently-open-product {
+    height: {{ section.settings.currently_product_height }}px;
+    width: 25%;
+    display: flex;
+    justify-content: end;
+    align-items: flex-start;
+    position: relative;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0px 0px 20px 20px;
+    .shop-by-look {
+      left: 20px;
+      position: unset !important;
+    }
+  }
+
+  /* ── DRAWER OVERLAY ── */
+  .complementary-products-drawer-wraper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    padding: 0px;
+    position: fixed;
+    background: rgba(0,0,0,0.4);
+    left: 100%;
+    right: -100%;
+    top: 0;
+    bottom: 0;
+    z-index: 99999;
+    transition: 0.4s ease;
+  }
+  .complementary-products-drawer-wraper.complementary_products_active {
+    left: 0;
+    right: 0;
+  }
+
+  /* ── DRAWER PANEL ── */
+  .complementary-products-drawer-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 520px;
+    height: 100%;
+    background: #ffffff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── DRAWER HEADER ── */
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e8e8e8;
+    flex-shrink: 0;
+  }
+  .drawer-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  .shop-heading{
+    border-bottom:none;
+  }
+  .close-pop-up {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a1a;
+  }
+  .close-pop-up svg { width: 20px; height: 20px; }
+
+  /* ── SCROLLABLE LIST ── */
+  .drawer-complementary-products {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* ══════════════════════════════
+     PRODUCT CARD — new design
+     ══════════════════════════════ */
+  .cp-product-card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    background: #fff;
+    margin-bottom: 2px;
+    gap: 15px;
+    padding: 5px 15px;
+  }
+
+  /* Left: large square image */
+  .cp-product-image {
+    width: 220px;
+    position: relative;
+    overflow: hidden;
+    flex: 0 0 30%;
+  }
+  .cp-product-image img {
+    flex: 0 0 30%;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    mix-blend-mode: multiply;
+  }
+
+  /* Bookmark dot — top left of image */
+  .cp-wishlist-dot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .cp-wishlist-dot svg {
+    width: 14px;
+    height: 14px;
+    color: #1a1a1a;
+  }
+
+  /* Right: product info */
+  .cp-product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .cp-product-title {
+    font-size: 12px;
+    color: #1a1a1a;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .cp-product-origin {
+    font-size: 10px;
+    color: #888;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .cp-product-price {
+    font-size: 10px;
+    color: #1a1a1a;
+    font-weight: 400;
+    margin: 0 0 6px 0;
+  }
+
+  /* Actions: bookmark btn + select size */
+  .cp-product-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .cp-bookmark-btn {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    padding: 0;
+  }
+  .cp-bookmark-btn:hover { border-color: #1a1a1a; }
+  .cp-bookmark-btn svg {
+    width: 15px;
+    height: 15px;
+    color: #1a1a1a;
+  }
+
+  .cp-size-open {
+    
+    height: 30px;
+    border: 1px solid #d8d8d8;
+    background: #fff;
+    padding: 0 14px;
+    font-size: 13px;
+    color: #1a1a1a;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 400;
+    transition: border-color 0.15s;
+    white-space: nowrap;
+  }
+  .cp-size-open:hover { border-color: #1a1a1a; }
+
+  /* Single-variant direct add */
+  .cp-add-btn {
+    padding: 0px 15px;
+    height: 30px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .cp-add-btn:hover:not(:disabled) { background: #333; }
+  .cp-add-btn.added { background: #555; cursor: default; }
+  .cp-add-btn:disabled { background: #c8c8c8; cursor: not-allowed; }
+
+  /* ── DRAWER FOOTER ── */
+  .drawer-footer {
+    flex-shrink: 0;
+    padding: 16px 24px;
+    border-top: 1px solid #e8e8e8;
+    background: #fff;
+  }
+  .drawer-skip-btn {
+    display: block;
+    width: 100%;
+    height: 50px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    text-align: center;
+    line-height: 50px;
+    text-decoration: none;
+    transition: background 0.2s;
+    border-radius: 2px;
+  }
+  .drawer-skip-btn:hover { background: #333; }
+
+  /* ══════════════════════════════
+     SIZE MODAL
+     ══════════════════════════════ */
+  .cp-size-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(0,0,0,0.45);
+    align-items: center;
+    justify-content: center;
+   
+  }
+  .cp-size-modal.active { display: flex; }
+
+  .cp-size-modal-content {
+    background: #f0f0f0;
+    width: 100%;
+    max-width: 520px;
+   
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .cp-modal-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .cp-modal-back,
+  .cp-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+  .cp-modal-back svg,
+  .cp-close svg { width: 22px; height: 22px; }
+
+  .cp-modal-title-area {
+    text-align: center;
+    padding: 4px 24px 14px;
+    flex-shrink: 0;
+  }
+  .cp-modal-title-area h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  .cp-size-guide-link {
+    display: none;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #888;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  .cp-col-headers {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    padding: 6px 16px 8px;
+    flex-shrink: 0;
+  }
+  .cp-col-headers .cp-ch {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+  .cp-col-headers .cp-ch span {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .cp-size-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 12px;
+  }
+
+  .cp-size-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+        position: sticky;
+    top: 0;
+    z-index: 99;
+    background-color: #f0f0f0;
+  }
+  .cp-size-row-label {
+    font-size: 12px;
+    color: #999;
+    text-align: left;
+    padding-left: 4px;
+  }
+  .cp-size-tile {
+    background: #fff;
+    border: none;
+    border-radius: 6px;
+    height: 32px;
+    width: 100%;
+    font-size: 12px;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+  }
+    .cp-size-tile.tags__sgd{
+    font-weight: 500;
+    background: none;
+    font-size: 14px;
+
+  }
+  .cp-size-tile:hover { background: #e8e8e8; }
+  .cp-size-tile.selected { background: #1a1a1a; color: #fff; }
+  .cp-size-tile.sold-out { color: #bbb; cursor: not-allowed; }
+  .cp-size-tile.sold-out .sold-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid #f0a070;
+    flex-shrink: 0;
+  }
+  .cp-size-tile-empty {
+    background: #e8e8e8;
+    border-radius: 6px;
+    height: 32px;
+  }
+
+  .cp-modal-footer {
+    flex-shrink: 0;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .cp-modal-price-amount {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+  .cp-modal-price-delivery {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+  }
+  .cp-modal-add-btn {
+    height: 50px;
+    padding: 0 32px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .cp-modal-add-btn:hover { background: #333; }
+  .cp-modal-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  @media(max-width: 768px) {
+    .complementary-products-wraper { flex-direction: column; }
+    .currently-open-product { width: 100%; }
+    .complementary-products-drawer-content { max-width: 100%; }
+    .cp-size-modal-content { max-width: 100%; }
+    .cp-product-image { width: 150px; min-width: 150px; min-height: 200px; }
+  }
+</style>
+
+<!-- DRAWER OVERLAY -->
+<div class="stl-drawer-overlay" id="stlDrawerOverlay-{{ section.id }}" aria-hidden="true"></div>
+
+<!-- DRAWER -->
+<div 
+  class="stl-drawer" 
+  id="stlDrawer-{{ section.id }}" 
+  role="dialog" 
+  aria-modal="true" 
+  aria-label="Complete your look"
+>
+  <!-- Header -->
+  <div class="stl-drawer-header">
+    <h3>Complete your look</h3>
+    <button class="stl-drawer-close" id="stlDrawerClose-{{ section.id }}" aria-label="Close drawer">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Body: Products -->
+  <div class="stl-drawer-body" id="stlDrawerBody-{{ section.id }}">
+    {% assign has_products = false %}
+    {% for block in section.blocks %}
+      {% if block.settings.product != blank %}
+        {% assign has_products = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+
+    {% if has_products %}
+      {% for block in section.blocks %}
+        {% if block.settings.product != blank %}
+          {% assign product = all_products[block.settings.product] %}
+
+          <div class="stl-drawer-product" data-product-id="{{ product.id }}">
+
+            <!-- Top: Image + Meta -->
+            <div class="stl-drawer-product-top">
+              {% if product.featured_image %}
+                <img 
+                  src="{{ product.featured_image | img_url: '300x' }}" 
+                  alt="{{ product.title }}"
+                  class="stl-drawer-product-image"
+                  loading="lazy"
+                >
+              {% endif %}
+              <div class="stl-drawer-product-meta">
+                {% if product.vendor != blank %}
+                  <p class="stl-drawer-product-vendor">{{ product.vendor }}</p>
+                {% endif %}
+                <p class="stl-drawer-product-title">{{ product.title }}</p>
+                <div class="stl-drawer-product-price">
+                  {{ product.price | money_without_currency }}
+                  <span class="currency">{{ cart.currency.iso_code }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom: Size selector + Add to cart -->
+            {% comment %} <div class="stl-drawer-product-actions">
+              <div class="stl-size-select-wrapper">
+                <select 
+                  class="stl-size-select" 
+                  data-product-id="{{ product.id }}"
+                  aria-label="Select a size for {{ product.title }}"
+                >
+                  <option value="">Select a size</option>
+                  {% for variant in product.variants %}
+                    <option 
+                      value="{{ variant.id }}" 
+                      {% unless variant.available %}disabled{% endunless %}
+                    >
+                      {{ variant.title }}{% unless variant.available %} – Sold out{% endunless %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <button 
+                class="stl-add-btn" 
+                data-product-id="{{ product.id }}"
+                aria-label="Add {{ product.title }} to cart"
+              >
+                Add
+              </button>
+            </div> {% endcomment %}
+            <!-- Bottom: Size selector + Add to cart -->
+<div class="stl-drawer-product-actions">
+  {% if product.variants.size == 1 and product.variants.first.title == 'Default Title' %}
+    <button class="stl-add-btn size-selected" data-variant-id="{{ product.variants.first.id }}" data-product-id="{{ product.id }}">Add</button>
+  {% else %}
+    <button class="stl-size-open-btn" data-product-id="{{ product.id }}">Select size</button>
+    <button class="stl-add-btn" data-product-id="{{ product.id }}">Add</button>
+  {% endif %}
+</div>
+
+<!-- SIZE MODAL for this product -->
+<div class="cp-size-modal" id="stl-size-modal-{{ product.id }}">
+  <div class="cp-size-modal-content">
+    <div class="cp-modal-topbar">
+      <button class="cp-modal-back cp-close" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="cp-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="cp-modal-title-area">
+      <h3>Select your size</h3>
+      <span class="cp-size-guide-link">View size guide</span>
+    </div>
+    <div class="cp-size-scroll">
+      <div class="cp-size-row">
+        <div class="cp-size-row-label"></div>
+        <button class="cp-size-tile tags__sgd">Slim</button>
+        <button class="cp-size-tile tags__sgd">Smart</button>
+        <button class="cp-size-tile tags__sgd">Relaxed</button>
+      </div>
+
+      {% assign sizes = product.variants | map: 'option1' | uniq %}
+      {% for size in sizes %}
+        {% assign count = 0 %}
+        {% for variant in product.variants %}
+          {% if variant.option1 == size %}{% assign count = count | plus: 1 %}{% endif %}
+        {% endfor %}
+        <div class="cp-size-row">
+          <div class="cp-size-row-label">{{ size }}</div>
+          {% for variant in product.variants %}
+            {% if variant.option1 == size %}
+              {% if variant.available %}
+                <button class="cp-size-tile" data-variant-id="{{ variant.id }}">{{ variant.title }}</button>
+              {% else %}
+                <button class="cp-size-tile sold-out" disabled><span class="sold-dot"></span>{{ variant.title }}</button>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if count < 3 %}<div class="cp-size-tile-empty"></div>{% endif %}
+          {% if count == 1 %}<div class="cp-size-tile-empty"></div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="cp-modal-footer">
+      <div>
+        <div class="cp-modal-price-amount">{{ product.price | money_without_trailing_zeros }}</div>
+        <div class="cp-modal-price-delivery">Delivery: 1 to 4 business days</div>
+      </div>
+      <button class="cp-modal-add-btn" disabled>Add to bag</button>
+    </div>
+  </div>
+</div>
+
+          </div>
+        {% endif %}
+      {% endfor %}
+
+    {% else %}
+      <p class="stl-drawer-empty">No products added to this look yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Footer: Skip -->
+  <div class="stl-drawer-footer">
+    <a href="/cart" class="stl-drawer-skip-btn" id="stlSkipBtn-{{ section.id }}">
+      Skip this step and access your cart
+    </a>
+  </div>
+</div>
+
+<!-- SECTION HTML -->
+<div class="shop-the-look-section" style="--section-padding-top: {{ section.settings.section_padding_top }}px; --section-padding-bottom: {{ section.settings.section_padding_bottom }}px;">
+
+  <!-- Mobile hero wrapper: bg image + text overlay together -->
+  <div class="stl-hero-wrapper">
+    {% if section.settings.background_image %}
+      <img 
+        src="{{ section.settings.background_image | img_url: '1920x' }}" 
+        alt="{{ section.settings.title }}"
+        class="shop-the-look-bg"
+        loading="lazy"
+      >
+    {% endif %}
+    
+    <div class="shop-the-look-overlay"></div>
+
+    <div class="shop-the-look-content">
+      <div class="shop-the-look-left">
+        {% if section.settings.badge_text != blank %}
+          <div class="shop-the-look-badge">{{ section.settings.badge_text }}</div>
+        {% endif %}
+        
+        {% if section.settings.title != blank %}
+          <h2 class="shop-the-look-title">{{ section.settings.title }}</h2>
+        {% endif %}
+      </div>
+
+      <div class="shop-the-look-right">
+        <div class="product-display-wrapper">
+        <div class="product-thumbnails-vertical">
+          {% for block in section.blocks %}
+            {% if block.settings.product != blank %}
+              {% assign product = all_products[block.settings.product] %}
+              <a href="{{ product.url }}" class="thumbnail-item">
+                {% if product.featured_image %}
+                  <img 
+                    src="{{ product.featured_image | img_url: '280x280' }}" 
+                    alt="{{ product.title }}"
+                    class="thumbnail-image"
+                    loading="lazy"
+                  >
+                {% endif %}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if section.settings.main_product != blank %}
+          {% assign main_product = all_products[section.settings.main_product] %}
+          <div class="main-product-card">
+            {% if main_product.featured_image %}
+              <img 
+                src="{{ main_product.featured_image | img_url: '600x' }}" 
+                alt="{{ main_product.title }}"
+                class="main-product-image"
+                loading="lazy"
+              >
+            {% endif %}
+            <div class="main-product-info">
+              <h3 class="main-product-title">{{ main_product.title }}</h3>
+              <div class="main-product-price">{{ main_product.price | money }}</div>
+
+              <button 
+                class="main-product-link" 
+                id="stlOpenDrawer-{{ section.id }}"
+                aria-controls="stlDrawer-{{ section.id }}"
+                aria-expanded="false"
+              >
+                {{ section.settings.cta_text }}
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  </div>{%- comment -%}end stl-hero-wrapper{%- endcomment -%}
+
+  <!-- MOBILE: 3-column image grid — shown BELOW bg image on mobile, hidden on desktop -->
+  <div class="stl-mobile-images-row">
+    {% if section.settings.main_product != blank %}
+      {% assign main_product = all_products[section.settings.main_product] %}
+      {% if main_product.featured_image %}
+        <span class="stl-mobile-img-cell">
+          <img src="{{ main_product.featured_image | img_url: '400x' }}" alt="{{ main_product.title }}" loading="lazy">
+        </span>
+      {% endif %}
+    {% endif %}
+    {% assign mob_count = 0 %}
+    {% for block in section.blocks %}
+      {% if mob_count >= 2 %}{% break %}{% endif %}
+      {% if block.settings.product != blank %}
+        {% assign bp = all_products[block.settings.product] %}
+        {% if bp.featured_image %}
+          <span class="stl-mobile-img-cell">
+            <img src="{{ bp.featured_image | img_url: '400x' }}" alt="{{ bp.title }}" loading="lazy">
+          </span>
+          {% assign mob_count = mob_count | plus: 1 %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- MOBILE: CTA button — shown below image grid, hidden on desktop -->
+  <button
+    class="stl-mobile-cta"
+    id="stlOpenDrawerMobile-{{ section.id }}"
+    aria-controls="stlDrawer-{{ section.id }}"
+    aria-expanded="false"
+  >
+    {{ section.settings.cta_text }}
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+</div>
+{% comment %} <script>
+(function() {
+  var sectionId = '{{ section.id }}';
+  var openBtn       = document.getElementById('stlOpenDrawer-'       + sectionId);
+  var openBtnMobile = document.getElementById('stlOpenDrawerMobile-' + sectionId);
+  var closeBtn      = document.getElementById('stlDrawerClose-'      + sectionId);
+  var overlay       = document.getElementById('stlDrawerOverlay-'    + sectionId);
+  var drawer        = document.getElementById('stlDrawer-'           + sectionId);
+
+  if (!drawer) return;
+
+  /* ---------- Drawer open/close ---------- */
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    openBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    openBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    if (openBtn) openBtn.focus();
+    if (openBtnMobile) openBtnMobile.focus();
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openDrawer);
+  if (openBtnMobile) openBtnMobile.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  /* ---------- Size select → activate Add button colour ---------- */
+  drawer.querySelectorAll('.stl-size-select').forEach(function(select) {
+    select.addEventListener('change', function() {
+      var productId = select.getAttribute('data-product-id');
+      var addBtn = drawer.querySelector('.stl-add-btn[data-product-id="' + productId + '"]');
+      if (!addBtn) return;
+      if (select.value) {
+        addBtn.classList.add('size-selected');
+      } else {
+        addBtn.classList.remove('size-selected');
+      }
+    });
+  });
+
+  /* ---------- Add to cart ---------- */
+  drawer.querySelectorAll('.stl-add-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var productId = btn.getAttribute('data-product-id');
+      var select    = drawer.querySelector('.stl-size-select[data-product-id="' + productId + '"]');
+
+      if (!select || !select.value) {
+        // Highlight the select to prompt user to pick a size
+        select.style.borderColor = '#c00';
+        select.focus();
+        setTimeout(function() { select.style.borderColor = ''; }, 2000);
+        return;
+      }
+
+      var variantId = select.value;
+      btn.textContent = '...';
+      btn.classList.add('adding');
+      btn.disabled = true;
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: variantId, quantity: 1 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        btn.textContent = 'Added';
+        btn.classList.remove('adding');
+        btn.classList.add('added');
+        // Refresh cart count if theme exposes it
+        if (typeof refreshCart === 'function') refreshCart();
+        if (document.dispatchEvent) {
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+        }
+        setTimeout(function() {
+          btn.textContent = 'Add';
+          btn.classList.remove('added', 'size-selected');
+          btn.disabled = false;
+        }, 2500);
+      })
+      .catch(function() {
+        btn.textContent = 'Error';
+        btn.classList.remove('adding');
+        btn.disabled = false;
+        setTimeout(function() { btn.textContent = 'Add'; }, 2000);
+      });
+    });
+  });
+
+})();
+/* ── STL: Size modal open ── */
+drawer.querySelectorAll('.stl-size-open-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var modal = document.getElementById('stl-size-modal-' + btn.getAttribute('data-product-id'));
+    if (modal) modal.classList.add('active');
+  });
+});
+
+/* ── STL: Size modal close ── */
+drawer.querySelectorAll('.cp-size-modal').forEach(function(modal) {
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) modal.classList.remove('active');
+  });
+  modal.querySelectorAll('.cp-close').forEach(function(btn) {
+    btn.addEventListener('click', function() { modal.classList.remove('active'); });
+  });
+});
+
+/* ── STL: Size tile select ── */
+drawer.querySelectorAll('.cp-size-tile:not(.sold-out):not(.tags__sgd)').forEach(function(tile) {
+  tile.addEventListener('click', function() {
+    var modal = tile.closest('.cp-size-modal');
+    modal.querySelectorAll('.cp-size-tile').forEach(function(t) { t.classList.remove('selected'); });
+    tile.classList.add('selected');
+    var addBtn = modal.querySelector('.cp-modal-add-btn');
+    addBtn.disabled = false;
+    addBtn.dataset.variantId = tile.dataset.variantId;
+  });
+});
+
+/* ── STL: Modal Add to cart ── */
+drawer.querySelectorAll('.cp-modal-add-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var variantId = btn.dataset.variantId;
+    if (!variantId) return;
+    var modal = btn.closest('.cp-size-modal');
+    btn.textContent = 'Adding...';
+    btn.disabled = true;
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: variantId, quantity: 1 })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function() {
+      btn.textContent = 'Added to Cart';
+      setTimeout(function() {
+        modal.classList.remove('active');
+        btn.textContent = 'Add to bag';
+        btn.disabled = true;
+        delete btn.dataset.variantId;
+        modal.querySelectorAll('.cp-size-tile.selected').forEach(function(t) { t.classList.remove('selected'); });
+      }, 1200);
+    })
+    .catch(function() {
+      btn.textContent = 'Add to bag';
+      btn.disabled = false;
+    });
+  });
+});
+</script> {% endcomment %}
+<script>
+{% comment %} (function() {
+  var sectionId = '{{ section.id }}';
+  var openBtn       = document.getElementById('stlOpenDrawer-'       + sectionId);
+  var openBtnMobile = document.getElementById('stlOpenDrawerMobile-' + sectionId);
+  var closeBtn      = document.getElementById('stlDrawerClose-'      + sectionId);
+  var overlay       = document.getElementById('stlDrawerOverlay-'    + sectionId);
+  var drawer        = document.getElementById('stlDrawer-'           + sectionId);
+
+  if (!drawer) return;
+
+  /* ---------- Drawer open/close ---------- */
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    if (openBtn) openBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    if (openBtn) openBtn.focus();
+    if (openBtnMobile) openBtnMobile.focus();
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openDrawer);
+  if (openBtnMobile) openBtnMobile.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  /* ── STL: Size modal open ── */
+  drawer.querySelectorAll('.stl-size-open-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var modal = document.getElementById('stl-size-modal-' + btn.getAttribute('data-product-id'));
+      if (modal) modal.classList.add('active');
+    });
+  });
+
+  /* ── STL: Size modal close ── */
+  drawer.querySelectorAll('.cp-size-modal').forEach(function(modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+    modal.querySelectorAll('.cp-close').forEach(function(closeEl) {
+      closeEl.addEventListener('click', function() { modal.classList.remove('active'); });
+    });
+  });
+
+  /* ── STL: Size tile select ── */
+  drawer.querySelectorAll('.cp-size-tile:not(.sold-out):not(.tags__sgd)').forEach(function(tile) {
+    tile.addEventListener('click', function() {
+      var modal = tile.closest('.cp-size-modal');
+      modal.querySelectorAll('.cp-size-tile').forEach(function(t) { t.classList.remove('selected'); });
+      tile.classList.add('selected');
+      var addBtn = modal.querySelector('.cp-modal-add-btn');
+      addBtn.disabled = false;
+      addBtn.dataset.variantId = tile.dataset.variantId;
+    });
+  });
+
+  /* ── STL: Modal Add to cart ── */
+  drawer.querySelectorAll('.cp-modal-add-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var variantId = btn.dataset.variantId;
+      if (!variantId) return;
+      var modal = btn.closest('.cp-size-modal');
+      btn.textContent = 'Adding...';
+      btn.disabled = true;
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: variantId, quantity: 1 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        btn.textContent = 'Added to Cart';
+        closeDrawer();
+        if (typeof refreshCart === 'function') refreshCart();
+        if (document.dispatchEvent) {
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+        }
+        setTimeout(function() {
+          modal.classList.remove('active');
+          btn.textContent = 'Add to bag';
+          btn.disabled = true;
+          delete btn.dataset.variantId;
+          modal.querySelectorAll('.cp-size-tile.selected').forEach(function(t) { t.classList.remove('selected'); });
+        }, 1200);
+      })
+      .catch(function() {
+        btn.textContent = 'Add to bag';
+        btn.disabled = false;
+      });
+    });
+  });
+
+  /* ── Direct add (single variant) ── */
+  drawer.querySelectorAll('.stl-add-btn[data-variant-id]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var variantId = btn.getAttribute('data-variant-id');
+      if (!variantId) return;
+      btn.textContent = '...';
+      closeDrawer();
+      btn.disabled = true;
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: variantId, quantity: 1 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        btn.textContent = 'Added';
+        btn.classList.add('added');
+        if (typeof refreshCart === 'function') refreshCart();
+        if (document.dispatchEvent) {
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+        }
+        setTimeout(function() {
+          btn.textContent = 'Add';
+          btn.classList.remove('added');
+          btn.disabled = false;
+        }, 2500);
+      })
+      .catch(function() {
+        btn.textContent = 'Error';
+        btn.disabled = false;
+        setTimeout(function() { btn.textContent = 'Add'; }, 2000);
+      });
+    });
+  });
+
+})(); {% endcomment %}
+
+
+(function() {
+  var sectionId = '{{ section.id }}';
+  var openBtn       = document.getElementById('stlOpenDrawer-'       + sectionId);
+  var openBtnMobile = document.getElementById('stlOpenDrawerMobile-' + sectionId);
+  var closeBtn      = document.getElementById('stlDrawerClose-'      + sectionId);
+  var overlay       = document.getElementById('stlDrawerOverlay-'    + sectionId);
+  var drawer        = document.getElementById('stlDrawer-'           + sectionId);
+
+  if (!drawer) return;
+
+  /* ---------- Drawer open/close ---------- */
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    if (openBtn) openBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    if (openBtn) openBtn.focus();
+    if (openBtnMobile) openBtnMobile.focus();
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openDrawer);
+  if (openBtnMobile) openBtnMobile.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  /* ── STL: Size modal open ── */
+  drawer.querySelectorAll('.stl-size-open-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var modal = document.getElementById('stl-size-modal-' + btn.getAttribute('data-product-id'));
+      if (modal) modal.classList.add('active');
+    });
+  });
+
+  /* ── STL: Size modal close ── */
+  drawer.querySelectorAll('.cp-size-modal').forEach(function(modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+    modal.querySelectorAll('.cp-close').forEach(function(closeEl) {
+      closeEl.addEventListener('click', function() { modal.classList.remove('active'); });
+    });
+  });
+
+  /* ── STL: Size tile select ── */
+  drawer.querySelectorAll('.cp-size-tile:not(.sold-out):not(.tags__sgd)').forEach(function(tile) {
+    tile.addEventListener('click', function() {
+      var modal = tile.closest('.cp-size-modal');
+      modal.querySelectorAll('.cp-size-tile').forEach(function(t) { t.classList.remove('selected'); });
+      tile.classList.add('selected');
+      var addBtn = modal.querySelector('.cp-modal-add-btn');
+      addBtn.disabled = false;
+      addBtn.dataset.variantId = tile.dataset.variantId;
+    });
+  });
+
+  /* ── STL: Modal Add to cart ── */
+  drawer.querySelectorAll('.cp-modal-add-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+
+      var variantId = btn.dataset.variantId;
+      if (!variantId) return;
+
+      var modal = btn.closest('.cp-size-modal');
+      btn.textContent = 'Adding...';
+      btn.disabled = true;
+
+      try {
+
+        await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
+        });
+
+        // GET CART
+        const cartRes = await fetch('/cart.js');
+        const cartData = await cartRes.json();
+
+        // EVENT
+        const CartUpdateEvent = (await import('@theme/events')).CartUpdateEvent;
+        const event = new CartUpdateEvent(cartData, 'stl-size-add', {
+          itemCount: cartData.item_count,
+          source: 'stl-drawer'
+        });
+
+        document.dispatchEvent(event);
+
+        document.dispatchEvent(new CustomEvent('theme:cart:change', {
+          detail: { cartCount: cartData.item_count }
+        }));
+
+        btn.textContent = 'Added to Cart';
+
+        // CLOSE CURRENT UI
+        modal.classList.remove('active');
+        closeDrawer();
+
+        // OPEN SHOPIFY CART DRAWER
+        setTimeout(function () {
+          const cartDrawer = document.querySelector('cart-drawer-component');
+          if (cartDrawer && cartDrawer.open) {
+            cartDrawer.open();
+          }
+        }, 200);
+
+        setTimeout(function() {
+          btn.textContent = 'Add to bag';
+          btn.disabled = true;
+          delete btn.dataset.variantId;
+
+          modal.querySelectorAll('.cp-size-tile.selected').forEach(function(t) {
+            t.classList.remove('selected');
+          });
+
+        }, 1200);
+
+      } catch (err) {
+        console.error(err);
+        btn.textContent = 'Add to bag';
+        btn.disabled = false;
+      }
+
+    });
+  });
+
+  /* ── Direct add (single variant) ── */
+  drawer.querySelectorAll('.stl-add-btn[data-variant-id]').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+
+      var variantId = btn.getAttribute('data-variant-id');
+      if (!variantId) return;
+
+      btn.textContent = '...';
+      btn.disabled = true;
+
+      try {
+
+        await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
+        });
+
+        // GET CART
+        const cartRes = await fetch('/cart.js');
+        const cartData = await cartRes.json();
+
+        // EVENT
+        const CartUpdateEvent = (await import('@theme/events')).CartUpdateEvent;
+        const event = new CartUpdateEvent(cartData, 'stl-direct-add', {
+          itemCount: cartData.item_count,
+          source: 'stl-drawer'
+        });
+
+        document.dispatchEvent(event);
+
+        document.dispatchEvent(new CustomEvent('theme:cart:change', {
+          detail: { cartCount: cartData.item_count }
+        }));
+
+        btn.textContent = 'Added';
+        btn.classList.add('added');
+
+        // CLOSE CURRENT DRAWER
+        closeDrawer();
+
+        // OPEN SHOPIFY CART DRAWER
+        setTimeout(function () {
+          const cartDrawer = document.querySelector('cart-drawer-component');
+          if (cartDrawer && cartDrawer.open) {
+            cartDrawer.open();
+          }
+        }, 200);
+
+        setTimeout(function() {
+          btn.textContent = 'Add';
+          btn.classList.remove('added');
+          btn.disabled = false;
+        }, 2500);
+
+      } catch (err) {
+        console.error(err);
+        btn.textContent = 'Error';
+        btn.disabled = false;
+        setTimeout(function() { btn.textContent = 'Add'; }, 2000);
+      }
+
+    });
+  });
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Shop The Look",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "MADE IN ITALY"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Shop The Look"
+    },
+    {
+      "type": "product",
+      "id": "main_product",
+      "label": "Main Product (Right Side)"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA Button Text",
+      "default": "See the full look"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Section Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Section Padding Bottom",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop The Look",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

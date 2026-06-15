@@ -1,0 +1,411 @@
+{% assign custom_selections = options %}
+
+{%- liquid
+  assign list_vals = '' | split
+  assign list_vals_s = '' | split
+  assign list_vals_g = '' | split
+  for option in custom_selections
+    if option.sub_options != blank
+      assign list_vals = list_vals | concat: option.sub_options | uniq
+      for s_option in option.sub_options
+        if s_option.sub_options
+          assign list_vals_s = list_vals_s | concat: s_option.sub_options | uniq
+          for g_option in s_option.sub_options
+            if g_option.sub_options
+              assign list_vals_g = list_vals_g | concat: g_option.sub_options | uniq
+            endif
+          endfor
+        endif
+      endfor
+    endif
+  endfor
+-%}
+{% if list_vals != blank %}
+  <ul
+    class="customizer-list childs-list  overview-list {% if contras == true %}first-childs-contras contrasts  {% else %} first-childs-style styles {% endif %} hidden "
+    data-index="1"
+  >
+    {% for main_option in custom_selections %}
+      {% assign total_length = 1 %}
+      {% if main_option.sub_options != blank %}
+        {% for option in main_option.sub_options %}
+          {% if option.option_type == 'collection' %}
+            {% assign collection_handle = option.label | handleize %}
+            {% assign selected_collection = collections[collection_handle] %}
+
+            {% if selected_collection %}
+              {% paginate selected_collection.products by 1000 %} 
+              {% for product in selected_collection.products %}
+                <li
+                  child-id="{{ option.id }}"
+                  parent-id="{{  main_option.id }}"
+                  again_select="{{  option.id }}"
+                  {{ CardSize }}
+                  class="hidden          {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+                  data-list=""
+                  current_index="2"
+                   sub-options="1"
+                   {% capture sub_title %}
+  {% if option.sub_title != blank %}
+    {{ option.sub_title }}
+  {% elsif main_option.sub_title != blank %}
+    {{ main_option.sub_title }}
+  {% else %}
+    {{ main_option.label }}
+  {% endif %}
+{% endcapture %}
+                  sub-title="{{ sub_title }}"
+                  {% for has_depended_options in option.dependent_options %}
+                    {% assign has_depended = has_depended_options.parent_id %} 
+                    {{ has_depended }}
+                  {% endfor %}
+                  {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %}
+                    has-depended="{{ has_depended }}"
+                    hasdisabled-to="{{ has_depended}}"
+                  {% endif %}
+                  data-main-parent="{{ main_option.id }}"
+                  childsIn="{% if contras == true %}contrasts{% else %}styles{% endif %}"
+                  1
+                >
+                  {% assign product_img = product.featured_image | image_url: width: , height: %}
+                  {%
+                    render 'customizer-card',
+                    option: option,
+                    parent_id: main_option.id,
+                    1st: main_option,
+                    override_label: product.title,
+                    override_image: product_img,
+                    product: product,
+                    product_id: product.id,
+                   sub_title: sub_title,
+                     steps: 2
+                  %}
+                </li>
+              {% endfor %}
+            {% endpaginate %}
+            {% endif %}
+
+          {% elsif option.option_type == '' or option.option_type == null %}
+                 {% assign steps = 1 %}
+
+  {% if option.sub_options != blank %}
+    {% assign steps = 2 %}
+    {% for child in option.sub_options %}
+      {% if child.sub_options != blank %}
+        {% assign steps = 3 %}
+        {% for grandchild in child.sub_options %}
+          {% if grandchild.sub_options != blank %}
+            {% assign steps = 4 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+            <li
+              child-id="{{ option.id }}"
+              parent-id="{{  main_option.id }}"
+              style_name="{{ option.label }}"
+              sub-options="{{ steps }}"
+              {{ CardSize }}
+
+              class="hidden {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+              {% for has_depended_options in option.dependent_options %}
+                {% assign has_depended = has_depended_options.parent_id %}
+                {{ has_depended }}
+              {% endfor %}
+              {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %}
+                has-depended="{{ has_depended }}"
+                hasdisabled-to="{{ has_depended}}"
+              {% endif %}
+              data-list="{{ option.sub_options | map: "id" | join:"," }}"
+              data-main-parent="{{ main_option.id }}"
+              current_index="2"
+{% capture sub_title %}
+  {% if option.sub_title != blank %}
+    {{ option.sub_title }}
+  {% elsif main_option.sub_title != blank %}
+    {{ main_option.sub_title }}
+  {% else %}
+    {{ main_option.label }}
+  {% endif %}
+{% endcapture %}
+              sub-title="{{ sub_title }}"
+              childsIn="{% if contras == true %}contrasts{% else %}styles{% endif %}"
+              1
+            >
+              {%
+                render 'customizer-card',
+                option: option,
+                parent_id: main_option.id,
+                1st: main_option,
+                sub_title: sub_title,
+                steps: 2
+              %}
+            </li>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}
+{% if list_vals_s != blank %}
+  <ul
+    class="customizer-list childs-list overview-list {% if contras == true %}second-childs-contras contrasts  {% else %}second-childs-style  styles {% endif %} hidden"
+    data-index="2"
+  >
+    {% for main_option in custom_selections %}
+      {% assign total_length = 1 %}
+      {% if main_option.sub_options != blank %}
+        {% assign total_length = total_length | plus: 1 %}
+        {% for sub_option in main_option.sub_options %}
+          {% if sub_option.sub_options != blank %}
+            {% assign total_length = total_length | plus: 1 %}
+            {% for option in sub_option.sub_options %}
+              {% if option.option_type == 'collection' %}
+                {% assign collection_handle = option.label | handleize %}
+                {% assign selected_collection_sub = collections[collection_handle] %}
+                {% if selected_collection_sub %}
+                  {% paginate selected_collection_sub.products by 1000 %} 
+                  {% for product in selected_collection_sub.products %}
+                    <li
+                      child-id="{{ option.id }}"
+                      parent-id="{{  sub_option.id }}"
+                      again_select="{{  sub_option.id }}"
+                      style_name="{{ product.title }}"
+                        sub-options="1"
+                      {{ CardSize }}
+                      {% for has_depended_options in option.dependent_options %}
+                        {% assign has_depended = has_depended_options.parent_id %}
+                        {{ has_depended }}
+                      {% endfor %}
+                      {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %}
+                        has-depended="{{ has_depended }}"
+                        hasdisabled-to="{{ has_depended}}"
+                      {% endif %}
+                      class="hidden {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+                      data-list=""
+                      data-main-parent="{{ main_option.id }}"
+                      current_index="3"
+                          {% capture sub_title %}
+  {% if option.sub_title != blank %}
+    {{ option.sub_title }}
+  {% elsif sub_option.sub_title != blank %}
+    {{ sub_option.sub_title }}
+  {% else %}
+    {{ sub_option.label }}
+  {% endif %}
+{% endcapture %}
+                      sub-title="{{ sub_title }}"
+                      childsIn="{% if contras == true %}contrasts{% else %}styles{% endif %}"
+                      2
+                    >
+                      {% assign product_img = product.featured_image | image_url: width: , height: %}
+                      {%
+                        render 'customizer-card',
+                        option: option,
+                        parent_id: main_option.id,
+                        1st: main_option,
+                        2nd:sub_option ,
+                        override_label: product.title,
+                        override_image: product_img,
+                        product: product,
+                        product_id: product.id,
+                           sub_title: sub_title,
+                             steps: 3
+                      %}
+                    </li>
+                  {% endfor %}
+                  {%endpaginate %}
+                {% endif %}
+              {% elsif option.option_type == '' or option.option_type == null %}
+                           {% assign steps = 1 %}
+
+  {% if option.sub_options != blank %}
+    {% assign steps = 2 %}
+    {% for child in option.sub_options %}
+      {% if child.sub_options != blank %}
+        {% assign steps = 3 %}
+        {% for grandchild in child.sub_options %}
+          {% if grandchild.sub_options != blank %}
+            {% assign steps = 4 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+                <li
+                  child-id="{{ option.id }}"
+                  parent-id="{{  sub_option.id }}"
+                  style_name="{{ option.label }}"
+                  sub-options="{{ steps }}"
+                  {{ CardSize }}
+                  {% for has_depended_options in option.dependent_options %}
+                    {% assign has_depended = has_depended_options.parent_id %}
+                    {{ has_depended }}
+                  {% endfor %}
+                  {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %}
+                    has-depended="{{ has_depended }}"
+                    hasdisabled-to="{{ has_depended}}"
+                  {% endif %}
+                  class="hidden {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+                  data-list="{{ option.sub_options | map: "id" | join:" , " }}"
+                  current_index="3"
+                  data-main-parent="{{ main_option.id }}"
+                  childsIn="{% if contras == true %}contrasts{% else %}styles{% endif %}"
+                  2
+                   {% capture sub_title %}
+  {% if option.sub_title != blank %}
+    {{ option.sub_title }}
+  {% elsif sub_option.sub_title != blank %}
+    {{ sub_option.sub_title }}
+  {% else %}
+    {{ sub_option.label }}
+  {% endif %}
+{% endcapture %}
+                      sub-title="{{ sub_title }}"
+                >
+                  {% render 'customizer-card', option: option, parent_id: main_option.id ,1st:main_option , 2nd:sub_option,   sub_title: sub_title,   steps: 3 %}
+                </li>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}
+{% if list_vals_g != blank %}
+  <ul
+    class="customizer-list childs-list overview-list {% if contras == true %}thrid--child-contras contrasts  {% else %} thrid--child-style styles {% endif %} hidden"
+    data-index="3"
+  >
+    {% for main_option in custom_selections %}
+      {% assign total_length = 1 %}
+      {% if main_option.sub_options != blank %}
+        {% assign total_length = total_length | plus: 1 %}
+        {% for sub_option in main_option.sub_options %}
+          {% if sub_option.sub_options != blank %}
+            {% assign total_length = total_length | plus: 1 %}
+            {% for grand_option in sub_option.sub_options %}
+              {% if grand_option.sub_options != blank %}
+                {% assign total_length = total_length | plus: 1 %}
+                {% for option in grand_option.sub_options %}
+                  {% if option.option_type == 'collection' %}
+                    {% assign collection_handle = option.label | handleize %}
+                    {% assign selected_collection_sub = collections[collection_handle] %}
+                    {% if selected_collection_sub %}
+                      {% paginate selected_collection_sub.products by 1000 %} 
+                      {% for product in selected_collection_sub.products %}
+                        <li
+                          child-id="{{ product.id }}"
+                          parent-id="{{  option.id }}"
+                          again_select="{{  grand_option.id }}"
+                          style_name="{{ product.title }}"
+                           sub-options="1"
+                          {{ CardSize }}
+                          {% for has_depended_options in option.dependent_options %}
+                            {% assign has_depended = has_depended_options.parent_id %}
+                            {{ has_depended }}
+                          {% endfor %}
+                          {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %}
+                            has-depended="{{ has_depended }}"
+                            hasdisabled-to="{{ has_depended}}"
+                          {% endif %}
+                          data-main-parent="{{ main_option.id }}"
+                          class="hidden {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+                          data-list=""
+                          current_index="4"
+                           {% capture sub_title %}
+  {% if option.sub_title != blank %}
+    {{ option.sub_title }}
+  {% elsif grand_option.sub_title != blank %}
+    {{ grand_option.sub_title }}
+  {% else %}
+    {{ grand_option.label }}
+  {% endif %}
+{% endcapture %}
+                      sub-title="{{ sub_title }}"
+                         
+                      childsIn="{% if contras == true %}contrasts{% else %}styles{% endif %}"
+                          3
+                        >
+                          {% assign product_img = product.featured_image | image_url: width: , height: %}
+                          {%
+                            render 'customizer-card',
+                            option: option,
+                            parent_id: main_option.id,
+                            1st: main_option,
+                            2nd:sub_option ,
+                            3rd:grand_option ,
+                            override_label: product.title,
+                            override_image: product_img,
+                            product: product,
+                            product_id: product.id,
+                               sub_title: sub_title,
+                                 steps: 4
+                          %}
+                        </li>
+                      {% endfor %}
+                    {% endpaginate %}
+                    {% endif %}
+                  {% elsif option.option_type == '' or option.option_type == null %}
+                               {% assign steps = 1 %}
+
+  {% if option.sub_options != blank %}
+    {% assign steps = 2 %}
+    {% for child in option.sub_options %}
+      {% if child.sub_options != blank %}
+        {% assign steps = 3 %}
+        {% for grandchild in child.sub_options %}
+          {% if grandchild.sub_options != blank %}
+            {% assign steps = 4 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+                    <li
+                      child-id="{{ option.id }}"
+                      parent-id="{{  grand_option.id }}"
+                      style_name="{{ option.label }}"
+                      sub-options="{{ steps }}"
+                      {{ CardSize }}
+                      {% for has_depended_options in option.dependent_options %}
+                        {% assign has_depended = has_depended_options.parent_id %}
+                        {{ has_depended }}
+                      {% endfor %}
+                         {% capture sub_title %}
+  {% if option.sub_title != blank %}
+    {{ option.sub_title }}
+  {% elsif grand_option.sub_title != blank %}
+    {{ grand_option.sub_title }}
+  {% else %}
+    {{ grand_option.label }}
+  {% endif %}
+{% endcapture %}
+                      sub-title="{{ sub_title }}"
+                      {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %}
+                        has-depended="{{ has_depended }}"
+                        hasdisabled-to="{{ has_depended}}"
+                      {% endif %}
+                      data-main-parent="{{ main_option.id }}"
+                      class="hidden {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+                      data-list="{{ option.sub_options | map: "id" | join:" , " }}"
+                      current_index="4"
+                      childsIn="{% if contras == true %}contrasts{% else %}styles{% endif %}"
+                      3
+                    >
+                      {% render 'customizer-card', option: option, parent_id: main_option.id ,1st:main_option , 2nd:sub_option, 3rd:grand_option,   sub_title: sub_title,   steps: 4 %}
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}

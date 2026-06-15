@@ -1,0 +1,322 @@
+<script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+
+{% comment %}
+  * Make sure you have the Flickity plugin installed and the proper license for this to function on your store
+  * Plugin, licensing and documentation at https://flickity.metafizzy.co/
+{% endcomment %}
+
+{% assign cell_align = section.settings.cell_align %}
+{% assign wrap_around = section.settings.wrap_around %}
+{% assign img_width = section.settings.img_width %}
+
+<div
+  class="flickity-section-{{ section.id }} flickity-index-slider collection"
+  style="background-color: {{ section.settings.bg }}"
+>
+  <div class="collection-slider section section-page-width">
+    <div class="section-header section-header-layout2 section-header-product">
+      <h2 class="collection-slider-heading">{{ section.settings.title }}</h2>
+    </div>
+    <div
+      class="flickity-section__carousel carousel-{{section.id }} text-center"
+      data-flickity='
+        {
+        "cellAlign": "{{ cell_align }}",
+        "pageDots": false,
+        "freeScroll": true,
+        "groupCells": true,
+        "contain": true,
+        "wrapAround": {{ wrap_around }}
+        }
+      '
+    >
+      {% for product in collection_main.products limit: collection_limit %}
+
+        <div class="carousel__cell" style="margin-right:{{ section.settings.mr }}px"></div>
+      {% endfor %}
+      {%- for block in section.blocks -%}
+        {% assign col = collections[block.settings.collection] %}
+        <div class="carousel__cell" style="margin-right:{{ section.settings.mr }}px" style="width: 200px">
+          <a class="collection-img" href="{{ block.settings.img_url }}">
+            <img src="{{ block.settings.image | img_url: 'master' }}" width="100%" height="auto">
+            <span class="caption">
+              <span class="name">{{ block.settings.collection_text }}</span>
+              <span class="catagory-name">{{ block.settings.collection_text1 }}</span>
+                {% if col %}
+          <span class="catagory-name">
+            {{ col.products_count }} Products
+          </span>
+        {% endif %}
+            </span>
+          </a>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection Slider",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Background Color"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Featured Collection Slider"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:sections.collection-list.settings.image_ratio.options__1.label"
+        },
+        {
+          "value": "portrait",
+          "label": "t:sections.collection-list.settings.image_ratio.options__2.label"
+        },
+        {
+          "value": "square",
+          "label": "t:sections.collection-list.settings.image_ratio.options__3.label"
+        }
+      ],
+      "default": "square",
+      "label": "t:sections.collection-list.settings.image_ratio.label",
+      "info": "t:sections.collection-list.settings.image_ratio.info"
+    },
+    {
+      "type": "select",
+      "id": "cell_align",
+      "label": "Slide Alignment",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "title_mb",
+      "min": 30,
+      "max": 120,
+      "step": 1,
+      "unit": "px",
+      "label": "Title Margin Bottom",
+      "default": 48
+    },
+    {
+      "type": "select",
+      "id": "cell_width",
+      "label": "Choose number of slides to show on start",
+      "options": [
+        {
+          "value": "25%",
+          "label": "Four"
+        },
+        {
+          "value": "20%",
+          "label": "Five"
+        },
+        {
+          "value": "16.6666667%",
+          "label": "Six"
+        },
+        {
+          "value": "12.5%",
+          "label": "Eight"
+        }
+      ],
+      "default": "25%"
+    },
+    {
+      "type": "radio",
+      "id": "wrap_around",
+      "label": "Enable Wrap Around (endless scrolling)",
+      "options": [
+        {
+          "value": "true",
+          "label": "True"
+        },
+        {
+          "value": "false",
+          "label": "False"
+        }
+      ],
+      "default": "true"
+    },
+    {
+      "type": "range",
+      "id": "mr",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Cell Margin Right",
+      "default": 16,
+      "info": "Save page to see changes."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select collection"
+        },
+        {
+          "id": "image",
+          "type": "image_picker",
+          "label": "image"
+        },
+        {
+          "id": "collection_text",
+          "type": "text",
+          "label": "Add Text Here"
+        },
+        {
+          "id": "collection_text1",
+          "type": "text",
+          "label": "Add Text Here"
+        },
+
+        {
+          "id": "img_url",
+          "type": "url",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Slider",
+      "category": "Slider"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+      .flickity-prev-next-button{
+        border-radius: 0 !important;
+      }
+
+      {% comment %} @media ( max-width: 767px ) {
+       .carousel__cell {
+      /* 2 cells in group */
+      width: calc( ( 100% - 10px ) / 2) !important;
+
+    } {% endcomment %}
+    }
+     .carousel__cell {
+      /* 2 cells in group */
+      width: 25%;
+
+    }
+
+    .collection-slider .collection-img {
+      position: relative;
+      display: block;
+    }
+
+    .collection-slider .collection-img .caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 50px 20px 20px;
+      background-image: linear-gradient(transparent, rgba(0,0,0,0.59));
+      color: #fff;
+      text-transform: uppercase;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    .collection-slider .collection-img .caption span {
+      display: block;
+    }
+
+    .collection-slider .section-header h2,
+  .home-sections-product .section-header-product h2 {
+    {% comment %} font-size: var(--font_size_plus12); {% endcomment %}
+    font-weight: 500;
+    display: inline-block;
+    vertical-align: middle;
+    background-color: #fff;
+    padding: 15px 25px;
+  }
+
+  .section-header-product {
+      text-align: center;
+  }
+  .section-header {
+      margin-bottom: 14px;
+      margin: 20px 79px;
+  }
+  .catagory-name{
+    color: Yellow; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  @media (min-width: 993px) {
+      .collection-slider .section-header:before, .home-sections-product .section-header-product:before {
+          left: 100px;
+          right: 100px;
+      }
+  }
+  .collection-slider .section-header:before, .home-sections-product .section-header-product:before {
+      content: '';
+      height: 1px;
+      background-color: #000;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: -1;
+  }
+  *, *::before, *::after {
+      box-sizing: border-box;
+  }
+  *, ::after, ::before {
+      box-sizing: border-box;
+  }
+  .section-header-product {
+      text-align: center;
+  }
+  .section-header {
+      {% comment %} width: 100%; {% endcomment %}
+      display: block;
+      position: relative;
+      margin-top: 0;
+      margin-bottom: 25px;
+      color: var(--color_heading_text);
+      margin: 20px 79px;
+  }
+
+    @media (max-width: 767px) {
+    .carousel__cell {
+      width: 70% !important; /* Show ~1.4 slides so user knows it's swipeable */
+    }
+
+    .collection-slider .collection-img .caption {
+      padding: 30px 10px 10px;
+      font-size: 14px;
+    }
+  }
+</style>

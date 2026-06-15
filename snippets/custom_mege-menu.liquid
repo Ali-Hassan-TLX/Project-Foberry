@@ -1,0 +1,11 @@
+{%- doc -%}
+  Renders mega menu list markup and optional featured content.
+
+  @param {object} blockTExt - The linklist to render.
+
+  @example
+  {% render 'custom_mege-menu', parent_link: link  %}
+{%- enddoc -%}
+{% if blockText != blank %}
+<div class="main-product" data-link="{{ blockText }}"></div>
+{% endif %}

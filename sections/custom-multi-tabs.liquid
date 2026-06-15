@@ -1,0 +1,166 @@
+<style>
+.section-{{section.id }} {
+    
+    .tab-name {
+      padding:0px 10px;
+      cursor:pointer;
+      margin:0px
+    }
+    .tab-name.active{
+              border-bottom: 2px solid #000000;
+    }
+.custom-multi-tabs-headings{
+    display:flex;
+    padding: 10px 30px;
+    margin:0px
+}
+
+}
+</style>
+    <div class="custom-multi-tabs-wraper">
+    <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    class="
+      section
+      section-{{section.id }}
+      section--{{ section.settings.section_width }}
+      color-{{ section.settings.color_scheme }}
+      section-resource-list
+      spacing-style
+      gap-style
+      "
+      style="
+      {%  render 'spacing-style', settings: section.settings %}
+      {%  render 'gap-style', value: section.settings.gap %}
+      {{ styles }}
+      "
+    >
+        <div class="custom-multi-tabs-headings
+            color-{{ section.settings.tabs_color_scheme }}
+            
+    ">
+<h4 class="tab-name active" tab-name="you-may-like">{{section.settings.like_products}}</h4>
+<h4 class="tab-name " tab-name="recent-view">{{section.settings.recent_view}}</h4>
+</div>
+<div class="custom-multi-tabs">
+ {% content_for 'blocks' %}
+</div>
+
+
+
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const headings = document.querySelectorAll('.custom-multi-tabs-headings .tab-name');
+  const blocks = document.querySelectorAll('.custom-multi-tabs .shopify-block');
+
+  function showTab(name) {
+    // remove active from headings
+    headings.forEach(h => h.classList.remove('active'));
+
+    // hide all blocks
+    blocks.forEach(b => b.classList.add('hidden'));
+
+    // activate clicked heading
+    const activeHeading = document.querySelector(`.tab-name[tab-name="${name}"]`);
+    activeHeading?.classList.add('active');
+
+    // show block by class match
+    const activeBlock = document.querySelector(`.custom-multi-tabs .${name}`);
+    activeBlock?.classList.remove('hidden');
+  }
+
+  // click
+  headings.forEach(tab => {
+    tab.addEventListener('click', () => {
+      showTab(tab.getAttribute('tab-name'));
+    });
+  });
+
+  // default on load
+  const defaultTab = document.querySelector('.tab-name.active')?.getAttribute('tab-name');
+  if (defaultTab) showTab(defaultTab);
+
+});
+</script>
+{% schema %}
+{
+"name": "Multi Tabs",
+"settings": [
+  {
+    "type":"text",
+    "id":"like_products",
+    "label":" You may like ",
+    "default": " You may like "
+  },
+  {
+    "type":"text",
+    "id":"recent_view",
+    "label":"Recent View",
+    "default": "Recent View"
+  },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "page-width"
+    },
+     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+     {
+      "type": "color_scheme",
+      "id": "tabs_color_scheme",
+      "label": "Tabs Color Scheme",
+      "default": "scheme-2"
+    },
+     {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+],
+"blocks": [
+    {
+    "type": "product-recent-view"
+    },
+    {
+    "type": "product-recommendations"
+    }
+],
+"presets": [
+    {
+    "name": "Multi Tabs"
+    }
+]
+}
+{% endschema %}

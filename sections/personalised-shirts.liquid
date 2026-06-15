@@ -1,0 +1,380 @@
+{% comment %}
+  Personalised Shirts Section
+  Single image or video on right side
+  Left content untouched
+  Compatible with Shopify Fabric theme
+{% endcomment %}
+
+<section class="personalised-shirts {{ section.id }}">
+  <div class="page-width">
+    <div class="ps-grid">
+
+      <!-- LEFT CONTENT (UNCHANGED) -->
+      <div class="ps-content">
+        <h2 class="ps-heading">{{ section.settings.heading }}</h2>
+        <div class="ps-underline"></div>
+        <p class="ps-text">{{ section.settings.text }}</p>
+
+        {% if section.settings.button_label != blank %}
+          <a href="{{ section.settings.button_link }}" class="ps-btn">
+            <span>{{ section.settings.button_label }}</span>
+          </a>
+        {% endif %}
+      </div>
+
+      {% comment %} <!-- RIGHT SIDE (IMAGE OR VIDEO) -->
+  <div class="ps-visual">
+
+  {% if section.settings.media_type == 'video' %}
+
+    {% if section.settings.mobile_video != blank %}
+      <div class="ps-mobile-only">
+        {{
+          section.settings.mobile_video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            playsinline: true,
+            class: 'ps-video-single'
+        }}
+      </div>
+    {% endif %}
+
+    {% if section.settings.video != blank %}
+      <div class="ps-desktop-only">
+        {{
+          section.settings.video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            playsinline: true,
+            class: 'ps-video-single'
+        }}
+      </div>
+    {% endif %}
+
+  {% else %}
+
+    {% if section.settings.mobile_image != blank %}
+      <img
+        class="ps-image-single ps-mobile-only"
+        src="{{ section.settings.mobile_image | image_url: width: 600 }}"
+        alt=""
+        loading="lazy"
+      >
+    {% endif %}
+
+    {% if section.settings.image != blank %}
+      <img
+        class="ps-image-single ps-desktop-only"
+        src="{{ section.settings.image | image_url: width: 800 }}"
+        alt=""
+        loading="lazy"
+      >
+    {% endif %}
+
+  {% endif %}
+
+</div> {% endcomment %}
+
+<div class="ps-visual">
+
+  <!-- MOBILE -->
+  {% if section.settings.mobile_media_type == 'video' %}
+
+    {% if section.settings.mobile_video != blank %}
+      <div class="ps-mobile-only">
+        {{
+          section.settings.mobile_video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            playsinline: true,
+            class: 'ps-video-single'
+        }}
+      </div>
+    {% endif %}
+
+  {% else %}
+
+    {% if section.settings.mobile_image != blank %}
+      <img
+        class="ps-image-single ps-mobile-only"
+        src="{{ section.settings.mobile_image | image_url: width: 600 }}"
+        alt=""
+        loading="lazy"
+      >
+    {% endif %}
+
+  {% endif %}
+
+
+  <!-- DESKTOP (UNCHANGED LOGIC) -->
+  {% if section.settings.media_type == 'video' %}
+
+    {% if section.settings.video != blank %}
+      <div class="ps-desktop-only">
+        {{
+          section.settings.video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            playsinline: true,
+            class: 'ps-video-single'
+        }}
+      </div>
+    {% endif %}
+
+  {% else %}
+
+    {% if section.settings.image != blank %}
+      <img
+        class="ps-image-single ps-desktop-only"
+        src="{{ section.settings.image | image_url: width: 800 }}"
+        alt=""
+        loading="lazy"
+      >
+    {% endif %}
+
+  {% endif %}
+
+</div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+/* SECTION */
+.personalised-shirts {
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* GRID 40 / 60 */
+.ps-grid {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  align-items: center;
+  gap: 60px;
+}
+
+/* LEFT CONTENT */
+.ps-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* HEADING */
+.ps-heading {
+  font-size: 42px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+/* UNDERLINE */
+.ps-underline {
+  height: 3px;
+  background: linear-gradient(90deg, #f5a623, #6c63ff);
+  margin: 10px 0 20px;
+  width: 100%;
+  border-radius: 2px;
+}
+
+/* TEXT */
+.ps-text {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+/* BUTTON */
+.ps-btn {
+  display: inline-block;
+  padding: 2px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #a855f7, #ec4899, #f97316);
+  text-decoration: none;
+}
+
+.ps-btn span {
+  display: block;
+  background: #ffffff;
+  padding: 14px 36px;
+  border-radius: 5px;
+  color: #000;
+  font-weight: 500;
+}
+
+.ps-btn:hover span {
+  background: transparent;
+  color: #ffffff;
+}
+
+/* RIGHT SIDE IMAGE */
+.ps-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ps-image-single {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* RIGHT SIDE VIDEO */
+.ps-video-single {
+  max-width: 70%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  padding-top:10%;
+  padding-bottom:10%;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .ps-heading {
+    font-size: x-large;
+  }
+  .ps-underline {
+    width: 65%;
+  }
+  .ps-text {
+    font-size: 18px;
+    text-align: center;
+  }
+  .ps-grid {
+    grid-template-columns: 1fr;
+  }
+  .ps-visual {
+    margin-top: 40px;
+  }
+  .ps-video-single{
+    margin-left:13%;
+  }
+}
+/* MOBILE / DESKTOP VISIBILITY */
+.ps-mobile-only {
+  display: none;
+}
+
+.ps-desktop-only {
+  display: block;
+  width: 80%;
+  padding-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .ps-mobile-only {
+    display: block;
+  }
+  .ps-desktop-only {
+    display: none;
+  }
+}
+
+</style>
+
+{% schema %}
+{
+  "name": "Personalised Shirts",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "PERSONALISED SHIRTS!"
+    }, 
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Craft the perfect look that reflects your individuality. You design, we craft."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "START DESIGNING"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Right Side Media"
+    },
+    {
+      "type": "select",
+      "id": "media_type",
+      "label": "Media Type",
+      "options": [
+        { "value": "image", "label": "Image" },
+        { "value": "video", "label": "Video" }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Right Image",
+      "info": "Used when Media Type is set to Image"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Right Video",
+      "info": "Used when Media Type is set to Video"
+    },
+    {
+  "type": "header",
+  "content": "Mobile Media"
+},
+{
+  "type": "select",
+  "id": "mobile_media_type",
+  "label": "Mobile Media Type",
+  "options": [
+    { "value": "image", "label": "Image" },
+    { "value": "video", "label": "Video" }
+  ],
+  "default": "image"
+},
+{
+  "type": "image_picker",
+  "id": "mobile_image",
+  "label": "Mobile Image",
+  "info": "Optional: Used on mobile devices"
+},
+{
+  "type": "video",
+  "id": "mobile_video",
+  "label": "Mobile Video",
+  "info": "Optional: Used on mobile devices"
+}
+
+  ],
+  "presets": [
+    {
+      "name": "Personalised Shirts Section"
+    }
+  ]
+}
+{% endschema %}
+

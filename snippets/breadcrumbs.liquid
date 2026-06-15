@@ -1,0 +1,208 @@
+<style> 
+  .breadcrumbs__list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumbs__item {
+ display: inline-flex;
+    line-height: 16px;
+    align-items: baseline;
+  }
+
+  .breadcrumbs__item:not(:last-child):after {
+    content: '';
+    display: inline-block;
+    height: 9px;
+    margin: 0 5px;
+    vertical-align: middle;
+    width: 5px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='15' viewBox='0 0 8 15' fill='none'><path d='M0 12.7063L5 7.7063L0 2.7063L1 0.706299L8 7.7063L1 14.7063L0 12.7063Z' fill='black'/></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .breadcrumbs__item a { 
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 400;
+    vertical-align: middle;
+  }
+
+  .breadcrumbs__link[aria-current="page"] {
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .collection--breadcrumbs {background: transparent;}
+  .collection--breadcrumbs .breadcrumbs__item a {opacity: 1;font-weight: 600;}
+  .collection--breadcrumbs .breadcrumbs__link[aria-current="page"] {font-weight: 300;}
+
+  @media(max-width:768px){
+   /* ol.breadcrumbs__list {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }*/
+    .breadcrumbs__item:not(:last-child):after{
+      margin: 0 10px;
+    }
+    .breadcrumbs__item {
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+</style>
+
+{%- unless template == 'index' or template == 'cart' or template == 'list-collections' or template == '404' -%}
+
+{%- assign t = template | split: '.' | first -%}
+
+<nav class="breadcrumbs" role="navigation" aria-label="breadcrumbs">
+  <ol class="breadcrumbs__list">
+
+    <!-- HOME -->
+    <li class="breadcrumbs__item">
+      <a class="breadcrumbs__link" href="{{ routes.root_url }}">Home</a>
+    </li>
+
+    {%- case t -%}
+
+      <!-- PAGE -->
+      {%- when 'page' -%}
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ page.url }}" aria-current="page">
+            {{ page.title }}
+          </a>
+        </li>
+
+      <!-- PRODUCT -->
+      {%- when 'product' -%}
+
+        {%- assign current_collection = nil -%}
+
+        {%- comment %}
+          1. Get collection from URL (MOST ACCURATE)
+        {% endcomment -%}
+        {%- if request.path contains '/collections/' -%}
+          {%- assign url_parts = request.path | split: '/' -%}
+          {%- assign collection_handle = url_parts[2] -%}
+          {%- assign current_collection = collections[collection_handle] -%}
+        {%- endif -%}
+
+        {%- comment %}
+          2. Fallback to Shopify collection object
+        {% endcomment -%}
+        {%- if current_collection == nil and collection -%}
+          {%- assign current_collection = collection -%}
+        {%- endif -%}
+
+        {%- comment %}
+          3. Final fallback → first product collection
+        {% endcomment -%}
+        {%- if current_collection == nil and product.collections.size > 0 -%}
+          {%- assign current_collection = product.collections.first -%}
+        {%- endif -%}
+
+        {%- if current_collection -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ current_collection.url }}">
+              {{ current_collection.title }}
+            </a>
+          </li>
+        {%- endif -%}
+
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ product.url }}" aria-current="page">
+            {{ product.title }}
+          </a>
+        </li>
+
+      <!-- COLLECTION -->
+      {%- when 'collection' -%}
+
+        {%- if current_tags -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ collection.url }}">
+              {{ collection.title }}
+            </a>
+          </li>
+
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" aria-current="page">
+              {{ current_tags | join: " + " }}
+            </a>
+          </li>
+        {%- else -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ collection.url }}" aria-current="page">
+              {{ collection.title }}
+            </a>
+          </li>
+        {%- endif -%}
+
+      <!-- BLOG -->
+      {%- when 'blog' -%}
+
+        {%- if current_tags -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ blog.url }}">
+              {{ blog.title }}
+            </a>
+          </li>
+
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" aria-current="page">
+              {{ current_tags | join: " + " }}
+            </a>
+          </li>
+        {%- else -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ blog.url }}" aria-current="page">
+              {{ blog.title }}
+            </a>
+          </li>
+        {%- endif -%}
+
+      <!-- ARTICLE -->
+      {%- when 'article' -%}
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ blog.url }}">
+            {{ blog.title }}
+          </a>
+        </li>
+
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ article.url }}" aria-current="page">
+            {{ article.title }}
+          </a>
+        </li>
+
+      <!-- SEARCH -->
+      {%- when 'search' -%}
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" aria-current="page">
+            Search
+          </a>
+        </li>
+
+      <!-- DEFAULT -->
+      {%- else -%}
+        <li class="breadcrumbs__item">
+          <a class="breadcrumbs__link" href="{{ request.path }}" aria-current="page">
+            {{ page_title }}
+          </a>
+        </li>
+
+    {%- endcase -%}
+
+  </ol>
+</nav>
+
+{%- endunless -%}

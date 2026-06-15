@@ -1,0 +1,172 @@
+{% style %}
+.gradient-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.gradient-border-btn {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  font-weight: 600;
+  text-decoration: none;
+  color: {{ block.settings.text_color }};
+  background: {{ block.settings.bg_color }};
+  z-index: 1;
+  transition: 0.3s ease;
+}
+
+.gradient-border-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: {{ block.settings.border_thickness }}px;
+  border-radius: inherit;
+  background: linear-gradient(
+    {{ block.settings.gradient_angle }}deg,
+    {{ block.settings.gradient_color_1 }},
+    {{ block.settings.gradient_color_2 }},
+    {{ block.settings.gradient_color_3 }}
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  z-index: -1;
+}
+
+.gradient-border-btn:hover {
+  opacity: 0.85;
+}
+{% endstyle %}
+
+<div class="gradient-btn-wrapper" {{ block.shopify_attributes }}>
+  <a
+    href="{{ block.settings.button_link }}"
+    class="gradient-border-btn"
+    style="
+      width: {% if block.settings.full_width %}100%{% else %}{{ block.settings.button_width }}px{% endif %};
+      padding: {{ block.settings.padding_y }}px {{ block.settings.padding_x }}px;
+      border-radius: {{ block.settings.radius }}px;
+    "
+  >
+    {{ block.settings.button_text }}
+  </a>
+</div>
+
+{% schema %}
+{
+  "name": "Gradient Border Button",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width Button",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "button_width",
+      "min": 100,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Button Width",
+      "default": 220
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding Top/Bottom",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "padding_x",
+      "min": 12,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding Left/Right",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Border Radius",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Thickness",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 5,
+      "unit": "deg",
+      "label": "Gradient Angle",
+      "default": 45
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_1",
+      "label": "Gradient Color 1",
+      "default": "#ff4d4d"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_2",
+      "label": "Gradient Color 2",
+      "default": "#ffcc00"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_3",
+      "label": "Gradient Color 3",
+      "default": "#6a5acd"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Button Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    }
+  ]
+}
+{% endschema %}

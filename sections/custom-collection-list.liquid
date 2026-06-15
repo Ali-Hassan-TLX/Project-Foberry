@@ -1,0 +1,242 @@
+{% liquid
+  assign use_related_collections = false
+  if section.settings.use_current_collection_product_collections and collection
+    assign use_related_collections = true
+  endif
+%}
+{%- assign pageUrl = contentForQuerystring
+  | split: '"pageurl":"'
+  | last
+  | split: '"'
+  | first
+  | split: '.myshopify.com'
+  | last
+  | replace: '\/', '/'
+  | replace: '%20', ' '
+  | replace: '\u0026', '&'
+-%}
+<section class="collection-row">
+  <div class="collection-row__scroller">
+    {% if use_related_collections and collection %}
+      {% assign seen_handles = '' %}
+      {% for product in collection.products %}
+        {% for related_collection in product.collections %}
+          {% if related_collection %}
+            {% assign token = related_collection.handle | append: ',' %}
+            {% unless seen_handles contains token %}
+              {% assign seen_handles = seen_handles | append: token %}
+
+              {% assign is_active = false %}
+              {% if collection and related_collection.handle == collection.handle %}
+                {% assign is_active = true %}
+              {% endif %}
+
+              <a
+                href="{{ related_collection.url }}"
+                class="collection-row__item{% if section.settings.highlight_current_collection and is_active %} collection-row__item--active{% endif %}"
+              >
+                {% if section.settings.show_title %}
+                  <span class="collection-row__title">
+                    {% if section.settings.custom_title != blank %}
+                      {{ section.settings.custom_title }}
+                    {% else %}
+                      {{ related_collection.title }}
+                    {% endif %}
+                  </span>
+                {% endif %}
+
+                {% if section.settings.show_count %}
+                  <span class="collection-row__count">{{ related_collection.products_count }}</span>
+                {% endif %}
+              </a>
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    {% else %}
+      {% for list_collection in section.settings.collections %}
+        {% if list_collection %}
+          {% assign is_active = false %}
+          {% if collection and list_collection.handle == collection.handle %}
+            {% assign is_active = true %}
+          {% endif %}
+
+          <a
+            href="{{ list_collection.url }}"
+            class="collection-row__item{% if section.settings.highlight_current_collection and is_active %} collection-row__item--active{% endif %}"
+          >
+            {% if section.settings.show_title %}
+              <span class="collection-row__title">
+                {% if section.settings.custom_title != blank %}
+                  {{ section.settings.custom_title }}
+                {% else %}
+                  {{ list_collection.title }}
+                {% endif %}
+              </span>
+            {% endif %}
+
+            {% if section.settings.show_count %}
+              <span class="collection-row__count">{{ list_collection.products_count }}</span>
+            {% endif %}
+          </a>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>
+
+{% stylesheet %}
+    .collection-row {
+      width: 100%;
+    }
+
+    .collection-row__scroller {
+      display: flex;
+      padding: 0.5rem 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin-left: 20%;
+      margin-right: 20%;
+    }
+
+    .collection-row__scroller::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+
+    .collection-row__item {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      color: inherit;
+      text-decoration: none;
+      scroll-snap-align: start;
+      white-space: nowrap;
+    }
+
+    .collection-row__item:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
+    }
+
+    .collection-row__item--active {
+      /* background-color: rgb(31 41 55);
+      color: rgb(249 250 251); */
+      font-weight: 600;
+      background: #ffffff;
+      color: #000000
+    }
+
+    .collection-row__title {
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+
+    .collection-row__count {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    /* Make item relative for underline */
+  .collection-row__item {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  /* Slight bold on hover */
+  .collection-row__item:hover .collection-row__title {
+    font-weight: 450;
+  }
+
+  /* Underline base */
+  .collection-row__item::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 0%;
+    height: 1px;
+    background-color: currentColor;
+    transition: width 0.3s ease;
+  }
+
+  /* Animate underline on hover */
+  .collection-row__item:hover::after {
+    width: 40%;
+  }
+
+  /* Active state underline */
+  .collection-row__item--active {
+    font-weight: 250;
+  }
+
+  .collection-row__item--active::after {
+    width: 40%;
+  }
+
+  @media(max-width:768px){
+    .collection-row__scroller{
+      margin: 0px 0px 10px 0px;
+    }
+  }
+
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection row",
+  "settings": [
+    {
+      "type": "collection_list",
+      "id": "collections",
+      "label": "Collections",
+      "limit": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show collection title",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "custom_title",
+      "label": "Custom title for all items",
+      "info": "If set, this text replaces each collection's title in the row."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show product count",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "highlight_current_collection",
+      "label": "Highlight current collection",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "use_current_collection_product_collections",
+      "label": "Use collections from products in current collection",
+      "info": "When enabled on a collection page, this section ignores the manual collection list and shows unique collections from the products in the current collection.",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection row"
+    }
+  ]
+}
+{% endschema %}

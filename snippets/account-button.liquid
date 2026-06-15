@@ -1,0 +1,103 @@
+{%- doc -%}
+  Renders an account button.
+
+  @param {string} [tag] - The tag to use
+  @param {string} [popover_id] - The id of the popover to target
+  @param {string} [popover_action] - The id of the popover to target
+  @param {string} [attributes] - Additional attributes to add to the tag
+{%- enddoc -%}
+
+{%- assign tag = tag | default: 'button' -%}
+<{{ tag }}
+  class="account-button header-actions__action"
+  aria-label="{{ 'accessibility.account' | t }}"
+  aria-haspopup="dialog"
+  {%- if popover_id -%}
+    popovertarget="{{ popover_id }}"
+    popovertargetaction="{{ popover_action | default: 'toggle' }}"
+  {%- endif -%}
+  ref="trigger"
+  {{ attributes }}
+>
+  {%- if customer.has_avatar? -%}
+    {{ customer | avatar }}
+  {%- elsif customer.first_name or customer.email -%}
+    {%- liquid
+      assign initial = customer.email | first
+
+      if customer.first_name != blank
+        assign initial = customer.first_name | first
+      endif
+    -%}
+    <span
+      class="account-button__avatar"
+      aria-hidden="true"
+    >
+      {{- initial -}}
+    </span>
+  {%- else -%}
+    <span
+      class="account-button__icon"
+      aria-hidden="true"
+    >
+     <svg
+            viewBox="0 0 13.9792 15.2316"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="13.979248"
+            height="15.231552"
+            fill="none"
+            customFrame="#000000"
+          >
+            <path id="Path 219" d="M9.50594 8.78319C11.9804 10.0047 13.3042 11.9625 13.4519 14.7307L12.1414 14.7307C12.0969 13.2855 11.5989 12.0317 10.5538 11.0222C9.54231 10.0439 8.31319 9.56206 6.91249 9.56932C4.35017 9.58269 1.86394 11.5519 1.76482 14.7316L0.503708 14.7316C0.430069 12.7191 1.61836 10.0459 4.41573 8.80022C3.03566 7.77208 2.33287 6.4099 2.44414 4.69237C2.52788 3.39769 3.1097 2.3275 4.11754 1.5106C6.05959 -0.0623932 8.89174 0.24144 10.4745 2.18028C12.033 4.08873 11.8457 7.12035 9.50594 8.78319ZM6.94563 8.26854C8.74165 8.25645 10.1581 6.87151 10.1893 5.09856C10.2221 3.24919 8.77684 1.78618 6.94038 1.79869C5.16301 1.81084 3.75664 3.18687 3.72589 4.9752C3.70583 5.8419 4.03621 6.68004 4.64224 7.29991C5.24828 7.91978 6.07874 8.26903 6.94563 8.26854Z" fill="currentColor" fill-rule="nonzero" />
+            <path id="Path 219" d="M13.4519 14.7307L12.1414 14.7307C12.0969 13.2855 11.5989 12.0317 10.5538 11.0222C9.54231 10.0439 8.31319 9.56206 6.91249 9.56932C4.35017 9.58269 1.86394 11.5519 1.76482 14.7316L0.503708 14.7316C0.430069 12.7191 1.61836 10.0459 4.41573 8.80022C3.03566 7.77208 2.33287 6.4099 2.44414 4.69237C2.52788 3.39769 3.1097 2.3275 4.11754 1.5106C6.05959 -0.0623932 8.89174 0.24144 10.4745 2.18028C12.033 4.08873 11.8457 7.12035 9.50594 8.78319C11.9804 10.0047 13.3042 11.9625 13.4519 14.7307ZM10.1893 5.09856C10.2221 3.24919 8.77684 1.78618 6.94038 1.79869C5.16301 1.81084 3.75664 3.18687 3.72589 4.9752C3.70583 5.8419 4.03621 6.68004 4.64224 7.29991C5.24828 7.91978 6.07874 8.26903 6.94563 8.26854C8.74165 8.25645 10.1581 6.87151 10.1893 5.09856Z" fill-rule="nonzero" stroke="rgb(112,112,112)" stroke-opacity="0" stroke-width="1.000000" />
+          </svg>
+    </span>
+  {%- endif -%}
+</{{ tag }}>
+
+{% stylesheet %}
+  .account-button {
+    color: var(--color-foreground);
+    appearance: none;
+    border: none;
+    background: none;
+    height: var(--button-size);
+    width: var(--button-size);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    transition: color var(--animation-speed) var(--animation-easing);
+    anchor-name: --account-button-trigger;
+  }
+
+  .account-button__avatar {
+    --account-button-size: 1.3rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--account-button-size);
+    height: var(--account-button-size);
+    border-radius: var(--style-border-radius-50);
+    background-color: var(--color-primary-button-background);
+    font-size: var(--font-size--xs);
+    font-weight: 500;
+    color: var(--color-primary-button-text);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .account-button__icon {
+    color: currentColor;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* The shop avatar doesn't bubble the click event up to our button, so we need to prevent that or the button doesn't work */
+  .account-button shop-user-avatar {
+    pointer-events: none;
+  }
+{% endstylesheet %}

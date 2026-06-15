@@ -1,0 +1,647 @@
+{% comment %} {%- comment -%}
+  Cart Drawer: Announcement Bar + Free Shipping Bar
+  Snippet name: cart-announcement-shipping.liquid
+  Usage: {% render 'cart-announcement-shipping' %}
+
+  Theme Settings (settings_schema.json mein add karo):
+  See bottom of this file for the JSON block.
+{%- endcomment -%}
+
+{%- liquid
+  assign ann1 = settings.cart_announcement_1 | strip
+  assign ann2 = settings.cart_announcement_2 | strip
+  assign ann3 = settings.cart_announcement_3 | strip
+
+  assign ann_count = 0
+  if ann1 != blank
+    assign ann_count = ann_count | plus: 1
+  endif
+  if ann2 != blank
+    assign ann_count = ann_count | plus: 1
+  endif
+  if ann3 != blank
+    assign ann_count = ann_count | plus: 1
+  endif
+
+  assign free_shipping_enabled = settings.cart_free_shipping_enabled
+  assign free_shipping_threshold = settings.cart_free_shipping_threshold | plus: 0
+  assign free_shipping_message = settings.cart_free_shipping_message | default: 'Free shipping on orders over {amount}!'
+  assign free_shipping_success = settings.cart_free_shipping_success | default: '🎉 You have unlocked free shipping!'
+
+  assign cart_total = cart.total_price
+  assign remaining = free_shipping_threshold | minus: cart_total
+  if remaining < 0
+    assign remaining = 0
+  endif
+
+  if free_shipping_threshold > 0
+    assign progress_percent = cart_total | times: 100.0 | divided_by: free_shipping_threshold
+    if progress_percent > 100
+      assign progress_percent = 100
+    endif
+  else
+    assign progress_percent = 0
+  endif
+
+  assign shipping_unlocked = false
+  if cart_total >= free_shipping_threshold and free_shipping_threshold > 0
+    assign shipping_unlocked = true
+  endif
+
+  assign remaining_money = remaining | money
+  assign threshold_money = free_shipping_threshold | money
+-%}
+
+{%- if ann_count > 0 or free_shipping_enabled -%}
+<div class="cart-top-bars" id="cart-top-bars">
+
+  {%- comment %} ======== ANNOUNCEMENT BAR ======== {% endcomment %}
+  {%- if ann_count > 0 -%}
+  <div class="cart-announcement-bar
+    {%- if ann_count > 1 %} cart-announcement-bar--slider{%- endif %}">
+
+    {%- if ann_count > 1 -%}
+      {%- comment %} Slider wrapper jab 2 ya 3 texts hain {%- endcomment %}
+      <div class="cart-ann-track" id="cartAnnTrack">
+        {%- if ann1 != blank -%}
+          <div class="cart-ann-slide">
+            <span>{{ ann1 }}</span>
+          </div>
+        {%- endif -%}
+        {%- if ann2 != blank -%}
+          <div class="cart-ann-slide">
+            <span>{{ ann2 }}</span>
+          </div>
+        {%- endif -%}
+        {%- if ann3 != blank -%}
+          <div class="cart-ann-slide">
+            <span>{{ ann3 }}</span>
+          </div>
+        {%- endif -%}
+      </div>
+      <div class="cart-ann-dots" id="cartAnnDots">
+        {%- for i in (1..ann_count) -%}
+          <button class="cart-ann-dot{%- if forloop.first %} is-active{%- endif %}"
+            aria-label="Slide {{ forloop.index }}"
+            data-index="{{ forloop.index0 }}"></button>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      {%- comment %} Sirf ek text hai — seedha show karo {%- endcomment %}
+      <div class="cart-ann-single">
+        {%- if ann1 != blank -%}<span>{{ ann1 }}</span>{%- endif -%}
+        {%- if ann2 != blank -%}<span>{{ ann2 }}</span>{%- endif -%}
+        {%- if ann3 != blank -%}<span>{{ ann3 }}</span>{%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+  {%- endif -%}
+
+  {%- comment %} ======== FREE SHIPPING BAR ======== {% endcomment %}
+  {%- if free_shipping_enabled and free_shipping_threshold > 0 -%}
+  <div class="cart-free-shipping-bar
+    {%- if shipping_unlocked %} cart-free-shipping-bar--success{%- endif %}">
+
+    {%- if shipping_unlocked -%}
+      <p class="cart-fs-message cart-fs-message--success">
+        {{ free_shipping_success }}
+      </p>
+    {%- else -%}
+      {%- assign display_message = free_shipping_message
+          | replace: '{amount}', threshold_money
+          | replace: '{remaining}', remaining_money -%}
+      <p class="cart-fs-message">{{ display_message }}</p>
+    {%- endif -%}
+
+    <div class="cart-fs-track" role="progressbar" data-min="{{ settings.cart_free_shipping_threshold }}"
+      aria-valuenow="{{ progress_percent | round }}"
+      aria-valuemin="0" aria-valuemax="100">
+      <div class="cart-fs-fill" style="width: {{ progress_percent }}%"></div>
+    </div>
+
+  </div>
+  {%- endif -%}
+
+</div>
+{%- endif -%}
+
+
+<style>
+/* =============================================
+   CART TOP BARS — Announcement + Free Shipping
+   ============================================= */
+
+.cart-top-bars {
+  width: 100%;
+}
+
+/* --- Announcement Bar --- */
+.cart-announcement-bar {
+  background-color: var(--cart-ann-bg, #000);
+  color: var(--cart-ann-color, #fff);
+  font-size: var(--cart-ann-font-size, 12px);
+  font-weight: 500;
+  text-align: center;
+  padding: 8px 12px;
+  overflow: hidden;
+  position: relative;
+  min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Single text (no slider) */
+.cart-ann-single {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Slider mode */
+.cart-ann-track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.cart-ann-slide {
+  min-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dots */
+.cart-ann-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.cart-ann-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.cart-ann-dot.is-active {
+  background: #fff;
+  transform: scale(1.3);
+}
+/* --- Free Shipping Bar --- */
+.cart-free-shipping-bar {
+  background-color: var(--cart-fs-bg, #f5f5f5);
+  color: var(--cart-fs-color, #333);
+  padding: 10px 14px 8px;
+  text-align: center;
+  border-top: 1px solid var(--cart-fs-border, #e8e8e8);
+}
+
+.cart-free-shipping-bar--success {
+  background-color: var(--cart-fs-success-bg, #e6f4ea);
+  color: var(--cart-fs-success-color, #1e7e34);
+}
+
+.cart-fs-message {
+  font-size: 12px;
+  margin: 0 0 7px;
+  line-height: 1.4;
+}
+
+.cart-fs-message--success {
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.cart-fs-track {
+  width: 100%;
+  height: 10px;
+  background: var(--cart-fs-track-bg, #ddd);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.cart-free-shipping-bar--success .cart-fs-track {
+  opacity: 0.4;
+}
+
+.cart-fs-fill {
+  height: 100%;
+  background: var(--cart-fs-fill-color, #000);
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cart-top-bars{
+    padding-bottom: 10px;
+}
+#cart-drawer-header{
+    padding-bottom: 0 !important;
+}
+</style>
+
+
+<script>
+/* ============================================
+   FREE SHIPPING BAR — Currency-aware JS
+   - Store currency se threshold convert karo
+   - MutationObserver se cart total detect karo
+   - Progress bar live update karo
+   ============================================ */
+(function () {
+
+  /* 1. Threshold Shopify ne cents mein diya hai (e.g. 500000 = Rs.5000)
+        Agar store ki currency PKR hai toh formatMoney seedha use karo,
+        warna Shopify.currency.rate se convert karo */
+  var THRESHOLD_CENTS = {{ settings.cart_free_shipping_threshold | times: 100 | round }};
+
+  {%- assign _fs_msg_prog = settings.cart_free_shipping_message | default: "Spend {remaining} more for free shipping!" -%}
+  {%- assign _fs_msg_ok   = settings.cart_free_shipping_success | default: "You have unlocked free shipping!" -%}
+  var MSG_PROG    = {{ _fs_msg_prog | json }};
+  var MSG_SUCCESS = {{ _fs_msg_ok   | json }};
+
+  if (!THRESHOLD_CENTS) return;
+
+  /* ---- Currency conversion ---- */
+  function getRate() {
+    // Shopify currency rate (1.0 agar store currency == presentment currency)
+    try {
+      return (window.Shopify && Shopify.currency && Shopify.currency.rate)
+        ? parseFloat(Shopify.currency.rate)
+        : 1.0;
+    } catch (e) { return 1.0; }
+  }
+
+  /* Cart total (cents) ko store currency mein convert karo */
+  function toStoreCents(cartCents) {
+    var rate = getRate();
+    return Math.round(cartCents * rate);
+  }
+
+  /* Threshold bhi same rate par convert karo */
+  function getThresholdConverted() {
+    var rate = getRate();
+    return Math.round(THRESHOLD_CENTS * rate);
+  }
+
+  /* ---- Money formatting ---- */
+  function formatMoney(cents) {
+    if (window.Shopify && typeof Shopify.formatMoney === 'function') {
+      var fmt = (window.theme && theme.moneyFormat)
+             || (window.Shopify.currency && Shopify.currency.active === 'PKR'
+                 ? 'Rs. {{amount}}'
+                 : '{{amount_with_comma_separator}}');
+      return Shopify.formatMoney(cents, fmt);
+    }
+    // Fallback: PKR style
+    return 'Rs. ' + Math.round(cents / 100).toLocaleString('en-PK');
+  }
+
+  /* ---- UI update function ---- */
+  function updateBar(rawCartCents) {
+    var cartCents      = toStoreCents(rawCartCents);
+    var thresholdCents = getThresholdConverted();
+
+    var bar     = document.querySelector('.cart-free-shipping-bar');
+    var fill    = document.querySelector('.cart-fs-fill');
+    var track   = document.querySelector('.cart-fs-track');
+    var message = document.querySelector('.cart-fs-message');
+    if (!bar || !fill || !message) return;
+
+    var percent   = Math.min((cartCents / thresholdCents) * 100, 100);
+    var remaining = Math.max(thresholdCents - cartCents, 0);
+    var unlocked  = cartCents >= thresholdCents;
+
+    fill.style.width = percent + '%';
+
+    if (unlocked) {
+      bar.classList.add('cart-free-shipping-bar--success');
+      message.classList.add('cart-fs-message--success');
+      message.textContent = MSG_SUCCESS;
+      message.style.marginBottom = '0';
+      if (track) track.style.opacity = '0.4';
+    } else {
+      bar.classList.remove('cart-free-shipping-bar--success');
+      message.classList.remove('cart-fs-message--success');
+      message.style.marginBottom = '';
+      if (track) track.style.opacity = '';
+
+      var text = MSG_PROG
+        .replace('{remaining}', formatMoney(remaining))
+        .replace('{amount}',    formatMoney(thresholdCents));
+      message.textContent = text;
+    }
+  }
+
+  /* ---- Cart total source: DOM se parse karo ---- */
+  function parseCartTotalFromDOM() {
+    // Yeh selector apne theme ke hisaab se adjust karo
+    var el = document.querySelector('[data-cart-total], .cart-subtotal__price, .totals__subtotal-value');
+    if (!el) return null;
+    var raw = el.getAttribute('data-cart-total') || el.textContent || '';
+    // Sirf numbers nikaalo (e.g. "Rs. 1,500.00" → 150000 cents)
+    var num = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+    // Agar attribute cents mein hai toh seedha use karo
+    if (el.hasAttribute('data-cart-total')) {
+      return parseInt(el.getAttribute('data-cart-total'), 10);
+    }
+    // Warna price string hai, multiply by 100
+    return Math.round(num * 100);
+  }
+
+  /* ---- MutationObserver: cart total change detect karo ---- */
+  function startObserver() {
+    var target = document.querySelector(
+      '[data-cart-total], .cart-subtotal__price, .totals__subtotal-value, #cart-price-subtotal, .cart-drawer__footer'
+    );
+    if (!target) return;
+
+    var observer = new MutationObserver(function () {
+      var cents = parseCartTotalFromDOM();
+      if (cents !== null) updateBar(cents);
+    });
+
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true
+    });
+  }
+
+  /* ---- Shopify native events (backup) ---- */
+  document.addEventListener('cart:refresh', function (e) {
+    var total = e.detail && e.detail.cart && e.detail.cart.total_price;
+    if (total !== undefined) updateBar(total);
+  });
+
+  document.addEventListener('cart:updated', function (e) {
+    var total = e.detail && e.detail.cart && e.detail.cart.total_price;
+    if (total !== undefined) updateBar(total);
+  });
+
+  /* ---- Fetch interceptor: /cart add/change/update pe /cart.js call karo ---- */
+  (function () {
+    var _fetch = window.fetch;
+    window.fetch = function (input) {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+      var result = _fetch.apply(this, arguments);
+      if (/\/cart\/(add|change|update|clear)/.test(url)) {
+        result.then(function () {
+          fetch('/cart.js')
+            .then(function (r) { return r.json(); })
+            .then(function (cart) { updateBar(cart.total_price); });
+        });
+      }
+      return result;
+    };
+  })();
+
+  /* ---- Init: page load pe current cart total se bar set karo ---- */
+  document.addEventListener('DOMContentLoaded', function () {
+    // /cart.js se actual cart total lo
+    fetch('/cart.js')
+      .then(function (r) { return r.json(); })
+      .then(function (cart) {
+        updateBar(cart.total_price);
+        startObserver(); // uske baad observer start karo
+      })
+      .catch(function () {
+        // Fallback: DOM se parse karo
+        var cents = parseCartTotalFromDOM();
+        if (cents !== null) updateBar(cents);
+        startObserver();
+      });
+  });
+
+})();
+</script> {% endcomment %}
+
+
+
+{%- liquid
+  assign currency = localization.country.currency.iso_code
+
+  if currency == 'PKR'
+    assign fs_threshold = settings.cart_free_shipping_threshold_pkr | times: 100
+  elsif currency == 'USD'
+    assign fs_threshold = settings.cart_free_shipping_threshold_usd | times: 100
+  else
+    assign fs_threshold = settings.cart_free_shipping_threshold_pkr | times: 100
+  endif
+
+  assign cart_total = cart.total_price
+  assign remaining = fs_threshold | minus: cart_total
+
+  if remaining < 0
+    assign remaining = 0
+  endif
+
+  assign progress = cart_total | times: 100 | divided_by: fs_threshold
+  if progress > 100
+    assign progress = 100
+  endif
+
+  assign unlocked = false
+  if cart_total >= fs_threshold
+    assign unlocked = true
+  endif
+
+  assign remaining_money = remaining | money
+  assign threshold_money = fs_threshold | money
+
+  assign fs_text = settings.cart_free_shipping_message
+  assign fs_text = fs_text | replace: '{remaining}', remaining_money
+  assign fs_text = fs_text | replace: '{amount}', threshold_money
+-%}
+
+{%- if settings.cart_free_shipping_enabled -%}
+<div class="cart-free-shipping-bar{% if unlocked %} success{% endif %}"
+     data-threshold="{{ fs_threshold }}">
+
+  <p class="fs-message">
+    {% if unlocked %}
+      {{ settings.cart_free_shipping_success }}
+    {% else %}
+      {{ fs_text }}
+    {% endif %}
+  </p>
+
+  <div class="fs-track">
+    <div class="fs-fill" style="width: {{ progress }}%"></div>
+  </div>
+</div>
+{%- endif -%}
+
+<style>
+.cart-free-shipping-bar {
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  background: {{ settings.cart_fs_bg }};
+  color: {{ settings.cart_fs_text }};
+}
+
+.cart-free-shipping-bar.success {
+  background: {{ settings.cart_fs_success_bg }};
+  color: {{ settings.cart_fs_success_text }};
+}
+
+.fs-message {
+  margin: 0 0 6px;
+}
+
+.fs-track {
+  height: 8px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: {{ settings.cart_fs_track_bg }};
+}
+
+.fs-fill {
+  height: 100%;
+  background: {{ settings.cart_fs_bar_color }};
+  width: 0%;
+  transition: width 0.4s ease;
+}
+</style>
+
+{% comment %} <script>
+(function () {
+
+  function updateFreeShipping(cartTotal) {
+    var bar = document.querySelector('.cart-free-shipping-bar');
+    if (!bar) return;
+
+    var threshold = parseInt(bar.dataset.threshold);
+    var fill = bar.querySelector('.fs-fill');
+    var message = bar.querySelector('.fs-message');
+
+    var percent = Math.min((cartTotal / threshold) * 100, 100);
+    var remaining = Math.max(threshold - cartTotal, 0);
+    var unlocked = cartTotal >= threshold;
+
+    fill.style.width = percent + '%';
+
+    if (unlocked) {
+      bar.classList.add('success');
+      message.textContent = {{ settings.cart_free_shipping_success | json }};
+    } else {
+      bar.classList.remove('success');
+
+      var text = {{ settings.cart_free_shipping_message | json }};
+      text = text
+        .replace('{remaining}', Shopify.formatMoney(remaining))
+        .replace('{amount}', Shopify.formatMoney(threshold));
+
+      message.textContent = text;
+    }
+  }
+
+  document.addEventListener('cart:updated', function(e){
+    if (e.detail && e.detail.cart) {
+      updateFreeShipping(e.detail.cart.total_price);
+    }
+  });
+
+  document.addEventListener('cart:refresh', function(e){
+    if (e.detail && e.detail.cart) {
+      updateFreeShipping(e.detail.cart.total_price);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function(){
+    fetch('/cart.js')
+      .then(function(r){ return r.json(); })
+      .then(function(cart){
+        updateFreeShipping(cart.total_price);
+      });
+  });
+
+})();
+</script> {% endcomment %}
+
+<script>
+(function () {
+
+  function updateFreeShipping(cartTotal) {
+    var bar = document.querySelector('.cart-free-shipping-bar');
+    if (!bar) return;
+
+    var threshold = parseInt(bar.dataset.threshold);
+    var fill = bar.querySelector('.fs-fill');
+    var message = bar.querySelector('.fs-message');
+
+    var percent = Math.min((cartTotal / threshold) * 100, 100);
+    var remaining = Math.max(threshold - cartTotal, 0);
+    var unlocked = cartTotal >= threshold;
+
+    fill.style.width = percent + '%';
+
+    if (unlocked) {
+      bar.classList.add('success');
+      message.textContent = {{ settings.cart_free_shipping_success | json }};
+    } else {
+      bar.classList.remove('success');
+
+      var text = {{ settings.cart_free_shipping_message | json }};
+      text = text
+        .replace('{remaining}', Shopify.formatMoney(remaining))
+        .replace('{amount}', Shopify.formatMoney(threshold));
+
+      message.textContent = text;
+    }
+  }
+
+  /* ✅ MutationObserver — price change detect */
+  function observeCartChanges() {
+    var target = document.body;
+
+    var observer = new MutationObserver(function () {
+      fetch('/cart.js')
+        .then(function(r){ return r.json(); })
+        .then(function(cart){
+          updateFreeShipping(cart.total_price);
+        });
+    });
+
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+
+  /* Shopify events */
+  document.addEventListener('cart:updated', function(e){
+    if (e.detail && e.detail.cart) {
+      updateFreeShipping(e.detail.cart.total_price);
+    }
+  });
+
+  document.addEventListener('cart:refresh', function(e){
+    if (e.detail && e.detail.cart) {
+      updateFreeShipping(e.detail.cart.total_price);
+    }
+  });
+
+  /* Initial load */
+  document.addEventListener('DOMContentLoaded', function(){
+    fetch('/cart.js')
+      .then(function(r){ return r.json(); })
+      .then(function(cart){
+        updateFreeShipping(cart.total_price);
+      });
+
+    observeCartChanges(); // 👈 IMPORTANT
+  });
+
+})();
+</script>

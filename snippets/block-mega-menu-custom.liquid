@@ -1,0 +1,33 @@
+
+{% liquid
+  assign custom_image = block.settings.custom_image
+  assign custom_content = block.settings.custom_content
+  assign custom_heading = block.settings.custom_heading
+%}
+
+<div 
+  class="custom-mega-menu-block" 
+  data-block-id="{{ block.id }}"
+  data-link-title="{{ link_title }}"
+  {{ block.shopify_attributes }}
+>
+  {% if custom_heading != blank %}
+    <h3 class="custom-mega-menu-block__heading">{{ custom_heading }}</h3>
+  {% endif %}
+  
+  {% if custom_image %}
+    <div class="custom-mega-menu-block__image">
+      {{
+        custom_image
+        | image_url: width: 600
+        | image_tag: loading: 'lazy', widths: '300, 400, 500, 600'
+      }}
+    </div>
+  {% endif %}
+
+  {% if custom_content != blank %}
+    <div class="custom-mega-menu-block__content">
+      {{ custom_content }}
+    </div>
+  {% endif %}
+</div>

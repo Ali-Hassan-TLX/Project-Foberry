@@ -1,0 +1,30 @@
+{% liquid
+  assign product_season = product.metafields.custom.product_season.value
+%}
+<style>
+.product-season{
+font-weight:500;
+color: {{ block.settings.custom_color | default: 'green' }} ;
+}
+
+</style>
+{% if product_season %}
+    <p class="product-season">Season: {{ product_season }}</p>
+{% endif %}
+{% schema %}
+{
+"name": "product-season",
+"settings": [
+  {
+    "type": "color",
+    "id": "custom_color",
+    "label": "Color"
+  }
+],
+"presets": [
+    {
+    "name": "product-season"
+    }
+]
+}
+{% endschema %}

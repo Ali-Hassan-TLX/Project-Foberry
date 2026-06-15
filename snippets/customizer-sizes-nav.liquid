@@ -1,0 +1,10 @@
+  <a
+          id="{{ nav_tabs.id }}"
+          data-toggle="tab"
+          href="#{{ nav_tabs.type }}"
+          role="tab"
+          aria-controls="{{ nav_tabs.type_nav_tabs.id }}"
+          aria-selected="{% if nav_tabs.standard_sizes != blank %}true {% endif %}"
+          class="{% if nav_tabs.standard_sizes != blank %}active {% endif %}"
+          >{{ nav_tabs.internal_title }}</a
+        >

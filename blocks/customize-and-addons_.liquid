@@ -1,0 +1,53 @@
+{% assign assign_collection = null %}
+
+{% for collection in product.collections %}
+  {% if collection.metafields.option.add_ons != blank %}
+    {% assign assign_collection = collection %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% assign single_product = product.metafields.option.add_ons %}
+
+{% if single_product != blank %}
+  {% assign product_data = single_product %}
+{% elsif assign_collection %}
+  {% assign product_data = assign_collection.metafields.option.add_ons %}
+{% endif %}
+
+{% for collection in product.collections %}
+  {% if collection.metafields.option_group.customization != blank %}
+    {% assign current_collection = collection %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% assign metaproduct = product.metafields.option_group.customization %}
+
+{% if metaproduct != blank %}
+  {% assign custom_selections = metaproduct %}
+{% elsif current_collection and current_collection.metafields.option_group.customization != blank %}
+  {% assign custom_selections = current_collection.metafields.option_group.customization %}
+{% endif %}
+
+{% if product_data != blank %}
+  {% render 'custom_addons', product_data: product_data %}
+{% else %}
+  <button id="open-modal" class="btn button-secondary btn-customize">
+    <a href="#PageContainer" class="btn">
+      {{ custom_selections.label }}
+      <span class="icon-edit"></span>
+    </a>
+  </button>
+{% endif %}
+{% schema %}
+{
+  "name": "Customize and addons",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Customize and addons"
+    }
+  ]
+}
+{% endschema %}

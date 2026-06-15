@@ -1,0 +1,269 @@
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="style" role="tabpanel" aria-labelledby="style-tab">
+    <div class="overview">
+      <a class="icon-arrow-left1 back-to-style  hidden" href="#style"></a>
+      <div class="currently_open_option hidden"></div>
+      <ul class="overview-list style-list  styles contrasts" data-index="0">
+        {% comment %}
+        {% endcomment %}
+         {% assign additional_items = section_options.contrast_options %}       
+         {% assign mono_show = section_options %}
+         {% assign CardSize = section_options.card_text %}
+        {% assign custom_selections = options %}
+        {% for option in custom_selections %}
+          {% assign option_value = option.require_option | strip %}
+          {% comment %} {% liquid
+          assign step_number = 0
+            
+          assign first_child = option.sub_options
+          if first_child != blank
+            assign step_number = 1
+            for second_child in option.sub_options
+            if second_child != blank
+              assign step_number =2
+              endif
+            endfor
+          endif
+        %}
+        {{ step_number }} 
+         
+        {% assign steps = 1 %} 
+
+{% if option.sub_options != blank %}
+  {% assign steps = steps | plus: 1 %}
+  {% for child in option.sub_options %}
+    {% if child.sub_options != blank %}
+      {% assign steps = steps | plus: 1 %}
+      {% for grandchild in child.sub_options %}
+        {% if grandchild.sub_options != blank %}
+          {% assign steps = steps | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+        {% endcomment %}
+         {% assign steps = 1 %}
+
+  {% if option.sub_options != blank %}
+    {% assign steps = 2 %}
+    {% for child in option.sub_options %}
+      {% if child.sub_options != blank %}
+        {% assign steps = 3 %}
+        {% for grandchild in child.sub_options %}
+          {% if grandchild.sub_options != blank %}
+            {% assign steps = 4 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+          <li
+            data-list="{{ option.sub_options | map: "id" | join:" , " }}"
+            class="  {% if option_value == '1' or option_value == 1 %}required-style {% endif %} {% if option.has_dependent_options == '1' or option.has_dependent_options == 1 %} hasdisabled {% endif %}"
+            data-id="{{ option.id }}"
+            style_name="{{ option.label }}"
+            sub-title="{{ option.sub_title }}"
+            sub-options=" {{ steps }}"
+            childsIn="styles"
+            {{CardSize}}
+            current_index="1"
+            {% for has_depended_options in option.dependent_options %}
+              {% assign has_depended = has_depended_options.parent_id %}
+              {% assign has_depended_label = has_depended_options.label %}
+            {% endfor %}
+            has-depended="{{ has_depended }}"
+            hasdisabled-to="{{ has_depended}}"
+          >
+            {% comment %}
+
+               {% render 'customizer-card' , option: option %}
+              {% render 'customizer-contrast', contrast_options:option %}
+            {% endcomment %}
+            <a
+              href="#"
+              class="option-card{% if option.require_option == '1' or option.require_option == 1 %} required-option{% endif %}"
+              data-list="{{ option.sub_options | map: "id" | join:" , " }}"
+              class="  {% if option_value == '1' or option_value == 1 %}required-style {% endif %} "
+              data-id="{{ option.id }}"
+              style_name="{{ option.label }}"
+              sub-title="{{ option.sub_title }}"
+              sub-test="{{ option.sub_title }}"
+            >
+              {% if option.require_option == '1' or option.require_option == 1 %}
+                <span class="required">Required</span>
+              {% elsif option.is_recommended == '1' or option.is_recommended == 1 %}
+                <span class="recommend">RECOMMENDED</span>
+              {% else %}
+                <span class="optional">Optional</span>
+              {% endif %}
+              <span class="unavailable">UNAVAILABLE </span>
+              <span class="icon-check-circle"></span>
+              <div class="scroll-wrapper">
+                <span class="title hidden top">{{ option.label }}</span>
+              </div>
+              <span class="img org_img">
+                {% if option.shopify_feature_image %}
+                  <img src="{{ option.shopify_feature_image }}" >
+                {% endif %}
+              </span>
+              <span class="img hidden select_img">
+                <img src="">
+              </span>
+              {% if option.has_additional_charges == '1'
+                or option.has_additional_charges == 1
+                and option.additional_charges != null
+              %}
+                <span class="additional_charges">+Rs{{ option.additional_charges }} </span>
+              {% endif %}
+              <div class="scroll-wrapper">
+                <span class="title bottom">{{ option.label }}</span>
+              </div>
+              <div class="scroll-wrapper">
+                <span class="name hidden">&nbsp;</span>
+              </div>
+              <div class="why-not-scroll">
+                <span class="why_not  "> Choose {{ has_depended_label }} for this option</span>
+              </div>
+
+              {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+                <div class="product_info">
+                  <button
+                    type="button"
+                    class="info_btn"
+                    data-toggle="modal"
+                    data-target="#{{ option.label }}"
+                  >
+                     <img src="  {{ 'info-icon.svg' | asset_url }}" width="100%" height="100%">
+                  </button>
+                </div>
+              {% endif %}
+              <span class="selection">
+                <span class="make-selection ">MAKE SELECTION</span>
+                <span class="selected hidden">CHANGE SELECTION</span>
+              </span>
+            </a>
+            {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+              <div
+                class="modal fade"
+                id="{{ option.label }}"
+                tabindex="-1"
+                role="dialog"
+                aria-hidden="true"
+              >
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <button type="button" class="close_btn" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">X</span>
+                    </button>
+                    <div class="modal-body">
+                      <span class="modal-title">{{ option.label }}</span>
+                      <div class="additional_popup_details">
+                        {{ option.additional_details }}
+                      </div>
+                    </div>
+                    <div class="modal-img">
+                      {% if option.shopify_feature_image != blank %}
+                        <img
+                          src="{{ option.shopify_feature_image }}"
+                          onerror="this.onerror=null; this.src='{{ 'placeholder.png' | asset_url }}';"
+                          alt="{{ option.label | escape }}"
+                          width="200"
+                          height="200"
+                        >
+                      {% else %}
+                        <img
+                          src="{{ 'placeholder.png' | asset_url }}"
+                          alt="Placeholder image"
+                          width="200"
+                          height="200"
+                        >
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+        {% assign monogram_options = monogram.setting %}
+{% if mono_show.enable_monogram  == '1' or mono_show.enable_monogram  == 1 %}
+        <li class="adjut_monogram" {{CardSize}}>
+          <a href="#" class="option-card monogram">
+            <span class="icon-check-circle"></span>
+            <div class="scroll-wrapper"></div>
+            <span class="title top hidden">Monogram</span>
+            <img src="{{ 'mono_img.png' | asset_url }}" class="custom-title">
+            <span class="img hidden">
+              <img src="">
+            </span>
+            <div class="scroll-wrapper">
+              <span class="title bottom">Monogram</span>
+            </div>
+            <div class="scroll-wrapper">
+              <span class="selections animation"></span>
+            </div>
+
+            {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+              <div class="" style="text-align: end;padding-right: 10px;">
+                 <img src="  {{ 'info-icon.svg' | asset_url }}" width="100%" height="100%">
+              </div>
+            {% endif %}
+            {% if monogram_options.has_additional_cost == '1'
+              or monogram_options.has_additional_cost == 1
+              and monogram_options.additional_cost != null
+            %}
+              <span class="additional_charges">+Rs{{ monogram_options.additional_cost }} </span>
+            {% endif %}
+            <span class="selection">
+              <span class="make-selection">MAKE SELECTION</span>
+              <span class="selected hidden">Change/Remove</span>
+            </span>
+          </a>
+        </li>
+        {% endif %}
+ {% if additional_items != blank %}
+        <li class="card-stack" sub-title="" {{CardSize}}>
+          <a href="#" class="option-card ">
+            <span class="icon-check-circle"></span>
+
+            <span class="name hidden">&nbsp;</span>
+            <span class="title"
+              >Additional<br>
+              Customisations</span
+            >
+            <span class="img">
+              <img src="    {{ 'Additional-Customisation.svg' | asset_url }} ">
+            </span>
+
+            {% if option.has_additional_details == '1' or option.has_additional_details == 1 %}
+              <div class="" style="text-align: end;padding-right: 10px;">
+                <img src="  {{ 'info-icon.svg' | asset_url }}" width="100%" height="100%">
+              </div>
+            {% endif %}
+            <span class="selection">
+              <span class="make-selection card-stack-text">MORE SHOW</span>
+            </span>
+          </a>
+          <a href="#" class="second">
+            <span class="selection">
+              <span class="make-selection card-stack-text">&nbsp;</span>
+            </span>
+          </a>
+          <a href="#" class="thrid">
+            <span class="selection">
+              <span class="make-selection card-stack-text">&nbsp;</span>
+            </span>
+          </a>
+        </li>
+        {%  endif %}
+        {% render 'customizer-contrast', CardSize:CardSize , contrast_options: contrast_options %}
+      </ul>
+
+      {% render 'customizer-childs-option', CardSize:CardSize , options: options, contras: false %}
+      {% render 'customizer-childs-option', CardSize:CardSize , options: contrast_options, contras: true %}
+      {% comment %}
+      {% endcomment %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+  {% assign shop_metafields = shop.metafields.settings.general %}
+
+
+<div id="fullscreen-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <div class="customizer-desktop-only">
+  {% render 'customizer-tab', current_product: shop_metafields %}
+  
+</div>
+    {% comment %}
+      
+    <button id="close-modal" class="modal-close hide_selection">
+      <svg xmlns="http://www.w3.org/2000/svg" width="45.422" height="42.421" viewBox="3414.623 571.977 45.422 42.421">
+        <g data-name="Group 102"><g data-name="Path 71"><path d="m3455.956 571.977-37.244 42.336" fill="#794d49" fill-rule="evenodd"/><path d="m3455.956 571.977-37.244 42.336" stroke-linejoin="round" stroke-linecap="round" stroke-width="4" stroke="#d3736b" fill="transparent"/></g><g data-name="Path 72"><path d="m3456.799 614.399-38.93-40.794" fill="#d3736b" fill-rule="evenodd"/><path d="m3456.799 614.399-38.93-40.794" stroke-linejoin="round" stroke-linecap="round" stroke-width="4" stroke="#d3736b" fill="transparent"/></g></g>
+      </svg>
+    </button>
+    {% endcomment %}
+    {% render 'customizer-new' %}
+  </div>
+</div>
+<style>
+   .modal-overlay {
+  position: fixed;
+    /* top: 7rem; */
+    left: 50%;
+    width: 100%;
+    /* height: calc(100% - 7rem); */
+    /* height: 100%; */
+    /* background: white; */
+     background: #EEEEEE;
+    {% comment %} z-index: 11; {% endcomment %}
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    /* max-width: 1720px; */
+    transform: translateX(-50%);
+   }
+   .modal-content {
+      /* background: #FAFAFA; */
+      background: #EEEEEE;
+     max-height: 100%;
+     /* overflow-y: auto; */
+     /* overflow-x: hidden; */
+     padding: 40px;
+     /* border-radius: 12px; */
+     /* max-width: calc(100% - 1rem); */
+         padding: 0px;
+     width: 100%;
+     display:flex;
+     /* text-align: center; */
+     position: relative;
+     font-family: var(--font_stack_body);
+    /* max-width: 1720px; */
+     border:none;
+     {% comment %} padding-bottom:20px; {% endcomment %}
+   }
+     
+   .modal-btn {
+     margin-top: 20px;
+     padding: 12px 24px;
+     font-size: 16px;
+     background-color: #000;
+     color: white;
+     border: none;
+     cursor: pointer;
+   }
+   .modal-btn:hover {
+     background-color: #333;
+   }
+</style>
+{% comment %} <script src="{{ 'option-card.js' | asset_url }}" defer="defer"></script> {% endcomment %}

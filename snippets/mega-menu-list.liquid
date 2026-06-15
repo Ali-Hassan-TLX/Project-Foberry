@@ -1,0 +1,724 @@
+{%- doc -%}
+  Renders mega menu list with Pini Parma layouts.
+  Layout 1: 2 nav columns + mini products + hero
+  Layout 2: 1 nav column + mini products + wide hero
+  Layout 3: 4 nav columns + hero image (no mini products)
+  Uses theme settings for customization.
+{%- enddoc -%}
+
+{% liquid
+  assign open_column_span = false
+  assign column_count = 0
+  assign links_before_wrap = 10
+  assign max_menu_columns = grid_columns_count | default: 6
+  assign max_menu_columns_tablet = grid_columns_count_tablet | default: 4
+
+  assign eager_loading = false
+  if section.index == blank
+    assign eager_loading = true
+  endif
+
+  assign parent_handle = parent_link.handle
+  
+  # Find matching mega menu settings
+  assign mega_menu_config = nil
+  assign mega_menu_index = nil
+  assign menu_layout = 'layout_1'
+  
+  for i in (1..10)
+    assign handle_key = 'mega_menu_' | append: i | append: '_handle'
+    assign stored_handle = settings[handle_key]
+    if stored_handle == parent_handle
+      assign mega_menu_index = i
+      assign layout_key = 'mega_menu_' | append: i | append: '_layout'
+      assign menu_layout = settings[layout_key] | default: 'layout_1'
+      break
+    endif
+  endfor
+%}
+
+<div class="mega-menu__list-wrapper mega-menu__list-wrapper--{{ menu_layout }}" data-menu-list-id="{{ id }}">
+  <!-- Left Section: Navigation Links -->
+  <div class="mega-menu__nav-section">
+    <ul class="mega-menu__list list-unstyled">
+      {% for link in parent_link.links %}
+        {% liquid
+          if forloop.first or open_column_span == false
+            assign open_column_span = true
+            assign break_after_modulo = link.links.size | modulo: links_before_wrap
+            if break_after_modulo == 1
+              assign links_before_wrap = links_before_wrap | minus: 1
+            endif
+            assign break_after_float = links_before_wrap | times: 1.0
+            assign column_span = link.links.size | divided_by: break_after_float | ceil | at_least: 1
+            assign column_count = column_count | plus: column_span
+            assign should_break_columns = true
+            assign span_class = 'mega-menu__column--span-' | append: column_span
+            echo '<li class="mega-menu__column ' | append: span_class | append: '">'
+          endif
+        %}
+        
+        <div class="mega-menu__column-content">
+          <a href="{{ link.url }}" class="mega-menu__link {% if link.links != blank %}mega-menu__link--parent{% endif %}">
+            {% assign collection = link.object %}
+            <span class="mega-menu__link-title wrap-text ">
+                                                {% if collection and collection.metafields.custom.icon %}
+              {{ collection.metafields.custom.icon | image_url: width: 20  | image_tag: alt: collection.title, class: 'custom-image'}}
+            {% endif %}
+              {{ link.title }}
+            </span>
+          </a>
+          
+          {% if link.links != blank %}
+            <ul class="list-unstyled mega-menu__sublinks" {% if should_break_columns %}style="column-count: {{ column_span }};"{% endif %}>
+              {% for childLink in link.links %}
+                {% assign break_after_modulo = forloop.index | modulo: links_before_wrap %}
+                <li {% if break_after_modulo == 0 and should_break_columns %}style="break-after: column;"{% endif %}>
+                  <a href="{{ childLink.url }}" class="mega-menu__link">
+                                {% assign collection = childLink.object %}
+                    <span class="mega-menu__link-title wrap-text">
+                                  {% if collection and collection.metafields.custom.icon %}
+              {{ collection.metafields.custom.icon | image_url: width: 20  | image_tag: alt: collection.title, class: 'custom-image'}}
+            {% endif %}
+                      {{ childLink.title }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+
+        {% liquid
+          assign next_linklist = parent_link.links[forloop.index]
+          if forloop.last
+            assign open_column_span = false
+          elsif next_linklist.links != blank
+            assign open_column_span = false
+          elsif link.links != blank and next_linklist.links == blank
+            assign open_column_span = false
+          endif
+          if open_column_span == false
+            echo '</li>'
+          endif
+        %}
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Right Section: Featured Products & Hero (Not shown in Layout 3) -->
+  {% if mega_menu_index and menu_layout != 'layout_3' %}
+    <div class="mega-menu__featured-section">
+      <!-- Mini Products Column -->
+      <div class="mega-menu__mini-products">
+        {% liquid
+          assign product_1_key = 'mega_menu_' | append: mega_menu_index | append: '_product_1'
+          assign product_2_key = 'mega_menu_' | append: mega_menu_index | append: '_product_2'
+          assign product_1_handle = settings[product_1_key]
+          assign product_2_handle = settings[product_2_key]
+        %}
+
+        {% if product_1_handle != blank %}
+          {% assign product_1 = all_products[product_1_handle] %}
+          {% if product_1.id %}
+            <div class="mega-menu__mini-product">
+              <a href="{{ product_1.url }}" class="mega-menu__mini-product-link">
+                <div class="mega-menu__mini-product-image-wrapper">
+                  {% if product_1.featured_image %}
+                    <img 
+                      src="{{ product_1.featured_image | image_url: width: 200 }}"
+                      alt="{{ product_1.featured_image.alt | escape }}"
+                      class="mega-menu__mini-product-image"
+                      loading="lazy"
+                    >
+                    {% if product_1.images[1] %}
+                      <img 
+                        src="{{ product_1.images[1] | image_url: width: 200 }}"
+                        alt="{{ product_1.images[1].alt | escape }}"
+                        class="mega-menu__mini-product-image"
+                        loading="lazy"
+                      >
+                    {% endif %}
+                  {% endif %}
+                </div>
+                <div class="mega-menu__mini-product-info">
+                  <p class="mega-menu__mini-product-title">{{ product_1.title }} </p>
+                  <span class="mega-menu__mini-product-cta">{{ settings.mega_menu_cta_text | default: "Buy now" }}</span>
+                </div>
+              </a>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        {% if product_2_handle != blank %}
+          {% assign product_2 = all_products[product_2_handle] %}
+          {% if product_2.id %}
+            <div class="mega-menu__mini-product">
+              <a href="{{ product_2.url }}" class="mega-menu__mini-product-link">
+                <div class="mega-menu__mini-product-image-wrapper">
+                  {% if product_2.featured_image %}
+                    <img 
+                      src="{{ product_2.featured_image | image_url: width: 200 }}"
+                      alt="{{ product_2.featured_image.alt | escape }}"
+                      class="mega-menu__mini-product-image"
+                      loading="lazy"
+                    >
+                    {% if product_2.images[1] %}
+                      <img 
+                        src="{{ product_2.images[1] | image_url: width: 200 }}"
+                        alt="{{ product_2.images[1].alt | escape }}"
+                        class="mega-menu__mini-product-image"
+                        loading="lazy"
+                      >
+                    {% endif %}
+                  {% endif %}
+                </div>
+                <div class="mega-menu__mini-product-info">
+                  <p class="mega-menu__mini-product-title">{{ product_2.title }} </p>
+                  <span class="mega-menu__mini-product-cta">{{ settings.mega_menu_cta_text | default: "Buy now" }}</span>
+                </div>
+              </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- Hero Image Column -->
+      <div class="mega-menu__hero">
+        {% liquid
+          assign hero_image_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_image'
+          assign hero_text_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_text'
+          assign hero_button_text_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_button_text'
+          assign hero_button_link_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_button_link'
+          
+          assign hero_image = settings[hero_image_key]
+          assign hero_text = settings[hero_text_key]
+          assign hero_button_text = settings[hero_button_text_key]
+          assign hero_button_link = settings[hero_button_link_key]
+        %}
+
+        {% if hero_image != blank %}
+          <div class="mega-menu__hero-image-wrapper">
+            <img 
+              src="{{ hero_image | image_url: width: 1200 }}"
+              alt="{{ hero_image.alt | escape }}"
+              class="mega-menu__hero-image"
+              loading="lazy"
+            >
+            {% if hero_text != blank or hero_button_text != blank %}
+              <div class="mega-menu__hero-overlay">
+                {% if hero_text != blank %}
+                  <h3 class="mega-menu__hero-text">{{ hero_text }}</h3>
+                {% endif %}
+                {% if hero_button_text != blank %}
+                  <a href="{{ hero_button_link }}" class="image-button">
+                    {{ hero_button_text }}
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Layout 3: Hero Image Only (no mini products) -->
+  {% if mega_menu_index and menu_layout == 'layout_3' %}
+    <div class="mega-menu__hero-only">
+      {% liquid
+        assign hero_image_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_image'
+        assign hero_text_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_text'
+        assign hero_button_text_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_button_text'
+        assign hero_button_link_key = 'mega_menu_' | append: mega_menu_index | append: '_hero_button_link'
+        
+        assign hero_image = settings[hero_image_key]
+        assign hero_text = settings[hero_text_key]
+        assign hero_button_text = settings[hero_button_text_key]
+        assign hero_button_link = settings[hero_button_link_key]
+      %}
+
+      {% if hero_image != blank %}
+        <div class="mega-menu__hero-image-wrapper">
+          <img 
+            src="{{ hero_image | image_url: width: 1200 }}"
+            alt="{{ hero_image.alt | escape }}"
+            class="mega-menu__hero-image"
+            loading="lazy"
+          >
+          {% if hero_text != blank or hero_button_text != blank %}
+            <div class="mega-menu__hero-overlay">
+              {% if hero_text != blank %}
+                <h3 class="mega-menu__hero-text">{{ hero_text }}</h3>
+              {% endif %}
+              {% if hero_button_text != blank %}
+                <a href="{{ hero_button_link }}" class="image-button">
+                  {{ hero_button_text }}
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+{% style %}
+  /* Layout 1: 2 nav columns + mini products + hero (Default - Clothing style) */
+  .mega-menu__list-wrapper--layout_1 {
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    gap: 0;
+    width: 100%;
+    padding-top: var(--padding-lg, 20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: calc(-1 * var(--submenu-padding-block-start));
+    align-items: start;
+  }
+
+  .mega-menu__list-wrapper--layout_1 .mega-menu__nav-section {
+    grid-column: 1 / 3;
+    display: flex;
+    padding-right: var(--gap-2xl, 40px);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .mega-menu__list-wrapper--layout_1 .mega-menu__featured-section {
+    grid-column: 3 / 5;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-lg, 20px);
+    height: auto;
+    padding-left: var(--gap-2xl, 40px);
+    margin-right: calc(-1 * var(--section-padding-inline));
+    align-items: start;
+  }
+
+  /* Layout 2: 1 nav column + mini products + wide hero (Shoes style) */
+  .mega-menu__list-wrapper--layout_2 {
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    gap: 0;
+    width: 100%;
+    padding-top: var(--padding-lg, 20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: calc(-1 * var(--submenu-padding-block-start));
+    align-items: start;
+  }
+
+  .mega-menu__list-wrapper--layout_2 .mega-menu__nav-section {
+    grid-column: 1;
+    display: flex;
+    padding-right: var(--gap-2xl, 40px);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .mega-menu__list-wrapper--layout_2 .mega-menu__featured-section {
+    grid-column: 2 / 5;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--gap-lg, 20px);
+    height: auto;
+    padding-left: var(--gap-2xl, 40px);
+    margin-right: calc(-1 * var(--section-padding-inline));
+    align-items: start;
+  }
+
+  /* Layout 3: 4 nav columns + hero image (no mini products) */
+  .mega-menu__list-wrapper--layout_3 {
+    display: grid;
+    grid-template-columns: 20% 20% 20% 20% 20%;
+    gap: 0;
+    width: 100%;
+    padding-top: var(--padding-lg, 20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: calc(-1 * var(--submenu-padding-block-start));
+    align-items: start;
+  }
+
+  .mega-menu__list-wrapper--layout_3 .mega-menu__nav-section {
+    grid-column: 1 / 5;
+    display: flex;
+    padding-right: var(--gap-2xl, 40px);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .mega-menu__list-wrapper--layout_3 .mega-menu__hero-only {
+    grid-column: 5;
+    height: auto;
+    margin-top: calc(-1 * var(--padding-lg, 20px));
+    margin-right: calc(-1 * var(--section-padding-inline));
+    margin-bottom: calc(-1 * var(--padding-lg, 20px));
+    padding-left: var(--gap-2xl, 40px);
+  }
+
+  /* Navigation list */
+  .mega-menu__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    width: 100%;
+  }
+
+  .mega-menu__column {
+    flex: 1;
+    min-width: 200px;
+    padding-right: var(--gap-xl, 24px);
+    padding-left: var(--gap-xl, 24px);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .mega-menu__column:first-child {
+    padding-left: 0;
+  }
+
+  .mega-menu__column:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
+
+  /* Layout 2: Single column navigation (no borders between nav items) */
+  .mega-menu__list-wrapper--layout_2 .mega-menu__column {
+    flex: 1 1 100%;
+    border-right: none;
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: var(--gap-lg, 20px);
+  }
+
+  .mega-menu__list-wrapper--layout_2 .mega-menu__column:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Layout 3: 4 navigation columns */
+  .mega-menu__list-wrapper--layout_3 .mega-menu__column {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .mega-menu__column-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Parent link with border */
+  .mega-menu__link--parent {
+    padding-bottom: var(--padding-sm, 12px);
+    margin-bottom: var(--gap-md, 16px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: block;
+  }
+
+  .mega-menu__sublinks {
+    margin-top: 0;
+  }
+
+  /* Mini Products Column - Exact Pini Parma Style */
+  .mega-menu__mini-products {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg, 20px);
+    padding-right: var(--gap-md, 16px);
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Layout 2: Adjust mini products width */
+  .mega-menu__list-wrapper--layout_2 .mega-menu__mini-products {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .mega-menu__mini-product {
+    background: var(--color-background);
+    overflow: visible;
+    transition: transform 0.2s ease;
+  }
+
+  .mega-menu__mini-product:hover {
+    transform: translateY(-2px);
+  }
+
+  .mega-menu__mini-product-link {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-md, 16px);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Image on left - 1:2 aspect ratio (portrait) */
+  .mega-menu__mini-product-image-wrapper {
+    flex-shrink: 0;
+    width: 100px;
+    height: 120px;
+    overflow: hidden;
+    background: #f5f5f5;
+    position: relative;
+  }
+
+  .mega-menu__mini-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  #submenu-1 .mega-menu__hero-image{
+    aspect-ratio: 1 / 1;
+  }
+  .mega-menu__mini-product-image:nth-child(2) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  .mega-menu__mini-product:hover .mega-menu__mini-product-image:nth-child(1) {
+    opacity: 0;
+  }
+
+  .mega-menu__mini-product:hover .mega-menu__mini-product-image:nth-child(2) {
+    opacity: 1;
+  }
+
+  /* Text on right */
+  .mega-menu__mini-product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs, 8px);
+    padding-top: 4px;
+    min-width: 0;
+  }
+
+  .mega-menu__mini-product-title {
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.4;
+    color: var(--color-foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  .mega-menu__mini-product-cta {
+    font-size: 14px;
+    text-decoration: underline;
+    font-weight: 500;
+    color: var(--color-foreground);
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .mega-menu__mini-product-link:hover .mega-menu__mini-product-cta {
+    text-decoration: none;
+  }
+
+  /* Hero Image Column - Full Width, No Border Radius */
+  .mega-menu__hero,
+  .mega-menu__hero-only {
+    position: relative;
+    height: auto;
+    overflow: hidden;
+    border-radius: 0;
+    height: auto !important;
+  }
+
+  .mega-menu__hero {
+    margin-top: calc(-1 * var(--padding-lg, 20px));
+    margin-right: calc(-1 * var(--section-padding-inline));
+    margin-bottom: calc(-1 * var(--padding-lg, 20px));
+  }
+
+  .mega-menu__hero-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mega-menu__hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-radius: 0;
+  }
+
+  .mega-menu__hero-overlay {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    right: 40px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md, 16px);
+    align-items: flex-start;
+  }
+
+  .mega-menu__hero-text {
+    font-size: 28px;
+    font-weight: 500;
+    margin: 0;
+    color: white;
+    line-height: 1.2;
+    max-width: 300px;
+  }
+
+  .mega-menu__hero-button {
+    display: inline-block;
+    padding: 12px 28px;
+    background:#ffffff4d !important;
+    color: white !important;
+    text-decoration: none;
+    border: 1px solid white;
+    border-radius: 0;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .mega-menu__hero-button:hover {
+    background: rgba(0,0,0,0.7) !important;
+    color: white !important;
+  }
+
+  /* Override any theme link styles */
+  a.mega-menu__hero-button,
+  a.mega-menu__hero-button:visited,
+  a.mega-menu__hero-button:link {
+    /* color: white !important; */
+  }
+
+  a.mega-menu__hero-button:hover {
+    /* color: black !important; */
+  }
+
+  /* Tablet Responsive */
+  @media screen and (max-width: 989px) {
+    .mega-menu__list-wrapper--layout_1,
+    .mega-menu__list-wrapper--layout_2,
+    .mega-menu__list-wrapper--layout_3 {
+      grid-template-columns: 1fr;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      margin-top: 0;
+    }
+
+    .mega-menu__list-wrapper--layout_1 .mega-menu__nav-section,
+    .mega-menu__list-wrapper--layout_2 .mega-menu__nav-section,
+    .mega-menu__list-wrapper--layout_3 .mega-menu__nav-section {
+      border-right: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-right: 0;
+      padding-bottom: var(--gap-lg, 20px);
+    }
+
+    .mega-menu__list-wrapper--layout_1 .mega-menu__featured-section,
+    .mega-menu__list-wrapper--layout_2 .mega-menu__featured-section {
+      grid-template-columns: 1fr;
+      gap: var(--gap-lg, 20px);
+      padding-left: 0;
+      padding-top: var(--gap-lg, 20px);
+      margin-right: 0;
+    }
+
+    .mega-menu__list-wrapper--layout_3 .mega-menu__hero-only {
+      margin: 0;
+      padding: var(--gap-lg, 20px) 0 0 0;
+    }
+
+    .mega-menu__mini-products {
+      flex-direction: row;
+      gap: var(--gap-md, 16px);
+      padding-right: 0;
+    }
+
+    .mega-menu__mini-product {
+      flex: 1;
+    }
+
+    .mega-menu__mini-product-link {
+      flex-direction: column;
+    }
+
+    .mega-menu__mini-product-image-wrapper {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1.2;
+    }
+
+    .mega-menu__hero {
+      margin-top: 0;
+      margin-right: 0;
+      margin-bottom: 0;
+    }
+
+    .mega-menu__hero-image-wrapper {
+      min-height: 300px;
+    }
+  }
+
+  /* Mobile - Hide featured section */
+  @media screen and (max-width: 749px) {
+    .mega-menu__featured-section,
+    .mega-menu__hero-only {
+      display: none;
+    }
+  }
+{% endstyle %}
+
+{% comment %} <script>
+  // Match hero image height to navigation content height
+  function matchMegaMenuHeights() {
+    document.querySelectorAll('.mega-menu__list-wrapper').forEach(function(wrapper) {
+      const navSection = wrapper.querySelector('.mega-menu__nav-section');
+      const heroImage = wrapper.querySelector('.mega-menu__hero');
+      const heroOnly = wrapper.querySelector('.mega-menu__hero-only');
+      const featuredSection = wrapper.querySelector('.mega-menu__featured-section');
+      
+      if (navSection && featuredSection && heroImage) {
+        // Get the actual height of navigation content
+        const navHeight = navSection.offsetHeight;
+        
+        // Set featured section and hero to match nav height
+        featuredSection.style.height = navHeight + 'px';
+        heroImage.style.height = (navHeight + 40) + 'px'; // +40 for top/bottom margins
+      }
+
+      // Layout 3: Match hero-only height
+      if (navSection && heroOnly) {
+        const navHeight = navSection.offsetHeight;
+        heroOnly.style.height = (navHeight + 40) + 'px';
+      }
+    });
+  }
+
+  // Run on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', matchMegaMenuHeights);
+  } else {
+    matchMegaMenuHeights();
+  }
+
+  // Run when mega menu is opened
+  document.addEventListener('mouseenter', function(e) {
+    if (e.target.closest('.menu-list__list-item')) {
+      setTimeout(matchMegaMenuHeights, 50);
+    }
+  }, true);
+
+  // Run on window resize
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(matchMegaMenuHeights, 250);
+  });
+</script> {% endcomment %}

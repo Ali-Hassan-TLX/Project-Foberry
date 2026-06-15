@@ -1,0 +1,146 @@
+<style>
+  *{
+    margin:0px;
+    padding:0px;
+
+  }
+</style>
+
+<div class="custom_summary_page hidden">
+  {% comment %}
+    {% render 'customizer-tab', current_product: shop_metafields %}
+  {% endcomment %}
+  <div class="custom_summary ">
+    <div class="summary_details">
+      <div class="notice-box">
+        <div class="section-title">Review Your Selections</div>
+        <p>
+          Take a moment to double-check your customizations before adding to your bag. This is your one-of-a-kind
+          garment. Designed by you, expertly crafted by Foberry.
+        </p>
+      </div>
+
+      <div class="slected-box ">
+        <span class="summary_title">Style </span>
+        <div class="selected_data summary_style"></div>
+      </div>
+      <hr>
+
+      <div class="slected-box">
+        <span class="summary_title">Monogram </span>
+        <div class="selected_data summary_monogram"></div>
+      </div>
+      <hr>
+      <div class="slected-box ">
+        <span class="summary_title">Additional Customization </span>
+        <div class="selected_data summary_additional"></div>
+      </div>
+      <hr>
+      <div class="slected-box">
+        <span class="summary_title">Sizes</span>
+        <div class="selected_data summary_sizes"></div>
+      </div>
+      <div class="slected-box">
+        <textarea id="comments" rows="4" placeholder="Additional Comment"></textarea>
+      </div>
+    </div>
+
+    <div class="product_add">
+      <img
+        src="{{ current_variant.featured_image | img_url: '2000x'}}"
+        width="120"
+        height="170"
+      >
+      <span class="product_title">{{ current_variant.title }}</span>
+      <div class="card_custom_price" data-base-price="{{ current_variant.price | money }}">
+        <span>PK. {{ current_variant.price | money }}</span>
+      </div>
+       
+        <form class="summary_form">
+          <div class="total-products">
+            <a class="decrease">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"/>
+              </svg>
+            </a>
+            <input name="quantity" class="total_quantity" value="1">
+            <a class="increase">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/>
+              </svg>
+            </a>
+          </div>
+          <input name="id" hidden value="{{ current_variant.selected_or_first_available_variant.id }}">
+          <button
+            class="add-to-cart"
+            type="button"
+            data-variant-id="{{ current_variant.selected_or_first_available_variant.id }}"
+          >
+            Add To Bag
+          </button>
+          <div class="customizer_additional_charges hidden">
+            <input type="" name="properties[additional_price]" value="0">
+          </div>
+        </form>
+      
+      {% comment %} <product-form-component data-product-id="{{ product.id }}">
+        <form class="summary_form">
+          <!-- ✅ REQUIRED (for accessibility + events, hidden) -->
+          <div ref="liveRegion" class="visually-hidden" aria-live="polite"></div>
+
+          <div class="total-products">
+            <a class="decrease">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"/>
+              </svg>
+            </a>
+
+            <input name="quantity" class="total_quantity" value="1">
+
+            <a class="increase">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- ✅ REQUIRED VARIANT REF -->
+          <input
+            name="id"
+            hidden
+            value="{{ current_variant.selected_or_first_available_variant.id }}"
+            ref="variantId"
+          >
+
+          <!-- ✅ ADD TO CART COMPONENT (REQUIRED) -->
+          <add-to-cart-component ref="addToCartButtonContainer">
+            <button
+              class="add-to-cart"
+              type="button"
+              ref="addToCartButton"
+              data-variant-id="{{ current_variant.selected_or_first_available_variant.id }}"
+            >
+              Add To Bag
+            </button>
+          </add-to-cart-component>
+
+          <!-- ✅ KEEP YOUR ADDITIONAL PRICE -->
+          <div class="customizer_additional_charges hidden">
+            <input type="hidden" name="properties[additional_price]" value="0">
+          </div>
+        </form>
+      </product-form-component> {% endcomment %}
+      <button class="save-btn">
+        {{ 'Save-Selection.svg' | inline_asset_content }} Save selections for future order
+      </button>
+    </div>
+    <div class="info-boxes">
+      {% for promotions in shop_metafields.promotions %}
+        <div class="info-box">
+          <strong>{{ promotions.heading }}</strong>
+          {{ promotions.content }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

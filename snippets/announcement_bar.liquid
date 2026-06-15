@@ -1,0 +1,128 @@
+{%- liquid
+  assign ann1 = settings.cart_announcement_1 | strip
+  assign ann2 = settings.cart_announcement_2 | strip
+  assign ann3 = settings.cart_announcement_3 | strip
+
+  assign ann_count = 0
+  if ann1 != blank
+    assign ann_count = ann_count | plus: 1
+  endif
+  if ann2 != blank
+    assign ann_count = ann_count | plus: 1
+  endif
+  if ann3 != blank
+    assign ann_count = ann_count | plus: 1
+  endif
+-%}
+
+{%- if ann_count > 0 -%}
+<div class="cart-announcement-bar{% if ann_count > 1 %} slider{% endif %}"
+     style="
+      background: {{ settings.cart_ann_bg }};
+      color: {{ settings.cart_ann_text }};
+      font-size: {{ settings.cart_ann_font_size }}px;
+     ">
+
+  {%- if ann_count > 1 -%}
+    <div class="ann-track" id="annTrack">
+      {%- if ann1 != blank -%}<div class="ann-slide"><span>{{ ann1 }}</span></div>{%- endif -%}
+      {%- if ann2 != blank -%}<div class="ann-slide"><span>{{ ann2 }}</span></div>{%- endif -%}
+      {%- if ann3 != blank -%}<div class="ann-slide"><span>{{ ann3 }}</span></div>{%- endif -%}
+    </div>
+
+    <div class="ann-dots">
+      {%- for i in (1..ann_count) -%}
+        <button class="ann-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.index0 }}"></button>
+      {%- endfor -%}
+    </div>
+  {%- else -%}
+    <div class="ann-single">
+      {%- if ann1 != blank -%}<span>{{ ann1 }}</span>{%- endif -%}
+      {%- if ann2 != blank -%}<span>{{ ann2 }}</span>{%- endif -%}
+      {%- if ann3 != blank -%}<span>{{ ann3 }}</span>{%- endif -%}
+    </div>
+  {%- endif -%}
+
+</div>
+
+<style>
+.cart-announcement-bar {
+  text-align: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.ann-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+.ann-slide {
+  min-width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.ann-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.ann-dot {
+  width: 5px;
+  height: 5px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+.ann-dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+.ann-single {
+  display: flex;
+  justify-content: center;
+}
+</style>
+
+<script>
+(function () {
+  var track = document.getElementById('annTrack');
+  var dots = document.querySelectorAll('.ann-dot');
+
+  if (!track || dots.length === 0) return;
+
+  var index = 0;
+
+  function goToSlide(i) {
+    track.style.transform = 'translateX(-' + (i * 100) + '%)';
+    
+    dots.forEach(function(dot){
+      dot.classList.remove('active');
+    });
+    dots[i].classList.add('active');
+
+    index = i;
+  }
+
+  dots.forEach(function(dot){
+    dot.addEventListener('click', function(){
+      goToSlide(parseInt(this.dataset.index));
+    });
+  });
+
+  // Auto slide
+  setInterval(function () {
+    index = (index + 1) % dots.length;
+    goToSlide(index);
+  }, 3000);
+
+})();
+</script>
+{%- endif -%}

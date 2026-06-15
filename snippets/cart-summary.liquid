@@ -1,0 +1,659 @@
+{%- doc -%}
+  Renders the cart summary totals.
+
+  @param {string} [accelerated_checkout_buttons_layout] - { 'vertical' } Forced layout of the additional checkout buttons, instead of relying on platform's layout.
+{%- enddoc -%}
+
+{% comment %} <div class="cart__summary-totals"> {% endcomment %}
+  {% # We need to keep this node in place to allow morphing to work properly # %}
+  {% comment %}
+  Snippet: you-may-also-like.liquid
+  Usage: {% render 'you-may-also-like' %}
+  Collection: Theme Settings > "You May Also Like" > Select Collection
+{% endcomment %}
+
+{% comment %} {% assign ymal_collection = collections[settings.ymal_collection] %}
+
+{% if ymal_collection != blank and ymal_collection.products.size > 0 %}
+
+<div class="ymal-wrap">
+  <h2 class="ymal-title">{{ settings.ymal_title | default: 'You May Also Like' }}</h2>
+
+  <div class="ymal-track">
+    {% for product in ymal_collection.products limit: settings.ymal_limit %}
+      <a href="{{ product.url }}" class="ymal-card">
+
+        <div class="ymal-card__img">
+          {% if product.featured_image != blank %}
+            <img
+              src="{{ product.featured_image | img_url: '200x200', crop: 'center' }}"
+              alt="{{ product.featured_image.alt | escape }}"
+              loading="lazy"
+              width="90"
+              height="90"
+            >
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'ymal-placeholder' }}
+          {% endif %}
+        </div>
+
+        <div class="ymal-card__info">
+          <p class="ymal-card__name">{{ product.title | truncate: 50 }}</p>
+
+          {% if settings.ymal_show_vendor %}
+            <p class="ymal-card__vendor">{{ product.vendor }}</p>
+          {% endif %}
+
+          <div class="ymal-card__price">
+            {% if product.compare_at_price > product.price %}
+              <s class="ymal-price--compare">{{ product.compare_at_price | money }}</s>
+              <span class="ymal-price--sale">{{ product.price | money }}</span>
+            {% else %}
+              <span class="ymal-price--regular">{{ product.price | money }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </a>
+    {% endfor %}
+  </div>
+
+</div>
+
+<style>
+.ymal-wrap {
+  padding: 24px 0;
+}
+.ymal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+.ymal-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+.ymal-track::-webkit-scrollbar { height: 4px; }
+.ymal-track::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+.ymal-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 260px;
+  min-width: 260px;
+  scroll-snap-align: start;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 10px;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
+.ymal-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+
+.ymal-card__img {
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+.ymal-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ymal-placeholder {
+  width: 100%;
+  height: 100%;
+  fill: #ddd;
+}
+.ymal-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ymal-card__name {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ymal-card__vendor {
+  font-size: 11px;
+  color: #888;
+  margin: 0;
+}
+.ymal-card__price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.ymal-price--regular { font-size: 13px; font-weight: 600; color: #000000ff; }
+.ymal-price--sale    { font-size: 13px; font-weight: 600; color: #e53d3d; }
+.ymal-price--compare { font-size: 11px; color: #aaa; }
+</style>
+
+{% endif %} {% endcomment %}
+
+  {% comment %} <div class="cart__original-total-container cart-primary-typography">
+    {%- if cart.cart_level_discount_applications.size > 0 -%}
+      <span class="cart__summary-item cart__original-total">
+        <span class="cart__original-total-label">{{ 'content.cart_subtotal' | t }}</span>
+        <span class="cart__original-total-value cart-secondary-typography">
+          {{- cart.original_total_price | money -}}
+        </span>
+      </span>
+      <div class="cart__summary-discounts">
+        <ul
+          class="discounts list-unstyled"
+          role="list"
+          aria-label="{{ 'content.discounts' | t }}"
+        >
+          {%- for discount in cart.cart_level_discount_applications -%}
+            <li class="cart__summary-item cart__discount">
+              <span class="cart__discount-label">
+                {{- 'icon-discount.svg' | inline_asset_content -}}
+                {{ discount.title | escape }}
+              </span>
+              <span class="cart__discount-value cart-secondary-typography"
+                >-{{ discount.total_allocated_amount | money -}}
+              </span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </div> {% endcomment %}
+
+  {% if settings.show_cart_note or settings.show_add_discount_code %}
+    {% comment %} <div class="cart-actions">
+      {% if settings.show_cart_note %}
+        <script
+          type="module"
+          src="{{ 'cart-note.js' | asset_url }}"
+        ></script>
+
+        <cart-note style="display: flex;">
+          <accordion-custom
+            class="cart-note"
+            {% if settings.cart_note_open_by_default %}
+              open-by-default-on-desktop
+              open-by-default-on-mobile
+            {% endif %}
+          >
+            <details
+              class="details"
+              {% if settings.cart_note_open_by_default %}
+                open
+              {% endif %}
+            >
+              <summary class="cart-note__summary">
+                <span class="cart-note__label cart-primary-typography">
+                  {{ 'content.seller_note' | t }}
+                </span>
+
+                <span class="svg-wrapper icon-plus">
+                  {{- 'icon-plus.svg' | inline_asset_content -}}
+                </span>
+              </summary>
+
+              <div class="details-content cart-note__inner">
+                <label
+                  for="cart-note"
+                  class="visually-hidden"
+                >
+                  {{- 'content.seller_note' | t -}}
+                </label>
+                <textarea
+                  form="cart-form"
+                  on:input="/updateCartNote"
+                  id="cart-note"
+                  class="cart-note__instructions"
+                  name="note"
+                >{{ cart.note }}</textarea>
+              </div>
+            </details>
+          </accordion-custom>
+        </cart-note>
+      {% endif %} {% endcomment %}
+      {% comment %} {% if settings.show_cart_note and settings.show_add_discount_code %}
+        <div class="cart-actions__divider"></div>
+      {% endif %} {% endcomment %}
+      {% comment %} {% if settings.show_add_discount_code %}
+        {% liquid
+          assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+          for item in cart.items
+            for allocation in item.line_level_discount_allocations
+              if allocation.discount_application.type == 'discount_code'
+                assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
+              endif
+            endfor
+          endfor
+
+          assign discount_codes = discount_codes | uniq
+
+          # Evaluate the boolean expression for the disclosure state
+          if discount_codes.size == 0
+            assign disclosure_expanded = false
+          else
+            assign disclosure_expanded = true
+          endif
+        %}
+
+        <disclosure-custom class="cart-discount">
+          <button
+            aria-controls="cart-discount-disclosure"
+            aria-expanded="{% if disclosure_expanded %}true{% else %}false{% endif %}"
+            aria-label="{% if disclosure_expanded %}{{ 'actions.close' | t }}{% else %}{{ 'actions.open' | t }}{% endif %} {{ 'accessibility.discount_menu' | t }}"
+            class="disclosure-trigger"
+            data-disclosure-open="{{ 'actions.open' | t }} {{ 'accessibility.discount_menu' | t }}"
+            data-disclosure-close="{{ 'actions.close' | t }} {{ 'accessibility.discount_menu' | t }}"
+            on:click="/toggleDisclosure"
+            ref="disclosureTrigger"
+            type="button"
+          >
+            <span class="disclosure-trigger__label cart-primary-typography">{{ 'content.discount' | t }}</span>
+
+            <span class="svg-wrapper icon-plus">
+              {{- 'icon-plus.svg' | inline_asset_content -}}
+            </span>
+          </button>
+
+          <div
+            class="disclosure-content"
+            {% unless disclosure_expanded %}
+              inert
+            {% endunless %}
+            ref="disclosureContent"
+          >
+            <div id="cart-discount-disclosure">
+              <cart-discount-component
+                data-section-id="{{ section.id }}"
+              >
+                <div class="cart-discount__content">
+                  <form
+                    on:submit="/applyDiscount"
+                    onsubmit="return false;"
+                    class="cart-discount__form"
+                  >
+                    <label
+                      for="cart-discount"
+                      class="visually-hidden"
+                    >
+                      {{- 'accessibility.discount' | t -}}
+                    </label>
+                    <input
+                      id="cart-discount"
+                      class="cart-discount__input"
+                      type="text"
+                      name="discount"
+                      size="8"
+                      placeholder="{{ 'content.discount_code' | t }}"
+                      required
+                    >
+                    <button
+                      type="submit"
+                      class="button button--primary cart-discount__button"
+                    >
+                      {{ 'actions.apply' | t }}
+                    </button>
+                  </form>
+                </div>
+                <div
+                  class="cart-discount__error hidden"
+                  role="alert"
+                  ref="cartDiscountError"
+                >
+                  <span class="svg-wrapper">
+                    {{- 'icon-error.svg' | inline_asset_content -}}
+                  </span>
+                  <small
+                    class="cart-discount__error-text cart-primary-typography hidden"
+                    ref="cartDiscountErrorDiscountCode"
+                  >
+                    {{ 'content.discount_code_error' | t: code: 'test' }}
+                  </small>
+                  <small
+                    class="cart-discount__error-text cart-primary-typography hidden"
+                    ref="cartDiscountErrorShipping"
+                  >
+                    {{ 'content.shipping_discount_error' | t }}
+                  </small>
+                </div>
+                <ul class="cart-discount__codes">
+                  {% for discount_code in discount_codes %}
+                    <li
+                      class="cart-discount__pill"
+                      data-discount-code="{{ discount_code }}"
+                      aria-label="{{ 'accessibility.discount_applied' | t: code: discount_code }}"
+                    >
+                      <p class="cart-discount__pill-code">
+                        {{ discount_code }}
+                      </p>
+                      <button
+                        type="button"
+                        on:click="/removeDiscount"
+                        class="cart-discount__pill-remove svg-wrapper svg-wrapper--smaller button-unstyled"
+                        aria-label="{{ 'actions.remove_discount' | t: code: discount_code }}"
+                      >
+                        {{- 'icon-filters-close.svg' | inline_asset_content -}}
+                      </button>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </cart-discount-component>
+            </div>
+          </div>
+        </disclosure-custom>
+      {% endif %} {% endcomment %}
+    </div>
+  {% endif %}
+
+  {%- liquid
+    if settings.currency_code_enabled_cart_total
+      assign total_price = cart.total_price | money_with_currency
+    else
+      assign total_price = cart.total_price | money
+    endif
+  -%}
+{%- liquid
+  # Start with Shopify total (in cents)
+  assign cart_total_with_additional = cart.total_price
+
+  # Loop through cart items
+  for item in cart.items
+    # Get additional_price (assume stored in dollars)
+    assign additional_price = item.properties.additional_price | default: 0 | plus: 0
+
+    # Convert to cents if necessary (Shopify stores prices in cents)
+    assign additional_price_cents = additional_price | times: 100
+
+    # Multiply by quantity
+    assign additional_total = additional_price_cents | times: item.quantity
+
+    # Add to cart total
+    assign cart_total_with_additional = cart_total_with_additional | plus: additional_total
+  endfor
+
+  # Display formatted total
+  if settings.currency_code_enabled_cart_total
+    assign total_price = cart_total_with_additional | money_with_currency
+  else
+    assign total_price = cart_total_with_additional | money
+  endif
+-%}
+  <div class="cart__total-container cart-sticky-con{% if settings.show_installments %} cart__total-container--has-installments{% endif %}">
+   {% comment %} <span
+      class="cart__summary-item cart__total"
+      rol e="status"
+    >
+      <span class="cart__total-label cart-primary-typography">{{ 'content.cart_estimated_total' | t }}</span>
+      <text-component
+        ref="cartTotal"
+        value="{{ total_price | strip_html }}"
+        class="cart__total-value cart-secondary-typography"
+        id="cart-total-price"
+        {% comment %} Used by payment_terms web component {% endcomment %}
+        data-cart-subtotal
+      >
+        {{ total_price }}
+      </text-component>
+    </span> {% endcomment %}
+    {% if settings.show_installments %}
+      <span class="cart__summary-item cart__installments">
+        {% form 'cart', cart %}
+          {{ form | payment_terms }}
+        {% endform %}
+      </span>
+    {% endif %}
+    <div class="cart__summary-item tax-note cart-primary-typography">
+      {% render 'tax-info', has_discounts_enabled: settings.show_add_discount_code %}
+    </div>
+<div class="cart__ctas">
+  <button
+    type="submit"
+    id="checkout"
+    class="cart__checkout-button button"
+    name="checkout"
+    {% if cart == empty %}
+      disabled
+    {% endif %}
+    form="cart-form"
+  >
+    {{ 'content.checkout' | t }} {{ total_price }}
+  </button>
+<div class="spinner_main"><div class="spinner" role="status" aria-label="Loading"></div></div>
+  {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
+    <div
+      class="
+        additional-checkout-buttons
+        {% if accelerated_checkout_buttons_layout == 'vertical' %}additional-checkout-buttons--vertical{% endif %}
+      "
+    >
+      {{ content_for_additional_checkout_buttons }}
+    </div>
+  {% endif %}
+</div>
+  </div>
+</div>
+
+
+{% stylesheet %}
+  .cart-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-block: 1px solid var(--color-border);
+    padding-block: 0;
+    margin-block-start: var(--margin-3xs);
+  }
+
+  .cart-actions__divider {
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .cart__summary-totals:not(:has(.cart-actions)) {
+    margin-block-start: var(--margin-3xs);
+    /* border-block-start: 1px solid var(--color-border);
+    padding-block-start: var(--margin-xl); */
+  }
+
+  .cart__installments {
+    color: var(--color-foreground);
+    font-size: var(--cart-font-size--2xs);
+  }
+
+  .cart-discount__input {
+    background-color: var(--color-input-background);
+    color: var(--color-input-text);
+    border-width: var(--style-border-width-inputs);
+    border-color: var(--color-input-border);
+    border-style: solid;
+    border-radius: var(--style-border-radius-inputs);
+    padding: var(--padding-sm) var(--padding-md);
+    height: 100%;
+    flex-grow: 1;
+    min-width: 0;
+    font-size: var(--cart-font-size--sm);
+  }
+
+  .cart-discount__input::placeholder {
+    color: rgb(var(--color-input-text-rgb) / var(--opacity-subdued-text));
+  }
+
+  .cart-discount__pill-code {
+    overflow: hidden;
+    max-width: 100px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  .cart-discount {
+    width: 100%;
+  }
+
+  .cart-discount .svg-wrapper {
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+  }
+
+  .cart-discount__codes {
+    display: none;
+    gap: var(--padding-xs);
+    flex-wrap: wrap;
+    list-style: none;
+    padding-inline: 0;
+    margin: 0;
+  }
+
+  .cart-discount__codes:has(.cart-discount__pill) {
+    display: flex;
+  }
+
+  .cart-discount__button {
+    height: 100%;
+  }
+
+  .cart-discount__content {
+    height: calc(var(--button-size) + var(--padding-2xs) + var(--padding-sm));
+  }
+
+  .cart-discount__pill {
+    display: flex;
+    color: var(--color-foreground);
+    gap: var(--padding-xs);
+    align-items: center;
+    padding: var(--padding-xs) var(--padding-sm);
+    border-radius: var(--style-border-radius-pills);
+    background-color: var(--color-input-background);
+    text-transform: uppercase;
+  }
+
+  .cart-discount__form {
+    display: flex;
+    gap: var(--padding-md);
+    align-items: center;
+    height: 100%;
+    padding-block: var(--padding-2xs) var(--padding-sm);
+  }
+
+  :is(.cart-discount__pill-remove, .cart-discount__pill-remove:hover) {
+    --close-icon-opacity: 0.4;
+
+    color: var(--color-foreground);
+    background-color: transparent;
+    pointer-events: all;
+    cursor: pointer;
+    height: 100%;
+  }
+
+  .cart-discount__error {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-block: var(--padding-2xs) var(--padding-sm);
+  }
+
+  .cart-discount__error .svg-wrapper {
+    flex-shrink: 0;
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+    margin-inline: var(--margin-3xs) var(--margin-xs);
+  }
+
+  .cart-discount__error-text {
+    margin-block-start: var(--margin-3xs);
+  }
+
+  .disclosure-trigger {
+    cursor: pointer;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--padding-sm);
+    padding-inline: 0;
+    width: 100%;
+    border: none;
+    background: #0000;
+
+    &[aria-expanded='true'] .horizontal {
+      rotate: 90deg;
+    }
+
+    &:is(:hover, :focus-visible) {
+      color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+    }
+
+    .horizontal {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    svg {
+      aspect-ratio: 1;
+      width: var(--icon-size-xs);
+      height: var(--icon-size-xs);
+    }
+  }
+
+  .disclosure-trigger__label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-2xs);
+    font-size: var(--cart-font-size--2xs);
+    font-weight: 500;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .disclosure-trigger .horizontal {
+      transition: rotate var(--surface-transition-duration) var(--surface-transition-timing);
+    }
+  }
+
+  .disclosure-content {
+    display: grid;
+    grid-template-rows: 1fr;
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    clip-path: inset(-5% -5% 0 -5%);
+    opacity: 1;
+
+    &[inert] {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+
+    & > * {
+      min-height: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .disclosure-content {
+      transition-property: grid-template-rows, opacity;
+      transition-duration: var(--surface-transition-duration);
+      transition-timing-function: var(--surface-transition-timing);
+    }
+  }
+{% endstylesheet %}
+

@@ -1,0 +1,429 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "name": "Title",
+          "settings": {
+            "text": "<h1>{{ closest.page.title }}</h1>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "page-content": {
+          "type": "page-content",
+          "settings": {},
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "heading",
+        "page-content"
+      ],
+      "disabled": true,
+      "settings": {
+        "content_direction": "column",
+        "gap": 49,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 80,
+        "section_width": "section section-full-width"
+      }
+    },
+    "hero_xnyhXF": {
+      "type": "hero",
+      "blocks": {
+        "text_e4Df3g": {
+          "type": "text",
+          "settings": {
+            "text": "<h1>BOOK AN APPOINTMENT</h1>",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "3rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_8eEdxa": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Bespoke clothing is all about having the perfect cloth stitched to your desire so that you can remain comfortable, confident, and classy. Book your visit with our Sales Representative and get your custom shirts the way you want. <strong>(Lahore Only)</strong></p>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h4",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground-heading)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 32,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "button_YUBYjp": {
+          "type": "button",
+          "name": "t:names.button",
+          "disabled": true,
+          "settings": {
+            "label": "Shop now",
+            "link": "shopify://collections/all",
+            "open_in_new_tab": false,
+            "style_class": "button",
+            "width": "fit-content",
+            "custom_width": 100,
+            "width_mobile": "fit-content",
+            "custom_width_mobile": 100,
+            "enalbe_custom_btn": false,
+            "button_text": "",
+            "button_link": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_e4Df3g",
+        "text_8eEdxa",
+        "button_YUBYjp"
+      ],
+      "name": "t:names.hero",
+      "settings": {
+        "media_type_1": "image",
+        "image_1": "shopify://shop_images/visit.webp",
+        "media_type_2": "image",
+        "stack_media_on_mobile": false,
+        "custom_mobile_media": false,
+        "media_type_1_mobile": "image",
+        "media_type_2_mobile": "image",
+        "link": "",
+        "open_in_new_tab": false,
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "flex-end",
+        "gap": 16,
+        "section_width": "page-width",
+        "section_height": "large",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-1",
+        "toggle_overlay": true,
+        "overlay_color": "#00000026",
+        "overlay_style": "gradient",
+        "gradient_direction": "to top",
+        "blurred_reflection": false,
+        "reflection_opacity": 75,
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    },
+    "section_DEnCzT": {
+      "type": "section",
+      "blocks": {
+        "text_Drm7Bm": {
+          "type": "text",
+          "name": "t:names.heading",
+          "disabled": true,
+          "settings": {
+            "text": "<h2>Book A Home Visit</h2>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_aqtcU3": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p><strong><br/>What’s the process?</strong></p><ul><li>Our sales rep will call and confirm a convenient time for the visit.</li><li>He will visit you at your office or home along with a range of fabrics displayed in Foberry’s Catalogues and the Measurement Kit to ensure your perfect measurements.</li><li>You can touch and feel the fabrics in real time and he will assist you regarding the selection of fabrics and designs as your personal stylist.</li><li>He can take your body measurement or shirt measurements, or you can also give him a perfect fit shirt of yours so that we can take a pattern out of it.</li><li>The sales rep will ensure personally that your custom shirts are stitched top-notch and all your requirements are fulfilled.</li><li>Once the shirt is crafted, he will visit you and let you wear and feel comfortable in your custom shirt so that you are fully satisfied.</li></ul><p> </p>",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_cHcfJR": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p><strong>Fabrics we use:</strong></p><p>We only use premium quality imported fabrics procured from a few finest fabric manufacturing firms around the globe. Pure Cotton, Italian Cotton, Egyptian Cotton, Corduroy, Flannel, Dobby, Poplin, Oxford Cotton, Linen, and Cotton Linen are mostly used for shirts.</p>",
+            "width": "fit-content",
+            "max_width": "none",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_RrBWUC": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p><strong>What makes us different?</strong></p><p>Our clients are our family. Once you have ordered a shirt, we will ensure that you are fully satisfied with your customized shirt as well as our services. Once your favourite shirt is crafted and you are satisfied with our services, you only need to call us whenever you are looking for new fabrics and our sales rep will be at your door to facilitate and we will take care of the rest.</p>",
+            "width": "fit-content",
+            "max_width": "none",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_pdizCP": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>Our sales rep is technically equipped and knows very well what kind of fabrics he is dealing with. He will be at your service and help you to pick the fabrics and designs as per your desires and personality, and further he will guide you with the selection of collars, cuffs, their shapes and styles, the pockets you need as well as the overall look of your attire.<br/><br/></p>",
+            "width": "fit-content",
+            "max_width": "none",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_CkE3nE": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>The best part is that it is totally free!<br/><br/></p>",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "center",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_Drm7Bm",
+        "text_aqtcU3",
+        "text_cHcfJR",
+        "text_RrBWUC",
+        "text_pdizCP",
+        "text_CkE3nE"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "small",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "177631149168b571c9": {
+      "type": "_blocks",
+      "blocks": {
+        "forms_inline_KxN6ex": {
+          "type": "shopify://apps/forms/blocks/inline/8744a304-fcb1-4347-b211-bb6b4759a76a",
+          "settings": {
+            "form_id": "955086",
+            "text_color": "#202020",
+            "button_background_color": "#202020",
+            "button_label_color": "#FFFFFF",
+            "links_color": "#1878B9",
+            "errors_color": "#E02229",
+            "text_alignment": "center",
+            "form_alignment": "center",
+            "padding_top": 0,
+            "padding_bottom": 11,
+            "padding_right": 0,
+            "padding_left": 0
+          }
+        }
+      },
+      "block_order": [
+        "forms_inline_KxN6ex"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    }
+  },
+  "order": [
+    "main",
+    "hero_xnyhXF",
+    "section_DEnCzT",
+    "177631149168b571c9"
+  ]
+}

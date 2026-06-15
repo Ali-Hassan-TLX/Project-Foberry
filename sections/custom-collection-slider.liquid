@@ -1,0 +1,707 @@
+{% comment %}
+  Custom Collection Slider Section for Shopify Fabric 2.0
+  File: sections/custom-collection-slider.liquid
+{% endcomment %}
+
+{{ 'custom-collection-slider.css' | asset_url | stylesheet_tag }}
+
+<section
+  id="section-{{ section.id }}"
+  class="custom-collection-slider"
+  data-section-id="{{ section.id }}"
+>
+  <div class="ccs-wrapper">
+
+    {% if section.settings.section_title != blank %}
+      {% assign title_font = section.settings.section_title_font %}
+      <div class="ccs-header">
+        <h2
+          class="ccs-section-title"
+          style="
+            font-size: {{ section.settings.section_title_size }}px;
+            {% if title_font != blank %}
+              font-family: {{ title_font.family }}, {{ title_font.fallback_families }};
+              font-weight: {{ title_font.weight }};
+              font-style: {{ title_font.style }};
+            {% endif %}
+          "
+        >{{ section.settings.section_title }}</h2>
+      </div>
+    {% endif %}
+
+    <div class="ccs-slider-outer">
+
+      {% if section.blocks.size > 1 %}
+        <button class="ccs-arrow ccs-arrow--prev" id="ccs-prev-{{ section.id }}" aria-label="Previous">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      {% endif %}
+
+      <div class="ccs-slider-container">
+        <div class="ccs-track" id="ccs-track-{{ section.id }}">
+          {% for block in section.blocks %}
+            {% assign collection = collections[block.settings.collection] %}
+            <div class="ccs-slide" {{ block.shopify_attributes }}>
+              <a
+                class="ccs-card"
+                style="border-radius: {{ block.settings.card_radius }}px;"
+                {% if collection != blank %}href="{{ collection.url }}"{% else %}href="#"{% endif %}
+              >
+
+                {% comment %} Full image — no crop, shows full portrait {% endcomment %}
+                {% if block.settings.custom_image != blank %}
+                  <img
+                    src="{{ block.settings.custom_image | img_url: '1080x1600' }}"
+                    alt="{{ block.settings.collection_label | default: collection.title }}"
+                    class="ccs-img"
+                    loading="lazy"
+                  >
+                {% elsif collection != blank and collection.image != blank %}
+                  <img
+                    src="{{ collection.image | img_url: '1080x1600' }}"
+                    alt="{{ collection.title }}"
+                    class="ccs-img"
+                    loading="lazy"
+                  >
+                {% elsif collection != blank and collection.products.first.featured_image != blank %}
+                  <img
+                    src="{{ collection.products.first.featured_image | img_url: '1080x1600' }}"
+                    alt="{{ collection.title }}"
+                    class="ccs-img"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="ccs-img-placeholder">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="100" height="100" fill="#e0e0e0"/>
+                      <path d="M30 65 L45 45 L55 58 L65 48 L75 65 Z" fill="#bbb"/>
+                      <circle cx="38" cy="38" r="7" fill="#bbb"/>
+                    </svg>
+                  </div>
+                {% endif %}
+
+                {% comment %} Gradient + text overlaid on image {% endcomment %}
+                <div class="ccs-overlay" style="border-radius: {{ block.settings.card_radius }}px;"></div>
+
+                <div class="ccs-content">
+                  {% assign label = block.settings.collection_label %}
+                  {% if label == blank and collection != blank %}
+                    {% assign label = collection.title %}
+                  {% endif %}
+                  {% if label != blank %}
+                    {% assign label_font = block.settings.label_font %}
+                    <h3
+                      class="ccs-label"
+                      style="
+                        color: {{ block.settings.label_color }};
+                        font-size: {{ block.settings.label_size }}px;
+                        {% if label_font != blank %}font-family: {{ label_font.family }}, {{ label_font.fallback_families }};
+                        font-weight: {{ label_font.weight }};
+                        font-style: {{ label_font.style }};{% endif %}
+                      "
+                    >{{ label }}</h3>
+                  {% endif %}
+
+                  {% if collection != blank %}
+                    <p class="ccs-count" style="color: {{ block.settings.count_color }};">
+                      {{ collection.products_count }} Products
+                    </p>
+                  {% endif %}
+
+                  {% if block.settings.extra_text != blank %}
+                    <p class="ccs-extra" style="color: {{ block.settings.extra_text_color }};">
+                      {{ block.settings.extra_text }}
+                    </p>
+                  {% endif %}
+                </div>
+
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if section.blocks.size > 1 %}
+        <button class="ccs-arrow ccs-arrow--next" id="ccs-next-{{ section.id }}" aria-label="Next">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      {% endif %}
+
+    </div>
+
+    {% if section.blocks.size > 1 %}
+      <div class="ccs-dots" id="ccs-dots-{{ section.id }}">
+        {% for block in section.blocks %}
+          <button
+            class="ccs-dot{% if forloop.first %} active{% endif %}"
+            data-index="{{ forloop.index0 }}"
+            aria-label="Slide {{ forloop.index }}"
+          ></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+  #section-{{ section.id }} {
+    --ccs-accent: {{ section.settings.accent_color }};
+    --ccs-bg: {{ section.settings.section_bg }};
+    --ccs-visible: {{ section.settings.visible_count }};
+    background-color: var(--ccs-bg);
+    padding: {{ section.settings.section_padding }}px 0;
+  }
+
+
+.ccs-track {
+  display: flex;
+  gap: 16px;
+}
+
+.ccs-slider-container::-webkit-scrollbar {
+  display: none;
+}
+.ccs-slider-container {
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE & Edge */
+}
+
+.ccs-slider-container::-webkit-scrollbar {
+  display: none;               /* Chrome, Safari */
+}
+
+  {% comment %} Load section title font {% endcomment %}
+  {% assign title_font = section.settings.section_title_font %}
+  {% unless title_font == blank %}
+    {{ title_font | font_face }}
+  {% endunless %}
+
+  {% comment %} Load the chosen font for every block that uses it {% endcomment %}
+  {% for block in section.blocks %}
+    {% assign lf = block.settings.label_font %}
+    {% unless lf == blank %}
+      {{ lf | font_face }}
+    {% endunless %}
+  {% endfor %}
+</style>
+{% comment %}
+<script>
+(function() {
+  var sectionId    = '{{ section.id }}';
+  var visibleCount = {{ section.settings.visible_count | default: 3 }};
+  var GAP          = 16;
+  var PEEK         = 50; /* px of the neighbouring card visible on each side */
+
+  function initSlider() {
+    var track    = document.getElementById('ccs-track-' + sectionId);
+    var prevBtn  = document.getElementById('ccs-prev-' + sectionId);
+    var nextBtn  = document.getElementById('ccs-next-' + sectionId);
+    var dotsWrap = document.getElementById('ccs-dots-' + sectionId);
+    if (!track) return;
+
+    var slides = Array.from(track.querySelectorAll('.ccs-slide'));
+    var total  = slides.length;
+    if (total === 0) return;
+
+    var current       = 0;
+    var isAnimating   = false;
+    var autoplayTimer = null;
+    var autoplay      = {{ section.settings.autoplay | json }};
+    var autoplaySpeed = {{ section.settings.autoplay_speed }} * 1000;
+
+    function getVC() {
+      if (window.innerWidth < 600) return 1;
+      if (window.innerWidth < 900) return Math.min(2, visibleCount);
+      return visibleCount;
+    }
+
+    function getMaxIndex() {
+      return Math.max(0, total - getVC());
+    }
+
+    function calcSlideWidth() {
+      var vc = getVC();
+      var containerW = track.parentElement.offsetWidth;
+      /* Subtract peek on BOTH sides + gaps between visible slides */
+      var usable = containerW - (PEEK * 2) - (GAP * (vc - 1));
+      return Math.floor(usable / vc);
+    }
+
+    function setLayout() {
+      var slideW = calcSlideWidth();
+      slides.forEach(function(s) {
+        s.style.width = slideW + 'px';
+        s.style.flex  = '0 0 ' + slideW + 'px';
+      });
+      /* Offset track by PEEK so left neighbour peeks in from the left edge */
+      track.style.paddingLeft  = PEEK + 'px';
+      track.style.paddingRight = PEEK + 'px';
+    }
+
+    function updateArrows() {
+      if (prevBtn) prevBtn.classList.toggle('ccs-arrow--hidden', current === 0);
+      if (nextBtn) nextBtn.classList.toggle('ccs-arrow--hidden', current >= getMaxIndex());
+    }
+
+    function goTo(index) {
+      if (isAnimating) return;
+      isAnimating = true;
+      var maxIdx = getMaxIndex();
+      current = Math.max(0, Math.min(index, maxIdx));
+      var slideW = calcSlideWidth();
+      /* Each step moves exactly one slide width + one gap */
+      var offset = current * (slideW + GAP);
+      track.style.transform = 'translateX(-' + offset + 'px)';
+
+      if (dotsWrap) {
+        dotsWrap.querySelectorAll('.ccs-dot').forEach(function(d, i) {
+          d.classList.toggle('active', i === current);
+        });
+      }
+      updateArrows();
+      setTimeout(function() { isAnimating = false; }, 430);
+    }
+
+    function next() { goTo(current >= getMaxIndex() ? 0 : current + 1); }
+    function prev() { goTo(current <= 0 ? getMaxIndex() : current - 1); }
+
+    if (prevBtn) prevBtn.addEventListener('click', function() { prev(); resetAutoplay(); });
+    if (nextBtn) nextBtn.addEventListener('click', function() { next(); resetAutoplay(); });
+
+    if (dotsWrap) {
+      dotsWrap.addEventListener('click', function(e) {
+        var dot = e.target.closest('.ccs-dot');
+        if (dot) { goTo(parseInt(dot.dataset.index)); resetAutoplay(); }
+      });
+    }
+
+    /* Swipe */
+    var tx = 0;
+    track.addEventListener('touchstart', function(e) { tx = e.changedTouches[0].screenX; }, { passive: true });
+    track.addEventListener('touchend', function(e) {
+      var diff = tx - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); resetAutoplay(); }
+    }, { passive: true });
+
+    /* Keyboard */
+    document.addEventListener('keydown', function(e) {
+      var sec = document.getElementById('section-' + sectionId);
+      if (!sec || !sec.matches(':hover, :focus-within')) return;
+      if (e.key === 'ArrowLeft')  { prev(); resetAutoplay(); }
+      if (e.key === 'ArrowRight') { next(); resetAutoplay(); }
+    });
+
+    function startAutoplay() {
+      if (!autoplay) return;
+      autoplayTimer = setInterval(next, autoplaySpeed);
+    }
+    function resetAutoplay() {
+      if (!autoplay) return;
+      clearInterval(autoplayTimer);
+      startAutoplay();
+    }
+
+    var container = track.closest('.ccs-slider-container');
+    if (container && autoplay) {
+      container.addEventListener('mouseenter', function() { clearInterval(autoplayTimer); });
+      container.addEventListener('mouseleave', startAutoplay);
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() { setLayout(); goTo(current); }, 150);
+    });
+
+    setLayout();
+    goTo(0);
+    startAutoplay();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSlider);
+  } else {
+    initSlider();
+  }
+
+  if (window.Shopify && Shopify.designMode) {
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail && e.detail.sectionId === sectionId) initSlider();
+    });
+    document.addEventListener('shopify:block:select', function(e) {
+      if (e.detail && e.detail.sectionId === sectionId) initSlider();
+    });
+  }
+})();
+</script>
+{% endcomment %}
+
+<script>
+(function() {
+  var sectionId    = '{{ section.id }}';
+  var visibleCount = {{ section.settings.visible_count | default: 3 }};
+  var GAP          = 16;
+  var PEEK         = 50;
+
+  function initSlider() {
+    var track    = document.getElementById('ccs-track-' + sectionId);
+    var prevBtn  = document.getElementById('ccs-prev-' + sectionId);
+    var nextBtn  = document.getElementById('ccs-next-' + sectionId);
+    var dotsWrap = document.getElementById('ccs-dots-' + sectionId);
+    if (!track) return;
+
+    var slides = Array.from(track.querySelectorAll('.ccs-slide'));
+    var total  = slides.length;
+    if (total === 0) return;
+
+    var current       = 0;
+    var isAnimating   = false;
+    var autoplayTimer = null;
+    var autoplay      = {{ section.settings.autoplay | json }};
+    var autoplaySpeed = {{ section.settings.autoplay_speed }} * 1000;
+
+    function getVC() {
+      if (window.innerWidth < 600) return 1;
+      if (window.innerWidth < 900) return Math.min(2, visibleCount);
+      return visibleCount;
+    }
+
+    function getMaxIndex() {
+      return Math.max(0, total - getVC());
+    }
+
+    function calcSlideWidth() {
+      var vc = getVC();
+      var containerW = track.parentElement.offsetWidth;
+      var usable = containerW - (PEEK * 2) - (GAP * (vc - 1));
+      return Math.floor(usable / vc);
+    }
+
+    function setLayout() {
+      var slideW = calcSlideWidth();
+      slides.forEach(function(s) {
+        s.style.width = slideW + 'px';
+        s.style.flex  = '0 0 ' + slideW + 'px';
+      });
+      track.style.paddingLeft  = PEEK + 'px';
+      track.style.paddingRight = PEEK + 'px';
+    }
+
+    function updateArrows() {
+      if (prevBtn) prevBtn.classList.toggle('ccs-arrow--hidden', current === 0);
+      if (nextBtn) nextBtn.classList.toggle('ccs-arrow--hidden', current >= getMaxIndex());
+    }
+
+    function goTo(index) {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      var maxIdx = getMaxIndex();
+      current = Math.max(0, Math.min(index, maxIdx));
+
+      var slideW = calcSlideWidth();
+      var offset = current * (slideW + GAP);
+
+      var container = track.parentElement;
+
+      container.scrollTo({
+        left: offset,
+        behavior: 'smooth'
+      });
+
+      if (dotsWrap) {
+        dotsWrap.querySelectorAll('.ccs-dot').forEach(function(d, i) {
+          d.classList.toggle('active', i === current);
+        });
+      }
+
+      updateArrows();
+      setTimeout(function() { isAnimating = false; }, 400);
+    }
+
+    function next() { goTo(current >= getMaxIndex() ? 0 : current + 1); }
+    function prev() { goTo(current <= 0 ? getMaxIndex() : current - 1); }
+
+    if (prevBtn) prevBtn.addEventListener('click', function() { prev(); resetAutoplay(); });
+    if (nextBtn) nextBtn.addEventListener('click', function() { next(); resetAutoplay(); });
+
+    if (dotsWrap) {
+      dotsWrap.addEventListener('click', function(e) {
+        var dot = e.target.closest('.ccs-dot');
+        if (dot) { goTo(parseInt(dot.dataset.index)); resetAutoplay(); }
+      });
+    }
+
+    var container = track.parentElement;
+
+    container.addEventListener('scroll', function() {
+      var slideW = calcSlideWidth();
+      var scrollLeft = container.scrollLeft;
+
+      current = Math.round(scrollLeft / (slideW + GAP));
+
+      if (dotsWrap) {
+        dotsWrap.querySelectorAll('.ccs-dot').forEach(function(d, i) {
+          d.classList.toggle('active', i === current);
+        });
+      }
+
+      updateArrows();
+    });
+
+    var tx = 0;
+    container.addEventListener('touchstart', function(e) { tx = e.changedTouches[0].screenX; }, { passive: true });
+    container.addEventListener('touchend', function(e) {
+      var diff = tx - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); resetAutoplay(); }
+    }, { passive: true });
+
+    document.addEventListener('keydown', function(e) {
+      var sec = document.getElementById('section-' + sectionId);
+      if (!sec || !sec.matches(':hover, :focus-within')) return;
+      if (e.key === 'ArrowLeft')  { prev(); resetAutoplay(); }
+      if (e.key === 'ArrowRight') { next(); resetAutoplay(); }
+    });
+
+    function startAutoplay() {
+      if (!autoplay) return;
+      autoplayTimer = setInterval(next, autoplaySpeed);
+    }
+
+    function resetAutoplay() {
+      if (!autoplay) return;
+      clearInterval(autoplayTimer);
+      startAutoplay();
+    }
+
+    if (container && autoplay) {
+      container.addEventListener('mouseenter', function() { clearInterval(autoplayTimer); });
+      container.addEventListener('mouseleave', startAutoplay);
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        setLayout();
+        goTo(current);
+      }, 150);
+    });
+
+    setLayout();
+    goTo(0);
+    startAutoplay();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSlider);
+  } else {
+    initSlider();
+  }
+
+  if (window.Shopify && Shopify.designMode) {
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail && e.detail.sectionId === sectionId) initSlider();
+    });
+    document.addEventListener('shopify:block:select', function(e) {
+      if (e.detail && e.detail.sectionId === sectionId) initSlider();
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Collection Slider",
+  "tag": "section",
+  "class": "section-collection-slider",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Shop by Collection"
+    },
+    {
+      "type": "range",
+      "id": "section_title_size",
+      "label": "Section title font size (px)",
+      "min": 14,
+      "max": 80,
+      "step": 2,
+      "default": 32
+    },
+    {
+      "type": "font_picker",
+      "id": "section_title_font",
+      "label": "Section title font family",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "visible_count",
+      "label": "Collections visible at once",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_bg",
+      "label": "Section background color",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / arrow color",
+      "default": "#222222"
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay speed (seconds)",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection Card",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Custom image (overrides collection image)"
+        },
+        {
+          "type": "header",
+          "content": "Collection Name"
+        },
+        {
+          "type": "text",
+          "id": "collection_label",
+          "label": "Collection name (overrides collection title)",
+          "placeholder": "e.g. Corduroy Shirts"
+        },
+        {
+          "type": "color",
+          "id": "label_color",
+          "label": "Name color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "range",
+          "id": "label_size",
+          "label": "Name font size (px)",
+          "min": 12,
+          "max": 60,
+          "step": 1,
+          "default": 22
+        },
+        {
+          "type": "font_picker",
+          "id": "label_font",
+          "label": "Name font family",
+          "default": "helvetica_n4"
+        },
+        {
+          "type": "header",
+          "content": "Product Count"
+        },
+        {
+          "type": "color",
+          "id": "count_color",
+          "label": "Product count color",
+          "default": "#dddddd"
+        },
+        {
+          "type": "header",
+          "content": "Extra Text"
+        },
+        {
+          "type": "text",
+          "id": "extra_text",
+          "label": "Extra text",
+          "placeholder": "e.g. Buy 5 Get 15% Off"
+        },
+        {
+          "type": "color",
+          "id": "extra_text_color",
+          "label": "Extra text color",
+          "default": "#f5c842"
+        },
+        {
+          "type": "header",
+          "content": "Card Style"
+        },
+        {
+          "type": "range",
+          "id": "card_radius",
+          "label": "Card corner radius (px)",
+          "min": 0,
+          "max": 60,
+          "step": 2,
+          "default": 16
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Slider",
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ],
+  "max_blocks": 12
+}
+{% endschema %}

@@ -1,0 +1,119 @@
+{% if input_options != blank %}
+ 
+  <label for="{{ standered_parent.label }}-{{ standered_option | handle }}-{{ suboption }}">
+    <input
+      type="radio"
+      id="{{ standered_parent.label }}-{{ standered_option | handle }}-{{ suboption }}"
+      name="{{ standered_parent.label }}"
+      value="{{ standered_option }}"
+      {% unless standered_parent.label contains 'Optional' %}
+        required
+      {% endunless %}
+    >
+    <span>{{ standered_option }}</span>
+  </label>
+
+{% elsif measurement_option != blank %}
+  <label for="{{ measurement_option.name }}">{{ measurement_option.name }}</label>
+  <div class="input-area">
+    <div class="input-holder">
+      <input type="number" id="{{ measurement_option.name }}" name="{{ measurement_option.name }}" step=".25" required>
+    </div>
+    <span class="measuring-scale">in</span>
+  </div>
+
+  <button
+    type="button"
+    class="info_btn"
+    data-toggle="modal"
+    data-target="#{{  measurement_option.name }}{{ measurement_option.id }}-info"
+  >
+    {{ 'info-icon.svg' | inline_asset_content }}
+  </button>
+
+  <div
+    class="modal fade"
+    id="{{  measurement_option.name }}{{ measurement_option.id }}-info"
+    tabindex="-1"
+    role="dialog"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <button type="button" class="close"   data-target="#{{  measurement_option.name }}-info" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">X</span>
+        </button>
+        <div class="modal-body">
+          <span class="modal-title">{{ measurement_option.name }}</span>
+          <div class="additional_popup_details">{{ measurement_option.instructions }}</div>
+        </div>
+        <div class="modal-img">
+          {% if measurement_option.image != blank %}
+            <img
+              src="{{  measurement_option.image }}"
+              onerror="this.onerror=null; this.src='{{ 'placeholder.png' | asset_url }}';"
+              alt="{{  measurement_option.label | escape }}"
+              width="250"
+              height="250"
+            >
+          {% else %}
+            <img
+              src="{{ 'placeholder.png' | asset_url }}"
+              alt="Placeholder image"
+              width="250"
+              height="250"
+            >
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% else %}
+  {% comment %}
+
+    <div class="question_sizes ">
+  {% endcomment %}
+  <div class="question_sizes skip_options {% if smart_sizes.id == "37" or smart_sizes.id == 37 %} active {% else %} hidden {% endif %} ">
+    <h2>{{ smart_sizes.question }}</h2>
+    {% for answers_options in smart_sizes.possible_answers %}
+      {% if answers_options.image != null %}
+        {% assign has_image = 'has_img' %}
+      {% endif %}
+    {% endfor %}
+
+    <ul class="question_options swatch-list  {{ has_image }}">
+      {% for answers_options in smart_sizes.possible_answers %}
+        <li class="smart_sizes_lis">
+          <label for="{{ smart_sizes.id }}-{{ answers_options.text | handle }}">
+            <input
+              type="radio"
+              id="{{ smart_sizes.id }}-{{answers_options.text | handle }}"
+              name="{{ smart_sizes.question }}"
+              value="{{ answers_options.text }}"
+              required
+              class="hidden"
+            >
+            {% if answers_options.image != null %}
+              <div class="img">
+                <img src="{{ answers_options.image  }}">
+              </div>
+            {% endif %}
+            <span>{{ answers_options.text }}</span>
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if smart_sizes.has_free_text == '1' or smart_sizes.has_free_text == 1 %}
+      <div class="custom_answer">
+        <span>{{ smart_sizes.free_text_label }}</span>
+        {% if smart_sizes.free_text_label != null %} <input name="custom_chose" type="text"> {% endif %}
+      </div>
+    {% endif %}
+ 
+    {% if smart_sizes.skipable == '1' or smart_sizes.skipable == 1 %}
+    <div class="skip_question">
+      <span>I’m not sure, skip question</span>
+    </div>
+  {% endif %}
+  </div>
+{% endif %}
