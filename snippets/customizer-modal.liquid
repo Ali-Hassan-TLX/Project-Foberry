@@ -3,19 +3,20 @@
 
 <div id="fullscreen-modal" class="modal-overlay" style="display: none;">
   <div class="modal-content">
-    <div class="customizer-desktop-only">
-  {% render 'customizer-tab', current_product: shop_metafields %}
-  
-</div>
     {% comment %}
-      
-    <button id="close-modal" class="modal-close hide_selection">
-      <svg xmlns="http://www.w3.org/2000/svg" width="45.422" height="42.421" viewBox="3414.623 571.977 45.422 42.421">
-        <g data-name="Group 102"><g data-name="Path 71"><path d="m3455.956 571.977-37.244 42.336" fill="#794d49" fill-rule="evenodd"/><path d="m3455.956 571.977-37.244 42.336" stroke-linejoin="round" stroke-linecap="round" stroke-width="4" stroke="#d3736b" fill="transparent"/></g><g data-name="Path 72"><path d="m3456.799 614.399-38.93-40.794" fill="#d3736b" fill-rule="evenodd"/><path d="m3456.799 614.399-38.93-40.794" stroke-linejoin="round" stroke-linecap="round" stroke-width="4" stroke="#d3736b" fill="transparent"/></g></g>
-      </svg>
-    </button>
+      The customizer markup (and its images / heavy DOM) lives inside this <template> so
+      nothing renders or loads at page load. customizer-open.js clones it into the DOM and
+      loads the customizer scripts the first time #open-modal is clicked (lazy load).
     {% endcomment %}
-    {% render 'customizer-new' %}
+    <template
+      id="customizer-template"
+      data-option-card-src="{{ 'option-card.js' | asset_url }}"
+    >
+      <div class="customizer-desktop-only">
+        {% render 'customizer-tab', current_product: shop_metafields %}
+      </div>
+      {% render 'customizer-new' %}
+    </template>
   </div>
 </div>
 <style>
@@ -66,6 +67,61 @@
    }
    .modal-btn:hover {
      background-color: #333;
+   }
+
+   /* Loading state on the "open customizer" button */
+   .open-modal.is-loading {
+     pointer-events: none;
+     position: relative;
+   }
+   .open-modal.is-loading .btn {
+     opacity: 0.45;
+   }
+   .open-modal.is-loading::after {
+     content: "";
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     width: 18px;
+     height: 18px;
+     margin: -9px 0 0 -9px;
+     border: 2px solid currentColor;
+     border-top-color: transparent;
+     border-radius: 50%;
+     animation: customizer-spin 0.7s linear infinite;
+   }
+
+   /* Loader shown inside the modal while the customizer loads */
+   .customizer-loader {
+     position: absolute;
+     inset: 0;
+     z-index: 5;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+     gap: 16px;
+     background: #EEEEEE;
+     font-family: var(--font_stack_body);
+   }
+   .customizer-loader.hidden {
+     display: none;
+   }
+   .customizer-loader__spinner {
+     width: 46px;
+     height: 46px;
+     border: 4px solid rgba(0, 0, 0, 0.15);
+     border-top-color: #794d49;
+     border-radius: 50%;
+     animation: customizer-spin 0.7s linear infinite;
+   }
+   .customizer-loader__text {
+     font-size: 15px;
+     letter-spacing: 0.04em;
+     color: #794d49;
+   }
+   @keyframes customizer-spin {
+     to { transform: rotate(360deg); }
    }
 </style>
 {% comment %} <script src="{{ 'option-card.js' | asset_url }}" defer="defer"></script> {% endcomment %}

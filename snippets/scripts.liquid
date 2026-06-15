@@ -303,16 +303,16 @@
   defer="defer"
 ></script>
 {% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
+  {% comment %}
+    customizer-open.js loads upfront and lazily injects the customizer markup +
+    option-card.js the first time #open-modal is clicked. custom_addons.js stays
+    here because it binds to the on-page addon UI (rendered in the buy buttons),
+    not the customizer modal.
+  {% endcomment %}
   <script
     src="{{ 'customizer-open.js' | asset_url }}"
     defer="defer"
   ></script>
-  <script
-  src="{{ 'option-card.js' | asset_url }}"
-  defer="defer"
-  ></script> 
-  {% comment %}
-  {% endcomment %}
   <script
     src="{{ 'custom_addons.js' | asset_url }}"
     defer="defer"
