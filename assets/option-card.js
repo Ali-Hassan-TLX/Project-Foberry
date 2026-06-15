@@ -1561,7 +1561,11 @@ Sizes?.addEventListener('change', function (e) {
       applyMarquee();
     });
   }
-  window.addEventListener('load', applyMarquee);
+  if (document.readyState === 'complete') {
+    applyMarquee();
+  } else {
+    window.addEventListener('load', applyMarquee);
+  }
   window.addEventListener('click', scheduleMarquee);
 
 // Price increases according to quantity

@@ -26,6 +26,30 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
+  function waitForInjectedStyles(container) {
+    const links = Array.from(container.querySelectorAll('link[rel="stylesheet"]'));
+    const pending = links
+      .filter((link) => !link.sheet)
+      .map((link) => new Promise((resolve) => {
+        link.addEventListener("load", resolve, { once: true });
+        link.addEventListener("error", resolve, { once: true });
+      }));
+
+    if (!pending.length) return Promise.resolve();
+    return Promise.race([
+      Promise.all(pending),
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+    ]);
+  }
+
+  function waitForPaint() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+  }
+
   //  Inject the customizer markup from its <template> and load its scripts once.
   function loadCustomizer() {
     if (customizerReady) return Promise.resolve();
@@ -51,13 +75,16 @@ document.addEventListener("DOMContentLoaded", function () {
       template.remove();
 
       patchReadyListeners();
+      const stylesReady = waitForInjectedStyles(parent);
 
       //  Load the customizer scripts in order; their module-level code now finds
       //  the injected DOM.
       (function loadNext(i) {
         if (i >= scripts.length) {
-          customizerReady = true;
-          resolve();
+          stylesReady.then(waitForPaint).then(() => {
+            customizerReady = true;
+            resolve();
+          });
           return;
         }
         const s = document.createElement("script");
