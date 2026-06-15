@@ -395,9 +395,14 @@ function getnewList(index, total_options, childsIn, subTitle, mainparent, dataId
   if (!targetUL) return;
 
   targetUL.setAttribute('data-scroll', targetUL.scrollTop);
-  setTimeout(() => { targetUL.scrollTop = 0 }, 500);
   targetUL.classList.remove('hidden');
-  setTimeout(() => targetUL.classList.add('openchilds'), 200);
+  targetUL.scrollTop = 0;
+  //   Trigger the slide-in on the next frame instead of after a fixed 200ms delay.
+  //   A double rAF lets the browser commit the initial state (display + translateX(-100%))
+  //   so the transform transition still plays, but it starts ~16ms later instead of 200ms.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => targetUL.classList.add('openchilds'));
+  });
 
   // Show/hide children
   const childListItems = targetUL.querySelectorAll('li[child-id]');
@@ -1515,27 +1520,41 @@ Sizes.addEventListener('change', function (e) {
 });
 // text slider
  function applyMarquee() {
-    const wrappers = document.querySelectorAll('.scroll-wrapper');
+    //   Collect all measurements first (reads), then apply class changes (writes).
+    //   Interleaving reads/writes forces a layout reflow on every iteration; batching
+    //   them keeps it to a single reflow no matter how many wrappers there are.
+    const updates = [];
 
-    wrappers.forEach(wrapper => {
+    document.querySelectorAll('.scroll-wrapper').forEach(wrapper => {
       const textElement = wrapper.querySelector('.name') || wrapper.querySelector('.title');
       if (!textElement) return;
-
-      textElement.classList.toggle('animate', textElement.scrollWidth > wrapper.clientWidth)
+      updates.push([textElement, textElement.scrollWidth > wrapper.clientWidth]);
     });
-    const scrollWrappers = document.querySelectorAll('.why-not-scroll');
 
-    scrollWrappers.forEach(wrapper => {
-      const textElement = wrapper.querySelector('.why_not') ;
+    document.querySelectorAll('.why-not-scroll').forEach(wrapper => {
+      const textElement = wrapper.querySelector('.why_not');
       if (!textElement) return;
-
-      textElement.classList.toggle('animate', textElement.scrollWidth > wrapper.clientWidth)
+      updates.push([textElement, textElement.scrollWidth > wrapper.clientWidth]);
     });
-  
 
+    updates.forEach(([textElement, overflowing]) => {
+      textElement.classList.toggle('animate', overflowing);
+    });
+  }
+
+  //   Coalesce the per-click re-measure into one run per animation frame so a burst
+  //   of clicks can't trigger repeated layout passes.
+  let marqueeScheduled = false;
+  function scheduleMarquee() {
+    if (marqueeScheduled) return;
+    marqueeScheduled = true;
+    requestAnimationFrame(() => {
+      marqueeScheduled = false;
+      applyMarquee();
+    });
   }
   window.addEventListener('load', applyMarquee);
-  window.addEventListener('click', applyMarquee);
+  window.addEventListener('click', scheduleMarquee);
 
 // Price increases according to quantity
   const priceContainer = document.querySelector('.card_custom_price');
